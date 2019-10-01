@@ -1,0 +1,83 @@
+#title_setting {
+    background-color: #222831;
+}
+
+.container-fluid {
+    background-color: #EEEEEE;
+}
+
+#logo {
+    background-color: #FFFFFF; 
+}
+
+#logo1{
+    background-color: #FFFFFF;
+    color: #000000;
+}
+
+#carousel-img{
+	display: block;
+	width: 60%;
+	margin-left: auto;
+  	margin-right: auto;
+}
+
+.abstract-img {
+  display: block;
+  margin-left: 20%;
+  margin-right: 0%;
+  width: 80%;
+}
+
+#caption_font{
+	height: auto;
+}
+
+#getting_Started{
+    background-color: #FFFFFF; 
+    padding-left: 10%;
+    padding-right: 10%
+}
+
+#testimonials{
+    background-color: #FFFFFF; 
+}
+
+#universities{
+    background-color: #FFFFFF; 
+}
+
+#funding{
+    background-color: #FFFFFF; 
+}
+
+#caption_font{
+	color: #292929;
+}
+
+#jumbotron-header{
+	background-color: #BFBFBF;
+}
+
+#contact {
+    background-color: #EEEEEE
+}
+
+.contrib {  
+    margin: 0.75em 0;  
+    padding: 0 1em;  
+    list-style: none;  
+}  
+
+.contrib_li:before {   
+    content: "";  
+    border-color: transparent #000000;  
+    border-style: solid;  
+    border-width: 0.35em 0 0.35em 0.45em;  
+    display: block;  
+    height: 0;  
+    width: 0;  
+    left: -1em;  
+    top: 1.15em;  
+    position: relative;  
+}
