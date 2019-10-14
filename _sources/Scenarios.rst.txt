@@ -1,0 +1,4 @@
+Scenarios
+=========
+
+Benchmarking library has five standardized scenarios for evaluvating the performance the control algorithms.

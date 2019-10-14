@@ -1,0 +1,10 @@
+Scenario Theta
+==============
+
+**Objective:**
+Maintain the flow at the outlet of the network below :math:`0.5m^3sec^{-1}`.
+
+.. image:: ./theta.png
+  :width: 400
+  :alt: Stormwater Network
+

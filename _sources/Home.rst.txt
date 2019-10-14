@@ -1,0 +1,46 @@
+Welcome
+=======
+
+Welcome to the Open-storm's benchmarking library !! 
+
+This library has a modular simulation model. By default, SWMM (pyswmm) is the default module for modeling the flow of the runoff in the stormwater networks. Instructions on the installation and use of the this package for analyzing the performance of the stormwater control algorithms are documented here. Please feel free to reach out if you find any discrepancies or have any questions. 
+
+Installation
+------------
+
+This package is built with python 3.7 and is supported on all operating systems (Windows, Mac OS, Linux).
+It can installed using `pip <https://pypi.org/project/pip/>`_ or `conda <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-pkgs.html>`_.
+
+.. code:: bash
+
+   pip install git+https://github.com/kLabUM/Benchmarking
+
+If you run into any issues installing the package, please refer to the advanced section for additional installation instructions or reach out to us.
+
+Getting Started
+---------------
+
+Scenarios are the fundamental components of the benchmarking library. A scenario constitutes a stormwater network and a driving rainevent. Refer to the scenarios section for a more detailed description.
+
+.. code:: python
+
+   import benchmarking
+
+
+   def controller(state):
+        actions = np.ones(2)
+        if state[0] > 0.5:
+                actions[0] = 0.5
+        if state[1] > 0.5:
+                actopns[1] = 0.5
+        return actions
+
+   env = benchmarking.scenarios.theta()
+
+   done = False 
+   while not done:
+       state = env.state()
+
+       actions = controller(state)
+       
+       done = env.step(actions)
