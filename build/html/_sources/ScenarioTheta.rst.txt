@@ -1,10 +1,33 @@
 Scenario Theta
 ==============
 
-**Objective:**
-Maintain the flow at the outlet of the network below :math:`0.5m^3sec^{-1}`.
+This synthetic scenario is designed to be a unit test for control
+algorithms. Two basins in this scenario are idealized to be rectangular
+with a capacity of :math:`1000m^3`.
+Outlets in the basins are at the bottom and have a dimension of :math:`1m^2`
+and their percent of opening can be controlled during the duration of
+the storm.
 
 .. image:: ./theta.png
   :width: 400
   :alt: Stormwater Network
 
+Objective
+---------
+
+Maintain the flow of water at the outlet of the stormwater network below :math:`0.5 m^3s^{-1}`.
+The degree of success or failure of the algorithm to achieve the objective is computed based on the following metric.
+
+State-action space
+------------------
+
+States
+~~~~~~
+
+Water levels (:math:`m`) in the two basins at every step, indexed by the order of the basin are
+defined as the states in this scenario. For example,
+
+Actions
+~~~~~~~
+
+Percent of valve opening :math:`[0,1]` are defined as the actions in the network.

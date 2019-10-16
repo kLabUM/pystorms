@@ -1,0 +1,24 @@
+Development
+===========
+
+Versioning
+----------
+
+This library follows *major.minor.patch* versioning.
+
+-  **major** : Any massive addition to the existing functionality
+
+-  **minor** : Addition of scenarios, redefining states vectors
+
+-  **patchs** : Bug fixes, documentation edits and other simple fixes
+
+Roadmap
+-------
+
+When all the desired features have been implemented and tested, 1.0.0
+will be released. This version will have the following (not limited)
+
+1. yaml configuration for the state-action space
+2. configurable scenarios with rainfall and networks
+3. independent support with pyswmm
+4. all operating systems support
