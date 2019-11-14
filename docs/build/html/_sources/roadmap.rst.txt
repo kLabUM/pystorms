@@ -18,7 +18,8 @@ Roadmap
 When all the desired features have been implemented and tested, 1.0.0
 will be released. This version will have the following (not limited)
 
-1. yaml configuration for the state-action space
-2. configurable scenarios with rainfall and networks
-3. independent support with pyswmm
-4. all operating systems support
+1. YAML definition for scenario configuration 
+2. Remove pyswmm_lite dependency, should only require pyswmm (numpy and pandas)
+3. Network and event drivers repository 
+4. 5+ tested scenarios with clearly tested performance metrics 
+5. Documentation 
