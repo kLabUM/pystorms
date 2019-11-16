@@ -1,8 +1,11 @@
 from pyswmm_lite import environment
-from pystorms.utilities import threshold, perf_metrics
-from pystorms.networks import load_network
-import numpy as np
+from pystorms.utilities import threshold, perf_metrics, load_network
+import yaml
 import abc
+import os
+
+# Absolute path
+PATH = os.path.abspath(os.path.dirname(__file__))
 
 
 # Create a abstract class to force the class definition
@@ -12,10 +15,13 @@ class scenario(abc.ABC):
     def step(self, actions, log=True):
         pass
 
-    @abc.abstractmethod
-    # Specific to the scenario
     def _logger(self):
-        pass
+        for attribute in self.data_log.keys():
+            if attribute != "performance_measure":
+                for element in self.data_log[attribute].keys():
+                    self.data_log[attribute][element].append(
+                        self.env.methods[attribute](element)
+                    )
 
     def state(self):
         return self.env._state()
@@ -43,59 +49,8 @@ class gamma(scenario):
 
     def __init__(self):
         # Network configuration
-        self.config = {
-            "swmm_input": load_network("gamma"),
-            "states": [
-                ("1", "depthN"),
-                ("2", "depthN"),
-                ("3", "depthN"),
-                ("4", "depthN"),
-                ("5", "depthN"),
-                ("6", "depthN"),
-                ("7", "depthN"),
-                ("8", "depthN"),
-                ("9", "depthN"),
-                ("10", "depthN"),
-                ("11", "depthN"),
-            ],
-            "action_space": [
-                "O1",
-                "O2",
-                "O3",
-                "O4",
-                "O5",
-                "O6",
-                "O7",
-                "O8",
-                "O9",
-                "O10",
-                "O11",
-            ],
-            "performance_targets": [
-                ("O1", "flow"),
-                ("O2", "flow"),
-                ("O3", "flow"),
-                ("O4", "flow"),
-                ("O5", "flow"),
-                ("O6", "flow"),
-                ("O7", "flow"),
-                ("O8", "flow"),
-                ("O9", "flow"),
-                ("O10", "flow"),
-                ("O11", "flow"),
-                ("1", "flooding"),
-                ("2", "flooding"),
-                ("3", "flooding"),
-                ("4", "flooding"),
-                ("5", "flooding"),
-                ("6", "flooding"),
-                ("7", "flooding"),
-                ("8", "flooding"),
-                ("9", "flooding"),
-                ("10", "flooding"),
-                ("11", "flooding"),
-            ],
-        }
+        self.config = yaml.load(open(PATH + "/config/gamma.yaml", "r"), yaml.FullLoader)
+        self.config["swmm_input"] = load_network(self.config["swmm_input"])
 
         # Common threhold for the network, can be done independently
         self._performormance_threshold = 4.0
@@ -141,20 +96,15 @@ class gamma(scenario):
 
         return done
 
-    def _logger(self):
-        # Log all the _performormance values
-        for ID, attribute in self.config["performance_targets"]:
-            self.data_log[attribute][ID].append(self.env.methods[attribute](ID))
-
 
 class theta(scenario):
     r"""Theta Benchmarking Scenario
 
-    Separated stormwater network driven by a __ __ event.
+    Separated stormwater network driven by a idealized event.
 
     Parameters
     ----------
-    config : dict
+    config : yaml configuration file
         physical attributes of the network.
 
     Methods
@@ -163,22 +113,14 @@ class theta(scenario):
 
     Notes
     -----
-    Notes about the peformance metric.
+    Performance is measured as the deviation from the threshold.
 
     """
 
     def __init__(self):
         # Network configuration
-        self.config = {
-            "swmm_input": load_network("theta"),
-            "states": [("P1", "depthN"), ("P2", "depthN")],
-            "action_space": ["1", "2"],
-            "performance_targets": [
-                ("8", "flow"),
-                ("P1", "flooding"),
-                ("P2", "flooding"),
-            ],
-        }
+        self.config = yaml.load(open(PATH + "/config/theta.yaml", "r"), yaml.FullLoader)
+        self.config["swmm_input"] = load_network(self.config["swmm_input"])
 
         self.threshold = 0.5
 
@@ -188,7 +130,7 @@ class theta(scenario):
         # Create an object for storing the data points
         self.data_log = {"performance_measure": [], "flow": {}, "flooding": {}}
 
-        # Data logger for storing _performormance data
+        # Data logger for storing _performance data
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
 
@@ -200,7 +142,7 @@ class theta(scenario):
         if log:
             self._logger()
 
-        # Estimate the performormance
+        # Estimate the performance
         _perform = 0.0
 
         for ID, attribute in self.config["performance_targets"]:
@@ -212,7 +154,7 @@ class theta(scenario):
                 flow = self.env.methods[attribute](ID)
                 _perform = threshold(value=flow, target=self.threshold, scaling=10.0)
 
-        # Record the _performormance
+        # Record the _performance
         self.data_log["performance_measure"].append(_perform)
 
         # Terminate the simulation
@@ -220,7 +162,3 @@ class theta(scenario):
             self.env._terminate()
 
         return done
-
-    def _logger(self):
-        for ID, attribute in self.config["performance_targets"]:
-            self.data_log[attribute][ID].append(self.env.methods[attribute](ID))

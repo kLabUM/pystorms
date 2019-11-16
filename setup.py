@@ -16,7 +16,8 @@ setup(
     package_data={
         "pystorms": [
             "networks/*.inp",
-            "StormLibrary/*.npy",
+            "storms/*.npy",
+            "config/*.yaml"
         ]
     },
     classifiers=[
