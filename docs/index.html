@@ -115,7 +115,7 @@
 
 <div class="container-fluid" id="jumbotron-header">
   &nbsp;
-  <h1 align="center">Benchmarking Framework for Smart Stormwater Systems</h1>
+  <h1 align="center">pystorms: simulation sandbox for the evaluation and design of stormwater control algorithms</h1>
   <h5 align="center">⚔️ Want to know how your control algorithm stacks up against others in smart stormwater systems? ⚔️</h5>
   &nbsp;
 </div>
@@ -194,23 +194,23 @@
 </div>
 </div>
 <div class="container-fluid" id="getting_Started">
-  <p class="text-justify"><br>Welcome! We have built this benchmarking toolbox to encourage more researchers to have access to smart stormwater control problems. We want these problems accessible to all populations of researchers &mdash; those with experience in controls, but not stormwater; those with experience in stormwater, but not controls; and those without prior experience in either! We have streamlined all of the backend details of running a smart stormwater control problem so that all you have to do is focus on the control algorithm (see below for an example).</p>
+  <p class="text-justify"><br>Welcome! We have built this library in an effort to systematize quantitative analysis of stormwater control algorithms. It is a natural extension of <a href="http://open-storm.org/" target="_blank"><strong>Open-Storm</strong></a>'s mission to open up and ease access into the technical world of smart stormwater systems. Our initial efforts allowed us to develop open source and free tools for anyone to be able to deploy flood sensors, measure green infrastructure, or even control storm or sewer systems. Now we have developed a tool to be able to test the performance of algorithms used to coordinate these different sensing and control technologies that have been deployed throughout urban water systems. <br> Ultimately we want to encourage more researchers to explore smart stormwater control problems! Whether you only have experience in controls or stormwater or neither, our aim is to have this library be accessible to you. We have streamlined all of the backend details of running a smart stormwater control problem, so all you have to do is focus on the control algorithm (see below for an example).</p>
 </div>
 &nbsp;
 
 <div class="container-fluid" id="getting_Started">
   <h2 align="center"><strong>Getting Started</strong></h2>
-  <p class="text-justify">To try out how exactly to interact with stormwater networks using our benchmarking toolbox, we encourage you to first begin with our "toy control problem" which you can access <strong>here</strong>. Once you feel comfortable with how our toolbox works, we then encourage you really begin to have some fun by interacting with our five benchmarking scenarios: <span style="font-family: courier; font-weight: bold">alpha</span>, <span style="font-family: courier; font-weight: bold">beta</span>, <span style="font-family: courier; font-weight: bold">gamma</span>, <span style="font-family: courier; font-weight: bold">delta</span>, and <span style="font-family: courier; font-weight: bold">epsilon</span>. These benchmarking scenarios are built using real-world inspired stormwater networks, driving events, and control assets.
+  <p class="text-justify">To try out how exactly to interact with stormwater networks using our benchmarking toolbox, we encourage you to first begin with <a href="https://klabum.github.io/pystorms/build/html/ScenarioTheta.html" target="_blank"><strong>scenario <span style="font-family: courier; font-weight: bold">theta</span></strong></a>, our "toy control problem". Once you feel comfortable with how our toolbox works, we then encourage you really begin to have some fun by interacting with our five challenging scenarios: <span style="font-family: courier; font-weight: bold">alpha</span>, <span style="font-family: courier; font-weight: bold">beta</span>, <span style="font-family: courier; font-weight: bold">gamma</span>, <span style="font-family: courier; font-weight: bold">delta</span>, and <span style="font-family: courier; font-weight: bold">epsilon</span>. These scenarios are built using real-world inspired stormwater networks, driving events, and control assets.
   <br><br>
   To learn more about this work, check out our github repository:
   <br>
-  <center><a href="https://github.com/kLabUM/Benchmarking" target="_blank"><img src="./images/logo_github.svg" alt="kLabUM/Benchmarking" height="50px"></a></center>
+  <center><a href="https://https://github.com/kLabUM/pystorms" target="_blank"><img src="./images/logo_github.svg" alt="kLabUM/pystorms" height="50px"></a></center>
   <br>
   To install and begin working, use:
   <br>
   </p>
   <div class="alert alert-secondary" role="alert">
-    pip install git+https://github.com/kLabUM/Benchmarking
+    pip install pystorms
   </div>
   <p class="text-justify">This is how one would go about running a scenario ...</p>
     <!-- HTML generated using hilite.me -->
@@ -223,25 +223,30 @@
      ">
      <pre style="margin: 0;
       line-height: 125%">
-<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">benchmarking</span>
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">pystorms</span>
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">numpy</span> <span style="color: #008800; font-weight: bold">as</span> <span style="color: #0e84b5; font-weight: bold">np</span>
 
+<span style="color: #919191"># Define your awesome controller</span>
 <span style="color: #008800; font-weight: bold">def</span> controller(state):
-    <span style="color: #919191">"""
-    Your control algorithm that generates actions based on state information.
-    """</span>
+    actions = np.ones(len(state))
+	for i in range(0, len(state)):
+		if state[i] > 0.5:
+			actions[i] = 1.0
     <span style="color: #008800; font-weight: bold">return</span> actions
 
-env = benchmarking.scenarios.alpha()
-done = <span style="color: #007020">False</span>
+env = pystorms.scenarios.theta() <span style="color: #919191"># Initialize scenario</span>
 
+done = <span style="color: #007020">False</span>
 <span style="color: #008800; font-weight: bold">while</span> <span style="font-weight: bold">not</span> done:
     state = env.state()
     actions = controller(state)
     done = env.step(actions)
+
+performance = env.performance()
 </pre></div></div>
 <br>
 <div class="container-fluid" id="getting_Started">
-  <p>For more technical details on what we have developed, and why, please check out our <strong>documentation</strong>.</p>
+  <p>For more technical details on what we have developed, and why, please check out our <a href="https://klabum.github.io/pystorms/build/html/index.html" target="_blank"><strong>documentation</strong></a>.</p>
   <h2 align="center"><strong>Contributing</strong></h2>
   <p class="text-justify">If you want to be more involved, please consider the following:
   <ul class="contrib">
