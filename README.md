@@ -9,17 +9,17 @@ This repo has been developed in an effort to systematize quantitative analysis o
 
 For reference on this `pystorms` we refer the reader to our manuscript describing the motivation behind the `pystorms` effort and details on the specifics behind this corresponding repo. In general, this repo provides three components:
 
-1. A library of `scenarios` that are built to allow for systematic quantitative evaluation of stormwater control algorithms, 
+1. A library of `scenarios` that is built to allow for systematic quantitative evaluation of stormwater control algorithms, 
 2. A stormwater hydraulic simulator named `pyswmm_lite` and forked heavily from OWA's [SWMM](https://github.com/kLabUM/Stormwater-Management-Model.git) and [pyswmm](https://github.com/kLabUM/pyswmm_lite.git), and
 3. An `environment` script that links the `pyswmm_lite` simulator to the `scenarios`, and can be edited/updated by users who might want to interface the `scenarios` with other stormwater simulator software (the `environment` script is included in `pyswmm-lite`).
 
 ## Installation 
 
-To use the scenarios we have developed with our default stormwater simulator, two installations must occur: (i) an installation of `pyswmm_lite` and (ii) the corresponding `pystorms` library. Additionally, both of these also require `python3` and `numpy`.
+To use the scenarios we have developed with our default stormwater simulator, two installations must occur: (i) `pyswmm_lite` and (ii) the corresponding `pystorms` library. Additionally, both of these also require `python3` and `numpy`.
 
-Before installation, we encourage users to consider setting up their Python environments using the `virtualenv`/`venv` packages for beetter control and organization of various Python packages and libraries. Details on these packages can be viewed [here](virtualenv.pypa.io) and [here](https://docs.python.org/3/library/venv.html), with an additional tool called `virtualenvwrapper` available [here](https://virtualenvwrapper.readthedocs.io/en/latest/command_ref.html).
+Before installation, we encourage users to consider setting up their Python environments using the `virtualenv`/`venv` packages for better control and organization of various Python packages and libraries. Details on these packages can be viewed [here](virtualenv.pypa.io) and [here](https://docs.python.org/3/library/venv.html), with an additional tool called `virtualenvwrapper` available [here](https://virtualenvwrapper.readthedocs.io/en/latest/command_ref.html).
 
-The *Easy Installation* instructions below attempts to install both `pyswmm_lite`, the `pystorms` library, and the corresponding dependencies (if not yet installed) altogether, but if you run into any errors or would like demarcated installation instructions, follow the additional instructions presented in the *Alternative Installation* section.
+The *Easy Installation* instructions below attempts to install `pyswmm_lite`, the `pystorms` library, and the corresponding dependencies (if not yet installed) together, but if you run into any errors or would like demarcated installation instructions, follow the additional instructions presented in the *Alternative Installation* section.
 
 ### Easy Installation 
 
@@ -29,7 +29,7 @@ The easiest way to install the `pystorms` library and its dependencies is to run
 pip3 install pystorms
 ```
 
-In case you encounter trouble in installing `pyswmm_lite`, then you can use the following set of commands instead:
+If you encounter trouble in installing `pyswmm_lite`, then you can use the following set of commands instead:
 
 ```bash
 git clone https://github.com/kLabUM/pyswmm_lite.git
@@ -43,7 +43,7 @@ An alternative method to install the library is the following:
 
 1. Clone/download the zip file of the `pystorms` repository from https://github.com/kLabUM/pystorms.git
 2. Move the downloaded `pystorms` to your desired directory
-2. Open your python client (Anaconda or generic python) from within the `pystorms` folder and run `pip3 install .`
+3. Open your Python client (Anaconda or generic Python) from within the `pystorms` folder and run `pip3 install .`
 
 Repeat the same method for `pyswmm_lite` if needed. 
 
