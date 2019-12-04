@@ -1,4 +1,4 @@
-# Open-Storm's Benchmarking Library Smarter Stormwater Networks
+# Open-Storm's `pystorms` Library for Smarter Stormwater Networks
 [![Build Status](https://travis-ci.com/kLabUM/Benchmarking.svg?token=T5sBokVeGg3qH8pp1ceB&branch=master)](https://travis-ci.com/kLabUM/Benchmarking)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
