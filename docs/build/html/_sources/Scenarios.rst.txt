@@ -1,4 +1,20 @@
 Scenarios
 =========
 
-Benchmarking library has five standardized scenarios for evaluvating the performance the control algorithms.
+.. image:: ./fig_scenarioComponents.png
+  :width: 400
+  :align: center
+
+Scenarios are primary components of the pystorms library. These scenarios comprise of a stormwater network, system driver, and corresponding control problem. This library provides the user access to a set of five standard scenarios that can be used for evaluation and development of control algorithms. Apart from these predefined scenarios, users have the choice to mix and match stormwater networks with any of the stormevents provided in the library.
+
+ 
+List of scenarios 
+-----------------
+1. Scenario theta 
+2. Scenario alpha (development) 
+3. Scenario beta (development)
+4. Scenario gamma 
+5. Scenario delta (development)
+
+Each of these scenarios are defined with a intial set of states that you can use to defining your control approches. But these set of states (i.e. depth and water levels in various elements of the stormwater network) are not the only measurements you can access. You can redefine the states in a scenario with couple of lines of code (refer to redefining states). 
+As a rule, in this library you can access to all the measurements computed by the stormwater simulation engine. 

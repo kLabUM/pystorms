@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome &mdash; Open-Storm Benchmarking 0.0.1 documentation</title>
+  <title>Welcome &mdash; pystorms 0.0.1 documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> Open-Storm Benchmarking
+            <a href="index.html" class="icon icon-home"> pystorms
           
 
           
@@ -101,6 +101,10 @@
 <li class="toctree-l1"><a class="reference internal" href="BuildingScenarios.html">Building Scenarios</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Contributing.html">Contributing</a></li>
 </ul>
+<p class="caption"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development</a></li>
+</ul>
 
             
           
@@ -114,7 +118,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">Open-Storm Benchmarking</a>
+          <a href="index.html">pystorms</a>
         
       </nav>
 
@@ -166,21 +170,21 @@
             
   <div class="section" id="welcome">
 <h1>Welcome<a class="headerlink" href="#welcome" title="Permalink to this headline">¶</a></h1>
-<p>Welcome to the Open-storm’s benchmarking library !!</p>
-<p>This library has a modular simulation model. By default, SWMM (pyswmm) is the default module for modeling the flow of the runoff in the stormwater networks. Instructions on the installation and use of the this package for analyzing the performance of the stormwater control algorithms are documented here. Please feel free to reach out if you find any discrepancies or have any questions.</p>
+<p>Welcome to the pystorms library !!</p>
+<p>This is a simulation sandbox for the development and evaluation of stormwater control algorithms.
+This library uses EPA-SWMM as its core simulation engine for modeling stormwater dynamics, but can be easily configured to use an other customized simulation software with minimal overhead. Please refer to the advanced section for more information.</p>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p>This package is built with python 3.7 and is supported on all operating systems (Windows, Mac OS, Linux).
 It can installed using <a class="reference external" href="https://pypi.org/project/pip/">pip</a> or <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-pkgs.html">conda</a>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install git+https://github.com/kLabUM/Benchmarking
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install pystorms
 </pre></div>
 </div>
 <p>If you run into any issues installing the package, please refer to the advanced section for additional installation instructions or reach out to us.</p>
 </div>
 <div class="section" id="getting-started">
 <h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
-<p>Scenarios are the fundamental components of the benchmarking library. A scenario constitutes a stormwater network and a driving rainevent. Refer to the scenarios section for a more detailed description.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">benchmarking</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pystorms</span>
 
 
 <span class="k">def</span> <span class="nf">controller</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
@@ -191,7 +195,7 @@ It can installed using <a class="reference external" href="https://pypi.org/proj
              <span class="n">actopns</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
      <span class="k">return</span> <span class="n">actions</span>
 
-<span class="n">env</span> <span class="o">=</span> <span class="n">benchmarking</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">theta</span><span class="p">()</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">pystorms</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">theta</span><span class="p">()</span>
 
 <span class="n">done</span> <span class="o">=</span> <span class="bp">False</span>
 <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
@@ -202,6 +206,7 @@ It can installed using <a class="reference external" href="https://pypi.org/proj
     <span class="n">done</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Scenarios are the fundamental components of the pystorms library. A scenario constitutes a stormwater network, a driving rainevent, and a control objective. When <code class="code docutils literal notranslate"><span class="pre">env</span> <span class="pre">=</span> <span class="pre">pystorms.scenarios.theta()</span></code> is called, all the necessary simulation modules are initialized and its control is handed back to the user. This simulation can be controlled by users using the method calls on <code class="code docutils literal notranslate"><span class="pre">env</span></code> class. States in the stormwater network(e.g. water levels, flows, pollutant concentrations) can be queried at any point of the simulation using the <code class="code docutils literal notranslate"><span class="pre">env.state()</span></code> method. This returns the predefined states for the simulation. Detailed state descriptions are presented in the scenario page. Once the control actions are identified, they can be implemented in the network and simulation can be progressed a time-step using the <code class="code docutils literal notranslate"><span class="pre">env.step(&lt;your</span> <span class="pre">actions</span> <span class="pre">here&gt;)</span></code> call.</p>
 </div>
 </div>
 

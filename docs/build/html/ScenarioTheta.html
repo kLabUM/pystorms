@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Scenario Theta &mdash; Open-Storm Benchmarking 0.0.1 documentation</title>
+  <title>Scenario Theta &mdash; pystorms 0.0.1 documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> Open-Storm Benchmarking
+            <a href="index.html" class="icon icon-home"> pystorms
           
 
           
@@ -89,10 +89,9 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Scenarios.html">Scenarios</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Scenario Theta</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#objective">Objective</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#state-action-space">State-action space</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#objective">Objective</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#states">States</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#actions">Actions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#control-actions">Control actions</a></li>
 </ul>
 </li>
 </ul>
@@ -104,6 +103,10 @@
 <li class="toctree-l1"><a class="reference internal" href="StateVectors.html">Defining States</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildingScenarios.html">Building Scenarios</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Contributing.html">Contributing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development</a></li>
 </ul>
 
             
@@ -118,7 +121,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">Open-Storm Benchmarking</a>
+          <a href="index.html">pystorms</a>
         
       </nav>
 
@@ -170,28 +173,22 @@
             
   <div class="section" id="scenario-theta">
 <h1>Scenario Theta<a class="headerlink" href="#scenario-theta" title="Permalink to this headline">¶</a></h1>
-<p>This synthetic scenario is designed to be a unit test for control
-algorithms. Two basins in this scenario are idealized to be rectangular
-with a capacity of <span class="math notranslate nohighlight">\(1000m^3\)</span>.
-Outlets in the basins are at the bottom and have a dimension of <span class="math notranslate nohighlight">\(1m^2\)</span>
-and their percent of opening can be controlled during the duration of
-the storm.</p>
-<a class="reference internal image-reference" href="_images/theta.png"><img alt="Stormwater Network" src="_images/theta.png" style="width: 400px;" /></a>
+<p>This scenario was created to serve as a unit test for control algorithms.
+In this scenario, two idealized basins (in parallel) of <span class="math notranslate nohighlight">\(1000m^3\)</span> are draining into a downstream water body.
+Outlets in the basins (<span class="math notranslate nohighlight">\(1m^2\)</span>) are at the bottom and can be controlled throughout the duration of the simulation.</p>
+<a class="reference internal image-reference" href="_images/theta.png"><img alt="_images/theta.png" class="align-center" src="_images/theta.png" style="width: 400px;" /></a>
 <div class="section" id="objective">
 <h2>Objective<a class="headerlink" href="#objective" title="Permalink to this headline">¶</a></h2>
 <p>Maintain the flow of water at the outlet of the stormwater network below <span class="math notranslate nohighlight">\(0.5 m^3s^{-1}\)</span>.
 The degree of success or failure of the algorithm to achieve the objective is computed based on the following metric.</p>
-</div>
-<div class="section" id="state-action-space">
-<h2>State-action space<a class="headerlink" href="#state-action-space" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="states">
 <h3>States<a class="headerlink" href="#states" title="Permalink to this headline">¶</a></h3>
 <p>Water levels (<span class="math notranslate nohighlight">\(m\)</span>) in the two basins at every step, indexed by the order of the basin are
-defined as the states in this scenario. For example,</p>
+defined as the states in this scenario.</p>
 </div>
-<div class="section" id="actions">
-<h3>Actions<a class="headerlink" href="#actions" title="Permalink to this headline">¶</a></h3>
-<p>Percent of valve opening <span class="math notranslate nohighlight">\([0,1]\)</span> are defined as the actions in the network.</p>
+<div class="section" id="control-actions">
+<h3>Control actions<a class="headerlink" href="#control-actions" title="Permalink to this headline">¶</a></h3>
+<p>Percent of valve opening <span class="math notranslate nohighlight">\([0,1]\)</span> at the outlet of each basin.</p>
 </div>
 </div>
 </div>

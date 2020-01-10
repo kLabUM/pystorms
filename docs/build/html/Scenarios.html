@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Scenarios &mdash; Open-Storm Benchmarking 0.0.1 documentation</title>
+  <title>Scenarios &mdash; pystorms 0.0.1 documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> Open-Storm Benchmarking
+            <a href="index.html" class="icon icon-home"> pystorms
           
 
           
@@ -87,7 +87,10 @@
 </ul>
 <p class="caption"><span class="caption-text">Scenarios:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Scenarios</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Scenarios</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#list-of-scenarios">List of scenarios</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="ScenarioTheta.html">Scenario Theta</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ScenarioGamma.html">Scenario Gamma</a></li>
 </ul>
@@ -96,6 +99,10 @@
 <li class="toctree-l1"><a class="reference internal" href="StateVectors.html">Defining States</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildingScenarios.html">Building Scenarios</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Contributing.html">Contributing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development</a></li>
 </ul>
 
             
@@ -110,7 +117,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">Open-Storm Benchmarking</a>
+          <a href="index.html">pystorms</a>
         
       </nav>
 
@@ -162,7 +169,20 @@
             
   <div class="section" id="scenarios">
 <h1>Scenarios<a class="headerlink" href="#scenarios" title="Permalink to this headline">¶</a></h1>
-<p>Benchmarking library has five standardized scenarios for evaluvating the performance the control algorithms.</p>
+<a class="reference internal image-reference" href="_images/fig_scenarioComponents.png"><img alt="_images/fig_scenarioComponents.png" class="align-center" src="_images/fig_scenarioComponents.png" style="width: 400px;" /></a>
+<p>Scenarios are primary components of the pystorms library. These scenarios comprise of a stormwater network, system driver, and corresponding control problem. This library provides the user access to a set of five standard scenarios that can be used for evaluation and development of control algorithms. Apart from these predefined scenarios, users have the choice to mix and match stormwater networks with any of the stormevents provided in the library.</p>
+<div class="section" id="list-of-scenarios">
+<h2>List of scenarios<a class="headerlink" href="#list-of-scenarios" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li><p>Scenario theta</p></li>
+<li><p>Scenario alpha (development)</p></li>
+<li><p>Scenario beta (development)</p></li>
+<li><p>Scenario gamma</p></li>
+<li><p>Scenario delta (development)</p></li>
+</ol>
+<p>Each of these scenarios are defined with a intial set of states that you can use to defining your control approches. But these set of states (i.e. depth and water levels in various elements of the stormwater network) are not the only measurements you can access. You can redefine the states in a scenario with couple of lines of code (refer to redefining states).
+As a rule, in this library you can access to all the measurements computed by the stormwater simulation engine.</p>
+</div>
 </div>
 
 

@@ -1,9 +1,10 @@
 Welcome
 =======
 
-Welcome to the Open-storm's benchmarking library !! 
+Welcome to the pystorms library !! 
 
-This library has a modular simulation model. By default, SWMM (pyswmm) is the default module for modeling the flow of the runoff in the stormwater networks. Instructions on the installation and use of the this package for analyzing the performance of the stormwater control algorithms are documented here. Please feel free to reach out if you find any discrepancies or have any questions. 
+This is a simulation sandbox for the development and evaluation of stormwater control algorithms. 
+This library uses EPA-SWMM as its core simulation engine for modeling stormwater dynamics, but can be easily configured to use an other customized simulation software with minimal overhead. Please refer to the advanced section for more information. 
 
 Installation
 ------------
@@ -13,18 +14,16 @@ It can installed using `pip <https://pypi.org/project/pip/>`_ or `conda <https:/
 
 .. code:: bash
 
-   pip install git+https://github.com/kLabUM/Benchmarking
+   pip install pystorms
 
 If you run into any issues installing the package, please refer to the advanced section for additional installation instructions or reach out to us.
 
 Getting Started
 ---------------
 
-Scenarios are the fundamental components of the benchmarking library. A scenario constitutes a stormwater network and a driving rainevent. Refer to the scenarios section for a more detailed description.
-
 .. code:: python
 
-   import benchmarking
+   import pystorms
 
 
    def controller(state):
@@ -35,7 +34,7 @@ Scenarios are the fundamental components of the benchmarking library. A scenario
                 actopns[1] = 0.5
         return actions
 
-   env = benchmarking.scenarios.theta()
+   env = pystorms.scenarios.theta()
 
    done = False 
    while not done:
@@ -44,3 +43,5 @@ Scenarios are the fundamental components of the benchmarking library. A scenario
        actions = controller(state)
        
        done = env.step(actions)
+
+Scenarios are the fundamental components of the pystorms library. A scenario constitutes a stormwater network, a driving rainevent, and a control objective. When :code:`env = pystorms.scenarios.theta()` is called, all the necessary simulation modules are initialized and its control is handed back to the user. This simulation can be controlled by users using the method calls on :code:`env` class. States in the stormwater network(e.g. water levels, flows, pollutant concentrations) can be queried at any point of the simulation using the :code:`env.state()` method. This returns the predefined states for the simulation. Detailed state descriptions are presented in the scenario page. Once the control actions are identified, they can be implemented in the network and simulation can be progressed a time-step using the :code:`env.step(<your actions here>)` call.
