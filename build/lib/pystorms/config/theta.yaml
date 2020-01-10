@@ -1,0 +1,27 @@
+# Configuration file for scenario theta 
+
+# swmm inp file 
+swmm_input: theta
+# state definitions
+states:
+        - !!python/tuple 
+          - P1
+          - depthN
+        - !!python/tuple
+          - P2
+          - depthN
+# Action space 
+action_space:
+        - "1"
+        - "2"
+# Performance Targets
+performance_targets:
+        - !!python/tuple
+          - "8"
+          - flow
+        - !!python/tuple
+          - P1
+          - flooding
+        - !!python/tuple
+          - P2
+          - flooding
