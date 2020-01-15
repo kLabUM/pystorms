@@ -217,7 +217,7 @@ response</strong></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;Outflows&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="_images/theta_uc.png" src="_images/theta_uc.png" />
+<img alt="_images/theta_uncontrolled.png" src="_images/theta_uncontrolled.png" />
 <p><strong>Now, lets see if we can design a control algorithm to maintain the
 flows below 0.5 :math:`m^3s^{-1}`</strong></p>
 <p>Design of such a control algorithm can be approached in many ways. But
@@ -249,22 +249,30 @@ example, we will design a simple algorithm that achives this.</p>
     <span class="k">return</span> <span class="n">actions</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">env</span> <span class="o">=</span> <span class="n">pystorms</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">theta</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">env_controlled</span> <span class="o">=</span> <span class="n">pystorms</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">theta</span><span class="p">()</span>
 <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
-    <span class="n">state</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">state</span><span class="p">()</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">env_controlled</span><span class="o">.</span><span class="n">state</span><span class="p">()</span>
     <span class="n">actions</span> <span class="o">=</span> <span class="n">controller</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="mf">0.50</span><span class="p">)</span>
-    <span class="n">done</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+    <span class="n">done</span> <span class="o">=</span> <span class="n">env_controlled</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">data_log</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">][</span><span class="s2">&quot;8&quot;</span><span class="p">])</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">env_controlled</span><span class="o">.</span><span class="n">data_log</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">][</span><span class="s2">&quot;8&quot;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Controlled&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">data_log</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">][</span><span class="s2">&quot;8&quot;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Uncontrolled&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Outflows&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;Outflows&#39;</span><span class="p">)</span>
+<img alt="_images/theta_controlled.png" src="_images/theta_controlled.png" />
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Controlled performance: </span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">Uncontrolled performance: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">env_controlled</span><span class="o">.</span><span class="n">performance</span><span class="p">(),</span> <span class="n">env</span><span class="o">.</span><span class="n">performance</span><span class="p">()))</span>
 </pre></div>
 </div>
-<img alt="_images/theta_c.png" src="_images/theta_c.png" />
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Controlled</span> <span class="n">performance</span><span class="p">:</span> <span class="mf">0.0</span>
+<span class="n">Uncontrolled</span> <span class="n">performance</span><span class="p">:</span> <span class="mf">0.1296391721430919</span>
+</pre></div>
+</div>
+<p>Controller is able to improve the performance of the network and
+maintain the outflows from the network below the desried threshold.</p>
 </div>
 </div>
 
