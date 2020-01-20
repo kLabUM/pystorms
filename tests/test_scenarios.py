@@ -26,6 +26,25 @@ def test_gamma():
         assert len(env.data_log["performance_measure"]) == steps
 
 
+def test_gamma_controller():
+    """
+    Test Gamma Controlled Performance
+    1. Uncontrolled
+    2. Closed
+    """
+    env = pystorms.scenarios.gamma()
+    done = False
+    while not done:
+        done = env.step(np.ones(11))
+    assert env.performance() > 10 ** 3
+    # All valves closed - remanent water in basins
+    env = pystorms.scenarios.gamma()
+    done = False
+    while not done:
+        done = env.step(np.zeros(11))
+    assert env.performance() > 10 ** 5
+
+
 def test_theta():
     """
     Tests for Alpha Scenario

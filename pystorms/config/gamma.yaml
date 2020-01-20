@@ -117,4 +117,37 @@ performance_targets:
           - flooding
         - !!python/tuple
           - "11"
-          - flooding                
+          - flooding
+        - !!python/tuple 
+          - "1"
+          - depthN
+        - !!python/tuple
+          - "2"
+          - depthN
+        - !!python/tuple 
+          - "3"
+          - depthN
+        - !!python/tuple
+          - "4"
+          - depthN
+        - !!python/tuple 
+          - "5"
+          - depthN
+        - !!python/tuple
+          - "6"
+          - depthN
+        - !!python/tuple 
+          - "7"
+          - depthN
+        - !!python/tuple
+          - "8"
+          - depthN
+        - !!python/tuple 
+          - "9"
+          - depthN
+        - !!python/tuple
+          - "10"
+          - depthN
+        - !!python/tuple 
+          - "11"
+          - depthN            

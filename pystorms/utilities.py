@@ -32,7 +32,7 @@ def load_network(name):
     elif name == "theta":
         path = os.path.join(HERE, "networks/theta.inp")
     else:
-        raise ValueError("Undefined Network, refer to the documentation")
+        raise ValueError("Undefined Network, please refer to the documentation")
     return path
 
 

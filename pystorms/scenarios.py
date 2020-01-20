@@ -33,18 +33,19 @@ class scenario(abc.ABC):
 class gamma(scenario):
     r"""Gamma Benchmarking Scenario
 
-    Separated stormwater network driven by a __ __ event.
+    Separated stormwater network driven by a 25 year 6 hour event.
 
     Parameters
     ----------
-    config : dict
-        physical attributes of the network.
+    config : yaml file
 
     Methods
     ----------
+    step :
 
     Notes
     -----
+    Objective : Route flows though the network such that they are below a threshold.
     """
 
     def __init__(self):
@@ -59,7 +60,12 @@ class gamma(scenario):
         self.env = environment(self.config, ctrl=True)
 
         # Create an object for storing the data points
-        self.data_log = {"performance_measure": [], "flow": {}, "flooding": {}}
+        self.data_log = {
+            "performance_measure": [],
+            "flow": {},
+            "flooding": {},
+            "depthN": {},
+        }
 
         # Data logger for storing _performormance data
         for ID, attribute in self.config["performance_targets"]:
@@ -74,21 +80,26 @@ class gamma(scenario):
             self._logger()
 
         # Estimate the _performormance
-        __performorm = 0.0  # temp variable
+        __performance = 0.0  # temp variable
 
         for ID, attribute in self.config["performance_targets"]:
             if attribute == "flooding":
-                flood = self.env.methods[attribute](ID)
-                if flood > 0.0:
-                    __performorm += 10 ** 6
-            else:
-                _target = self._performormance_threshold
-                __performorm += threshold(
-                    self.env.methods[attribute](ID), _target, scaling=1.0
+                __flood = self.env.methods[attribute](ID)
+                if __flood > 0.0:
+                    __performance += 10 ** 6
+            elif attribute == "flow":
+                __target = self._performormance_threshold
+                __performance += threshold(
+                    self.env.methods[attribute](ID), __target, scaling=1.0
                 )
+            # Check for water in the last timestep
+            elif done and attribute == "depthN":
+                __depth = self.env.methods[attribute](ID)
+                if __depth > 0.10:
+                    __performance += 7 * 10 ** 5
 
         # Record the _performormance
-        self.data_log["performance_measure"].append(__performorm)
+        self.data_log["performance_measure"].append(__performance)
 
         # Terminate the simulation
         if done:
@@ -143,19 +154,21 @@ class theta(scenario):
             self._logger()
 
         # Estimate the performance
-        _perform = 0.0
+        __performance = 0.0
 
         for ID, attribute in self.config["performance_targets"]:
             if attribute == "flooding":
-                flood = self.env.methods[attribute](ID)
-                if flood > 0.0:
-                    _perform += 10 ** 6
+                __flood = self.env.methods[attribute](ID)
+                if __flood > 0.0:
+                    __performance += 10 ** 6
             if attribute == "flow":
-                flow = self.env.methods[attribute](ID)
-                _perform = threshold(value=flow, target=self.threshold, scaling=10.0)
+                __flow = self.env.methods[attribute](ID)
+                __performance = threshold(
+                    value=__flow, target=self.threshold, scaling=10.0
+                )
 
         # Record the _performance
-        self.data_log["performance_measure"].append(_perform)
+        self.data_log["performance_measure"].append(__performance)
 
         # Terminate the simulation
         if done:
