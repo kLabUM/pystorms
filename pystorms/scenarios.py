@@ -30,8 +30,102 @@ class scenario(abc.ABC):
         return perf_metrics(self.data_log["performance_measure"], metric)
 
 
+class epsilon(scenario):
+    r"""Epsilon Scenario
+
+    Stormwater network with control structures in pipes
+
+    Parameters
+    ----------
+    config : yaml file
+
+    Methods
+    ----------
+    step:
+
+    Notes
+    ----------
+    Objective : Route flows to maintain constant outflow at the outlet
+
+    """
+
+    def __init__(self):
+        # Network configuration
+        self.config = yaml.load(open(PATH + "/config/epsilon.yaml", "r"), yaml.FullLoader)
+        self.config["swmm_input"] = load_network(self.config["swmm_input"])
+
+        # Dry weather TSS loading, measured at the outlet of the network
+        self._performormance_threshold = 1.075  # Kg/sec
+
+        # Create the env based on the config file
+        self.env = environment(self.config, ctrl=True)
+
+        # Create an object for storing data
+        self.data_log = {
+            "performance_measure": [],
+            "loading": {},
+            "pollutantL": {},
+            "flow": {},
+            "flooding": {},
+        }
+
+        # Data logger for storing _performormance data
+        for ID, attribute in self.config["performance_targets"]:
+            self.data_log[attribute][ID] = []
+
+    def step(self, actions, log=True):
+        # Implement the action and take a step forward
+        _, done = self.env.step(actions)
+
+        # Log the flows in the networks
+        if log:
+            self._logger()
+
+        # Estimate the _performormance
+        __performance = 0.0  # temporary variable
+
+        for ID, attribute in self.config["performance_targets"]:
+            if attribute == "flooding":
+                flood = self.env.methods[attribute](ID)
+                if flood > 0.0:
+                    __performance += 10 ** 9
+            elif attribute == "loading":
+                _target = self._performormance_threshold
+                pollutantLoading = (
+                    self.env.methods["pollutantL"](ID, 0)
+                    * self.env.methods["flow"](ID)
+                    * 28.3168
+                    / (10 ** 6)
+                )
+                __performance += threshold(pollutantLoading, _target)
+
+        # Record the _performormance
+        self.data_log["performance_measure"].append(__performance)
+
+        # Terminate the simulation
+        if done:
+            self.env._terminate()
+
+        return done
+
+    def _logger(self):
+        # Log all the _performormance values;
+        # additionally, other components can be added here
+        for ID, attribute in self.config["performance_targets"]:
+            if attribute == "loading":
+                pollutantLoading = (
+                    self.env.methods["pollutantL"](ID, 1)
+                    * self.env.methods["flow"](ID)
+                    * 28.3168
+                    / (10 ** 6)
+                )
+                self.data_log[attribute][ID].append(pollutantLoading)
+            else:
+                self.data_log[attribute][ID].append(self.env.methods[attribute](ID))
+
+
 class gamma(scenario):
-    r"""Gamma Benchmarking Scenario
+    r"""Gamma Scenario
 
     Separated stormwater network driven by a 25 year 6 hour event.
 
@@ -109,7 +203,7 @@ class gamma(scenario):
 
 
 class theta(scenario):
-    r"""Theta Benchmarking Scenario
+    r"""Theta Scenario
 
     Separated stormwater network driven by a idealized event.
 
@@ -120,7 +214,7 @@ class theta(scenario):
 
     Methods
     ----------
-
+    step:
 
     Notes
     -----

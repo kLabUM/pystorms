@@ -1,0 +1,102 @@
+# Configuration file for scenario theta 
+
+# swmm inp file 
+swmm_input: epsilon
+# state definitions
+states:
+        - !!python/tuple 
+          - "004"
+          - depthN
+        - !!python/tuple
+          - "006"
+          - depthN
+        - !!python/tuple 
+          - "011"
+          - depthN
+        - !!python/tuple
+          - "022"
+          - depthN
+        - !!python/tuple 
+          - "027"
+          - depthN
+        - !!python/tuple
+          - "030"
+          - depthN
+        - !!python/tuple 
+          - "033"
+          - depthN
+        - !!python/tuple
+          - "039"
+          - depthN
+        - !!python/tuple 
+          - "044"
+          - depthN
+        - !!python/tuple
+          - "050"
+          - depthN
+        - !!python/tuple 
+          - "060"
+          - depthN
+        - !!python/tuple
+          - "001"
+          - depthN
+        - !!python/tuple
+          - "001"
+          - pollutantL
+          - 0
+
+# Action space 
+action_space:
+        - "ISD001"
+        - "ISD002"
+        - "ISD003"
+        - "ISD004"
+        - "ISD005"
+        - "ISD006"
+        - "ISD007"
+        - "ISD008"
+        - "ISD009"
+        - "ISD010"
+        - "ISD011"  
+
+# Performance Targets
+performance_targets:
+        - !!python/tuple
+          - "001"
+          - loading
+        - !!python/tuple
+          - "001"
+          - flow
+        - !!python/tuple
+          - "004"
+          - flooding
+        - !!python/tuple
+          - "006"
+          - flooding
+        - !!python/tuple
+          - "011"
+          - flooding
+        - !!python/tuple
+          - "022"
+          - flooding
+        - !!python/tuple
+          - "027"
+          - flooding
+        - !!python/tuple
+          - "030"
+          - flooding
+        - !!python/tuple
+          - "033"
+          - flooding
+        - !!python/tuple
+          - "039"
+          - flooding
+        - !!python/tuple
+          - "044"
+          - flooding
+        - !!python/tuple
+          - "050"
+          - flooding
+        - !!python/tuple
+          - "060"
+          - flooding
