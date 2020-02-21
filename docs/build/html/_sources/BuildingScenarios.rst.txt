@@ -1,190 +1,112 @@
-Building Scenarios
-==================
+=========================
+Building Custom Scenarios
+=========================
 
-Apart from the scenarios provided in the library, custom scenarios can
-be built using the ``benchmarking`` library.
+Developing custom scenarios for contributing to the ``pystorms`` library or your personal use is really easy.
 
-Steps for building a custom scenarios
--------------------------------------
+**Steps for building a custom scenarios**
 
-1. Anonymize the stormwater network
-2. Identify the event drivers
-3. Choose an objective and performance metric
-4. Choose the state and action space
-5. Set up the class
+1. Anonymize the stormwater network, if you are considering contributing to the ``pystorms`` repository.
+2. Identify the event drivers (e.g. stormevents, tides). 
+3. Choose an objective and performance metric for evaluating the objective. 
+4. Decide on the state and action space. 
+5. Build the class and populate the yaml file. 
 
 Anonymize the stormwater network
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------
 
 To ensure that the stormwater network is anonymized, we apply randomized
 transformations on the network that transform the coordinates of the
 network, while maintaining the integrity of the network topology.
 
-In a SWMM input file the geometry of the model elements (length,
-elevation, cross section, etc.,) and their coordinate locations (ie the
-location to be displayed in the visualization of the model in a
-program,) are defined in separate sections. This separation allows the
-transformation of the coordinate data without altering the geometry of
-the model elements. This means that the coordinates of the model
-elements can be rotated, scaled, and translated without effecting any of
-the geometry values relevant to the execution of the model.
+In a SWMM input file the geometry of the model elements (length, elevation, cross section, etc.,) and their coordinate locations (i.e. the location to be displayed in the visualization of the model in a program) are defined in separate sections.
+This separation allows the transformation of the coordinate data without altering the geometry of the model elements.
+This means that the coordinates of the model elements can be rotated, scaled, and translated without effecting any of the geometry values relevant to the execution of the model.
 
-The anonymization procedure is as follows: 1. **Rotate** all coordinates
-by a common (random) angle between 0 and 360 degrees (The randomly
-generated rotation angle is not exposed.) 2. **Scale** all coordinates
-such that they are within a 100,000 x 100,000 unit box. 3. **Translate**
-coordinates to be within the bounding box defined by its two corners of
-(0,0) and (100000, 100000). 4. **Output** the anonymized coordinates to
-a new SWMM input file. By default comments are scrubbed from the input
-file, therefore no identifying metadata is kept in the anonymized
-version. 5. **Inspect** anonymized SWMM input file for any identifiable
-information remaining.
+Anonymization procedure
+^^^^^^^^^^^^^^^^^^^^^^^
+        1. **Rotate** all coordinates by a common (random) angle between 0 and 360 degrees. This randomly generated rotation angle is not exposed.
+        2. **Scale** all coordinates such that they are within a 100,000 x 100,000 unit box.
+        3. **Translate** coordinates to be within the bounding box defined by its two corners of (0,0) and (100000, 100000).
+        4. **Output** the anonymized coordinates to a new SWMM input file. By default comments are scrubbed from the input file, therefore no identifying metadata is kept in the anonymized version.
+        5. **Inspect** anonymized SWMM input file for any identifiable information remaining.
 
-More information on the anonymization routine and the code to do so can
-be found
+More information on the anonymization routine and the code to do so can be found
 `here <https://github.com/kLabUM/AnonymizeINP/blob/master/AnonymizeFullRoutine.ipynb>`__.
 
-Once the network is anonymized, the names of the nodes, links, or any
-components that can be traced back to the original model have to be
-updated. Currently, we do not have a proper nomenclature style for
-renaming the network components.
+Once the network is anonymized, the names of the nodes, links, or any components that can be traced back to the original model have to be updated.
+Currently, we do not have a proper nomenclature style for renaming the network components, so we leave this up to the better judgement of the users. 
 
-Choose the event driver
-~~~~~~~~~~~~~~~~~~~~~~~
+Event driver
+------------
 
-The event driver can be a rainfall event, time series data of flows, or
-some initial volumes in nodes. Refer to the section on handling event
-drivers for more details.
+The event driver can be a rainfall event, time series data of flows, or some initial volumes in nodes.
+Basically, anything that is supported by the stormwater simulation engine.
 
-Pick the control objective and performance metric
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Control objective and performance metric
+----------------------------------------
 
-The performance measure quantifies the ability of the control algorithm
-in achieving its objective. For example, if your objective was to
-minimize the CSO volume, a performance measure could be the CSO volume
-that occurs with the implementation of control.
+The performance measure quantifies the ability of the control algorithm in achieving its objective.
+For example, if your objective was to minimize the CSO volume, a performance measure could be the CSO volume that occurs with the implementation of control.
 
 Choose the state and action space
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------
 
-After choosing an appropriate performance measure for quantifying the
-control objective, pick the states (i.e., the network elements at which
-certain states, such as flow, water level, or pollutant concentrations,
-are measured) and the action space (i.e., controllable network assets).
+After choosing an appropriate performance measure for quantifying the control objective, pick the states (i.e., the network elements where certain states, such as flow, water level, or pollutant concentrations, are measured) and the action space (i.e., controllable network assets).
 
+Building ``pystorms`` scenario class
+------------------------------------
 .. code:: python
 
-   def MyAwesomeScenario: # Choose a name for your Scearnio. Please stick to Camel Case for ease of readability. 
+   def MyAwesomeScenario: # Choose a name for your Scenario 
        """
-       Benchmarking scenario with a predefined network and ___ rainevent. 
+       description of scenario 
 
 
        Methods
        -------
-       step(actions)
-           Steps the simulation forward by implementing the actions and computes the performance 
-       performance(metric)
-       Returns the performance of the control algorithm
+       < make a note of any new methods implemented for the class >
        
-           
+       Notes
+       -----
+       < any additional information you would want to provide about the scenario >
+
        """
        def __init__(self): # The scenario class ideally should not take any arguments
            
-           # Define your network parameters here.
-           self.config = {} # Dictionary for emebedding all the physical information of the network
+           # Scenario meta data is defined in the yaml file 
+           self.config = yaml.load(open(PATH + "/config/<scenario name>.yaml", "r"), yaml.FullLoader) # Meta data is loaded into the class as a dict file, which can be modified by the users. 
            
-           # Load the network 
-           self.config["swmm_input"] = benchmarking.load_network("myawesome") # Pick one of the available networks
+           # Load the network input file.
+           self.config["swmm_input"] = load_network(self.config["swmm_input"])
            # Refer to adding a network for more details on how to contribute a network to the library
            
-           self.config["states"] = [("J1", "depthN"), ("C1","flow"), ("C3", "depthL")] # Predefined tuples of node IDs
-           # and attributes 
-           # State dimensions will be returned in the order in which they are defined
-           # Refer to the section state space for more information
-           
-           self.config["action_space"] = ["O1", "O2"] # Control points in the network 
-           # This will also be controlled in the order in which they are defined in the network
-           
-           # Create the swmm object based on the input file; this will be passed along though the class
-           # Users can use object to get access to all pyswmm and pyswmm_lite functionality
-           self.env = pyswmm_lite.environment(config)
-           
-           # Define the objects on which performance of the controller will be computed 
-           self.config["performance_targets"] = [("C1", "flow"), ("J1", "flooding")]
-           # Performance will be measured based on the attribute listed in the performance target
-           
-           # Set up thresholds for your performance measures; you can have one for each metric
-           self.config["performance_thresholds"] = [("C1", 4.0), ("C2", 5.0)]
+           # Create the simulation environment
+           self.env = environment(self.config, ctrl = True)
                
-           # Create an object for handling the performance measure and states to store
+           # Create an object for logging data, this can include all the data being used for computing performance metrics and data that can be used for debugging
            self.data_log = {"performance_measure" : [],
                             "flows" : {},
                             "flooding" : {}}
-           # Data logger to storing performance data 
-           # Currently we only log the performance_targets, but this can be augmented to include
-           # some other nodes
+
+           # Populate the data_log with elements whose measurements have to be recorded.
            for ID, attribute in self.config["performance_targets"]:
                self.data_log[attribute][ID] = []
                
-          
-
-       def step(self, actions):
-           """
-           TODO add numpy docstring 
-           """
-       
+       def step(self, actions, log= True):
            # Step ahead and update the state 
            _, done = self.env.step(actions)
            
            # A logger of the states, actions, performance targets, and any other useful information
-           self._logger()
+           if log:
+                self._logger()
            
            # Create a performance measure 
-           _perform = 0.0
+           __performance = 0.0
            
-           # Performance objective 
-           _index = 0
            for ID, attribute in self.config["performance_targets"]:
-               
-               # Penalize flooding 
-               if attribute == "flooding":
-                   flood = self.env.methods[attribute](ID)
-                   if flood > 0.0:
-                       _perform += 10**6
-               else:
-               # Compute the performance threshold 
-               _perform += benchmarking.performance_measure.threshold(self.env.methods[attribute](ID),
-                                                                     self.config["performance_thresholds"][_index][1])
-               _index += 1 # Iteration for performance threshold
-               
-               # Record the performance 
-               self.data_log["performance_measure"].append(_perform)
+               """
+               Implement your performance evaluation here.
+               """               
+               self.data_log["performance_measure"].append(__performance)
            return done
-           
-       def _logger(self):
-           """
-           Logs the information from the simulation into the data log
-           """
-           for ID, attribute in self.config["performance_targets"]:
-               self.data_log[attribute][ID].append(self.env.methods[attribute](ID))
-
-       def performance(self, metric="mean"):
-           """
-           Return performance measure, numpy docstring 
-           """
-           if len(self.performance_measure) < 1:
-               raise ValueError('Run step; performance metrics have not been computed')
-           if metric == "mean":
-               return sum(self.performance_measure)/len(self.performance_measure)
-           elif metric == "cumulative":
-               return sum(self.performance_measure)
-           elif metric == "recent":
-               return self.performance_measure[-1]
-           else:
-               raise ValueError("mean, cumulative,and recent are the only valid metrics")
-
-       def state(self):
-           """
-           Refer to pyswmm_lite documentation for more details on the implementation of state function.
-           """
-           return self.env._state()

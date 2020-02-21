@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Contributing &mdash; Open-Storm Benchmarking 0.0.1 documentation</title>
+  <title>Contributing &mdash; pystorms 0.0.1 documentation</title>
   
 
   
@@ -36,7 +36,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Building Scenarios" href="BuildingScenarios.html" /> 
+    <link rel="next" title="Development" href="roadmap.html" />
+    <link rel="prev" title="Building Custom Scenarios" href="BuildingScenarios.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -50,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> Open-Storm Benchmarking
+            <a href="index.html" class="icon icon-home"> pystorms
           
 
           
@@ -82,7 +83,7 @@
             
               <p class="caption"><span class="caption-text">Getting Started:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Home.html">Welcome</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Home.html">⛈ ⛈ Welcome to the <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> ⛈ ⛈</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Scenarios:</span></p>
 <ul>
@@ -93,7 +94,7 @@
 <p class="caption"><span class="caption-text">Advanced:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="StateVectors.html">Defining States</a></li>
-<li class="toctree-l1"><a class="reference internal" href="BuildingScenarios.html">Building Scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BuildingScenarios.html">Building Custom Scenarios</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#steps-for-contributing">Steps for contributing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#addressing-bug-fix">Addressing bug fix</a></li>
@@ -102,10 +103,15 @@
 <li class="toctree-l3"><a class="reference internal" href="#networks-py"><code class="docutils literal notranslate"><span class="pre">networks.py</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#utilities-py"><code class="docutils literal notranslate"><span class="pre">utilities.py</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#scenario-py"><code class="docutils literal notranslate"><span class="pre">scenario.py</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#config"><code class="docutils literal notranslate"><span class="pre">config</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
+</ul>
+<p class="caption"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development</a></li>
 </ul>
 
             
@@ -120,7 +126,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">Open-Storm Benchmarking</a>
+          <a href="index.html">pystorms</a>
         
       </nav>
 
@@ -173,8 +179,6 @@
   <div class="section" id="contributing">
 <h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h1>
 <p>Thank you for your interest !</p>
-<p><strong>Currently windows implementation does not support the complete
-functionality. Please reach out if you can support windows.</strong></p>
 <div class="section" id="steps-for-contributing">
 <h2>Steps for contributing<a class="headerlink" href="#steps-for-contributing" title="Permalink to this headline">¶</a></h2>
 <p>Master branch in the repository houses the code that has been completely
@@ -188,8 +192,8 @@ issue</a></p>
 <ol class="arabic simple">
 <li><p>Fork the repository and clone it into your local machine</p></li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/kLabUM/Benchmarking
-<span class="nb">cd</span> Benchmarking
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/kLabUM/pystorms
+<span class="nb">cd</span> pystorms
 </pre></div>
 </div>
 <ol class="arabic simple" start="2">
@@ -221,7 +225,7 @@ request</a></p>
 <h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
 <p>Please create a unit test for the code addition or any contribution you
 wish make to the library. This repository uses <code class="docutils literal notranslate"><span class="pre">pytest</span></code> for testing.
-Unit tests can be found in the <code class="docutils literal notranslate"><span class="pre">/Benchmarking/tests/</span></code></p>
+Unit tests can be found in the <code class="docutils literal notranslate"><span class="pre">/pystorms/tests/</span></code></p>
 </div>
 <div class="section" id="details-on-where-to-include-what">
 <h2>Details on where to include what<a class="headerlink" href="#details-on-where-to-include-what" title="Permalink to this headline">¶</a></h2>
@@ -262,10 +266,43 @@ not specific to a particular scenario. Hence, this function would be in
 </div>
 <div class="section" id="scenario-py">
 <h3><code class="docutils literal notranslate"><span class="pre">scenario.py</span></code><a class="headerlink" href="#scenario-py" title="Permalink to this headline">¶</a></h3>
-<p>This contains the main scenarios used for benchmarking control
+<p>This contains the main scenarios used for testing control
 algorithms. Refer to building scenarios for more details on how to build
 a scenario.</p>
 <p>Anything that is <strong>specific</strong> to a network or scenario would go here.</p>
+</div>
+<div class="section" id="config">
+<h3><code class="docutils literal notranslate"><span class="pre">config</span></code><a class="headerlink" href="#config" title="Permalink to this headline">¶</a></h3>
+<p>All the configuration files, like the input file, state and action space, and performance metrics are placed in this file. Create a new file for the scenario you are creating.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Configuration file for scenario theta</span>
+
+<span class="c1"># swmm inp file</span>
+<span class="nt">swmm_input</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">theta</span>
+<span class="c1"># state definitions</span>
+<span class="nt">states</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="kt">!!python/tuple</span>
+          <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">P1</span>
+          <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">depthN</span>
+        <span class="p p-Indicator">-</span> <span class="kt">!!python/tuple</span>
+          <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">P2</span>
+          <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">depthN</span>
+<span class="c1"># Action space</span>
+<span class="nt">action_space</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;1&quot;</span>
+        <span class="p p-Indicator">-</span> <span class="s">&quot;2&quot;</span>
+<span class="c1"># Performance Targets</span>
+<span class="nt">performance_targets</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="kt">!!python/tuple</span>
+          <span class="p p-Indicator">-</span> <span class="s">&quot;8&quot;</span>
+          <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">flow</span>
+        <span class="p p-Indicator">-</span> <span class="kt">!!python/tuple</span>
+          <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">P1</span>
+          <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">flooding</span>
+        <span class="p p-Indicator">-</span> <span class="kt">!!python/tuple</span>
+          <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">P2</span>
+          <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">flooding</span>
+</pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -278,8 +315,10 @@ a scenario.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="roadmap.html" class="btn btn-neutral float-right" title="Development" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-        <a href="BuildingScenarios.html" class="btn btn-neutral float-left" title="Building Scenarios" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+        <a href="BuildingScenarios.html" class="btn btn-neutral float-left" title="Building Custom Scenarios" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome &mdash; Open-Storm Benchmarking 0.0.1 documentation</title>
+  <title>⛈ ⛈ Welcome to the pystorms ⛈ ⛈ &mdash; pystorms 0.0.1 documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> Open-Storm Benchmarking
+            <a href="index.html" class="icon icon-home"> pystorms
           
 
           
@@ -83,9 +83,13 @@
             
               <p class="caption"><span class="caption-text">Getting Started:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Welcome</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">⛈ ⛈ Welcome to the <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> ⛈ ⛈</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-pystorms">What is pystorms?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#research-using-pystorms">Research using pystorms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#citation">Citation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#licence">Licence</a></li>
 </ul>
 </li>
 </ul>
@@ -98,8 +102,12 @@
 <p class="caption"><span class="caption-text">Advanced:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="StateVectors.html">Defining States</a></li>
-<li class="toctree-l1"><a class="reference internal" href="BuildingScenarios.html">Building Scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BuildingScenarios.html">Building Custom Scenarios</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Contributing.html">Contributing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development</a></li>
 </ul>
 
             
@@ -114,7 +122,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">Open-Storm Benchmarking</a>
+          <a href="index.html">pystorms</a>
         
       </nav>
 
@@ -145,7 +153,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Welcome</li>
+      <li>⛈ ⛈ Welcome to the <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> ⛈ ⛈</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -164,44 +172,72 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="welcome">
-<h1>Welcome<a class="headerlink" href="#welcome" title="Permalink to this headline">¶</a></h1>
-<p>Welcome to the Open-storm’s benchmarking library !!</p>
-<p>This library has a modular simulation model. By default, SWMM (pyswmm) is the default module for modeling the flow of the runoff in the stormwater networks. Instructions on the installation and use of the this package for analyzing the performance of the stormwater control algorithms are documented here. Please feel free to reach out if you find any discrepancies or have any questions.</p>
+  <div class="section" id="cloud-with-lightning-and-rain-cloud-with-lightning-and-rain-welcome-to-the-pystorms-cloud-with-lightning-and-rain-cloud-with-lightning-and-rain">
+<h1>⛈ ⛈ Welcome to the <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> ⛈ ⛈<a class="headerlink" href="#cloud-with-lightning-and-rain-cloud-with-lightning-and-rain-welcome-to-the-pystorms-cloud-with-lightning-and-rain-cloud-with-lightning-and-rain" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="what-is-pystorms">
+<h2>What is pystorms?<a class="headerlink" href="#what-is-pystorms" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pystorms</span></code> is a python library for the development and evaluation of stormwater control algorithms created by the open-storm group. It is built on <a class="reference external" href="https://github.com/OpenWaterAnalytics/pyswmm">pyswmm</a>, a python wrapper for the interacting with EPA-SWMM.
+This library provides a collection of stormwater networks and streamlined programming interface that can be adopted for analyzing the performance of control algorithms.</p>
+</div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>This package is built with python 3.7 and is supported on all operating systems (Windows, Mac OS, Linux).
-It can installed using <a class="reference external" href="https://pypi.org/project/pip/">pip</a> or <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-pkgs.html">conda</a>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install git+https://github.com/kLabUM/Benchmarking
+<p>This package is built in python 3.7 and is supported on all operating systems (Windows, Mac OS, Linux).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install pystorms
 </pre></div>
 </div>
-<p>If you run into any issues installing the package, please refer to the advanced section for additional installation instructions or reach out to us.</p>
+<p>If you run into any issues installing the package, please refer to the advanced section for additional installation instructions or feel free to contact us.</p>
 </div>
 <div class="section" id="getting-started">
 <h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
-<p>Scenarios are the fundamental components of the benchmarking library. A scenario constitutes a stormwater network and a driving rainevent. Refer to the scenarios section for a more detailed description.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">benchmarking</span>
-
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pystorms</span>
 
 <span class="k">def</span> <span class="nf">controller</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
      <span class="n">actions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
      <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
              <span class="n">actions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
      <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
-             <span class="n">actopns</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+             <span class="n">actions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
      <span class="k">return</span> <span class="n">actions</span>
 
-<span class="n">env</span> <span class="o">=</span> <span class="n">benchmarking</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">theta</span><span class="p">()</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">pystorms</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">theta</span><span class="p">()</span>
 
 <span class="n">done</span> <span class="o">=</span> <span class="bp">False</span>
 <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
     <span class="n">state</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">state</span><span class="p">()</span>
-
     <span class="n">actions</span> <span class="o">=</span> <span class="n">controller</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-
     <span class="n">done</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Scenarios are the fundamental components of the pystorms library. A scenario constitutes of a stormwater network, a driving rainevent, and a control objective. When <code class="code docutils literal notranslate"><span class="pre">env</span> <span class="pre">=</span> <span class="pre">pystorms.scenarios.theta()</span></code> is called, all the necessary simulation modules are initialized. Simulation can be controlled using the method calls of <code class="code docutils literal notranslate"><span class="pre">env</span></code> class. States in the stormwater network(e.g. water levels, flows, pollutant concentrations) can be queried at any point of the simulation using the <code class="code docutils literal notranslate"><span class="pre">env.state()</span></code> method. Control actions can be implemented in the network and simulation can be progressed a time-step using the <code class="code docutils literal notranslate"><span class="pre">env.step(&lt;your</span> <span class="pre">actions</span> <span class="pre">here&gt;)</span></code> call. Please refer to the scenarios section for more information.</p>
+</div>
+<div class="section" id="research-using-pystorms">
+<h2>Research using pystorms<a class="headerlink" href="#research-using-pystorms" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="citation">
+<h2>Citation<a class="headerlink" href="#citation" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-latex notranslate"><div class="highlight"><pre><span></span>@inproceedings<span class="nb">{</span>10.1145/3302509.3313336,
+author = <span class="nb">{</span>Rimer, Sara P. and Mullapudi, Abhiram and Troutman, Sara C. and Kerkez, Branko<span class="nb">}</span>,
+title = <span class="nb">{</span>A Benchmarking Framework for Control and Optimization of Smart Stormwater Networks: Demo Abstract<span class="nb">}</span>,
+year = <span class="nb">{</span>2019<span class="nb">}</span>,
+isbn = <span class="nb">{</span>9781450362856<span class="nb">}</span>,
+publisher = <span class="nb">{</span>Association for Computing Machinery<span class="nb">}</span>,
+address = <span class="nb">{</span>New York, NY, USA<span class="nb">}</span>,
+url = <span class="nb">{</span>https://doi-org.proxy.lib.umich.edu/10.1145/3302509.3313336<span class="nb">}</span>,
+doi = <span class="nb">{</span>10.1145/3302509.3313336<span class="nb">}</span>,
+booktitle = <span class="nb">{</span>Proceedings of the 10th ACM/IEEE International Conference on Cyber-Physical Systems<span class="nb">}</span>,
+pages = <span class="nb">{</span>350–351<span class="nb">}</span>,
+numpages = <span class="nb">{</span>2<span class="nb">}</span>,
+keywords = <span class="nb">{</span>real-time control, water infrastructure, smart cities<span class="nb">}</span>,
+location = <span class="nb">{</span>Montreal, Quebec, Canada<span class="nb">}</span>,
+series = <span class="nb">{</span>ICCPS ’19<span class="nb">}</span>
+<span class="nb">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="licence">
+<h2>Licence<a class="headerlink" href="#licence" title="Permalink to this headline">¶</a></h2>
+<a class="reference internal image-reference" href="_images/gplv3-or-later.svg"><div align="left" class="align-left"><img alt="_images/gplv3-or-later.svg" src="_images/gplv3-or-later.svg" width="100" /></div>
+</a>
 </div>
 </div>
 

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to Open-Storm Benchmarking’s documentation! &mdash; Open-Storm Benchmarking 0.0.1 documentation</title>
+  <title>Welcome to Open-Storm Benchmarking’s documentation! &mdash; pystorms 0.0.1 documentation</title>
   
 
   
@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Welcome" href="Home.html" /> 
+    <link rel="next" title="⛈ ⛈ Welcome to the pystorms ⛈ ⛈" href="Home.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -50,7 +50,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> Open-Storm Benchmarking
+            <a href="#" class="icon icon-home"> pystorms
           
 
           
@@ -82,7 +82,7 @@
             
               <p class="caption"><span class="caption-text">Getting Started:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Home.html">Welcome</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Home.html">⛈ ⛈ Welcome to the <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> ⛈ ⛈</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Scenarios:</span></p>
 <ul>
@@ -93,7 +93,7 @@
 <p class="caption"><span class="caption-text">Advanced:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="StateVectors.html">Defining States</a></li>
-<li class="toctree-l1"><a class="reference internal" href="BuildingScenarios.html">Building Scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BuildingScenarios.html">Building Custom Scenarios</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Contributing.html">Contributing</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Development:</span></p>
@@ -113,7 +113,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">Open-Storm Benchmarking</a>
+          <a href="#">pystorms</a>
         
       </nav>
 
@@ -168,9 +168,13 @@
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Getting Started:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Home.html">Welcome</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="Home.html">⛈ ⛈ Welcome to the <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> ⛈ ⛈</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Home.html#what-is-pystorms">What is pystorms?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Home.html#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Home.html#getting-started">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Home.html#research-using-pystorms">Research using pystorms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Home.html#citation">Citation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Home.html#licence">Licence</a></li>
 </ul>
 </li>
 </ul>
@@ -178,10 +182,15 @@
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Scenarios:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Scenarios.html">Scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Scenarios.html">Scenarios</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Scenarios.html#list-of-scenarios">List of scenarios</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="ScenarioTheta.html">Scenario Theta</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="ScenarioTheta.html#objective">Objective</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ScenarioTheta.html#state-action-space">State-action space</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ScenarioTheta.html#states">States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ScenarioTheta.html#control-actions">Control actions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ScenarioTheta.html#example-equal-filling-controller">Example: Equal-filling Controller</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ScenarioGamma.html">Scenario Gamma</a></li>
@@ -191,8 +200,12 @@
 <p class="caption"><span class="caption-text">Advanced:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="StateVectors.html">Defining States</a></li>
-<li class="toctree-l1"><a class="reference internal" href="BuildingScenarios.html">Building Scenarios</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="BuildingScenarios.html#steps-for-building-a-custom-scenarios">Steps for building a custom scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BuildingScenarios.html">Building Custom Scenarios</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="BuildingScenarios.html#anonymize-the-stormwater-network">Anonymize the stormwater network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildingScenarios.html#event-driver">Event driver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildingScenarios.html#control-objective-and-performance-metric">Control objective and performance metric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildingScenarios.html#choose-the-state-and-action-space">Choose the state and action space</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildingScenarios.html#building-pystorms-scenario-class">Building <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> scenario class</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Contributing.html">Contributing</a><ul>
@@ -210,6 +223,7 @@
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="roadmap.html#versioning">Versioning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="roadmap.html#roadmap">Roadmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="roadmap.html#version-0-1-0">Version 0.1.0</a></li>
 </ul>
 </li>
 </ul>
@@ -232,7 +246,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Home.html" class="btn btn-neutral float-right" title="Welcome" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Home.html" class="btn btn-neutral float-right" title="⛈ ⛈ Welcome to the pystorms ⛈ ⛈" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>

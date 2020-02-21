@@ -3,9 +3,6 @@ Contributing
 
 Thank you for your interest !
 
-**Currently windows implementation does not support the complete
-functionality. Please reach out if you can support windows.**
-
 Steps for contributing
 ----------------------
 
@@ -23,8 +20,8 @@ Addressing bug fix
 
 .. code:: bash
 
-   git clone https://github.com/kLabUM/Benchmarking
-   cd Benchmarking 
+   git clone https://github.com/kLabUM/pystorms
+   cd pystorms 
 
 2. Create a new branch with your or just
 
@@ -58,7 +55,7 @@ Testing
 
 Please create a unit test for the code addition or any contribution you
 wish make to the library. This repository uses ``pytest`` for testing.
-Unit tests can be found in the ``/Benchmarking/tests/``
+Unit tests can be found in the ``/pystorms/tests/``
 
 Details on where to include what
 --------------------------------
@@ -105,8 +102,44 @@ not specific to a particular scenario. Hence, this function would be in
 ``scenario.py``
 ~~~~~~~~~~~~~~~
 
-This contains the main scenarios used for benchmarking control
+This contains the main scenarios used for testing control
 algorithms. Refer to building scenarios for more details on how to build
 a scenario.
 
 Anything that is **specific** to a network or scenario would go here.
+
+``config``
+~~~~~~~~~~
+
+All the configuration files, like the input file, state and action space, and performance metrics are placed in this file. Create a new file for the scenario you are creating.  
+
+.. code:: yaml
+
+        # Configuration file for scenario theta 
+
+        # swmm inp file 
+        swmm_input: theta
+        # state definitions
+        states:
+                - !!python/tuple 
+                  - P1
+                  - depthN
+                - !!python/tuple
+                  - P2
+                  - depthN
+        # Action space 
+        action_space:
+                - "1"
+                - "2"
+        # Performance Targets
+        performance_targets:
+                - !!python/tuple
+                  - "8"
+                  - flow
+                - !!python/tuple
+                  - P1
+                  - flooding
+                - !!python/tuple
+                  - P2
+                  - flooding
+

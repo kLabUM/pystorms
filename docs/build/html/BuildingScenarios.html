@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Building Scenarios &mdash; Open-Storm Benchmarking 0.0.1 documentation</title>
+  <title>Building Custom Scenarios &mdash; pystorms 0.0.1 documentation</title>
   
 
   
@@ -51,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> Open-Storm Benchmarking
+            <a href="index.html" class="icon icon-home"> pystorms
           
 
           
@@ -83,7 +83,7 @@
             
               <p class="caption"><span class="caption-text">Getting Started:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Home.html">Welcome</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Home.html">⛈ ⛈ Welcome to the <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> ⛈ ⛈</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Scenarios:</span></p>
 <ul>
@@ -94,17 +94,22 @@
 <p class="caption"><span class="caption-text">Advanced:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="StateVectors.html">Defining States</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Building Scenarios</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#steps-for-building-a-custom-scenarios">Steps for building a custom scenarios</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#anonymize-the-stormwater-network">Anonymize the stormwater network</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#choose-the-event-driver">Choose the event driver</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pick-the-control-objective-and-performance-metric">Pick the control objective and performance metric</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#choose-the-state-and-action-space">Choose the state and action space</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Building Custom Scenarios</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#anonymize-the-stormwater-network">Anonymize the stormwater network</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#anonymization-procedure">Anonymization procedure</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#event-driver">Event driver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#control-objective-and-performance-metric">Control objective and performance metric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#choose-the-state-and-action-space">Choose the state and action space</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-pystorms-scenario-class">Building <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> scenario class</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Contributing.html">Contributing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development</a></li>
 </ul>
 
             
@@ -119,7 +124,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">Open-Storm Benchmarking</a>
+          <a href="index.html">pystorms</a>
         
       </nav>
 
@@ -150,7 +155,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Building Scenarios</li>
+      <li>Building Custom Scenarios</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -169,185 +174,111 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="building-scenarios">
-<h1>Building Scenarios<a class="headerlink" href="#building-scenarios" title="Permalink to this headline">¶</a></h1>
-<p>Apart from the scenarios provided in the library, custom scenarios can
-be built using the <code class="docutils literal notranslate"><span class="pre">benchmarking</span></code> library.</p>
-<div class="section" id="steps-for-building-a-custom-scenarios">
-<h2>Steps for building a custom scenarios<a class="headerlink" href="#steps-for-building-a-custom-scenarios" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="building-custom-scenarios">
+<h1>Building Custom Scenarios<a class="headerlink" href="#building-custom-scenarios" title="Permalink to this headline">¶</a></h1>
+<p>Developing custom scenarios for contributing to the <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> library or your personal use is really easy.</p>
+<p><strong>Steps for building a custom scenarios</strong></p>
 <ol class="arabic simple">
-<li><p>Anonymize the stormwater network</p></li>
-<li><p>Identify the event drivers</p></li>
-<li><p>Choose an objective and performance metric</p></li>
-<li><p>Choose the state and action space</p></li>
-<li><p>Set up the class</p></li>
+<li><p>Anonymize the stormwater network, if you are considering contributing to the <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> repository.</p></li>
+<li><p>Identify the event drivers (e.g. stormevents, tides).</p></li>
+<li><p>Choose an objective and performance metric for evaluating the objective.</p></li>
+<li><p>Decide on the state and action space.</p></li>
+<li><p>Build the class and populate the yaml file.</p></li>
 </ol>
 <div class="section" id="anonymize-the-stormwater-network">
-<h3>Anonymize the stormwater network<a class="headerlink" href="#anonymize-the-stormwater-network" title="Permalink to this headline">¶</a></h3>
+<h2>Anonymize the stormwater network<a class="headerlink" href="#anonymize-the-stormwater-network" title="Permalink to this headline">¶</a></h2>
 <p>To ensure that the stormwater network is anonymized, we apply randomized
 transformations on the network that transform the coordinates of the
 network, while maintaining the integrity of the network topology.</p>
-<p>In a SWMM input file the geometry of the model elements (length,
-elevation, cross section, etc.,) and their coordinate locations (ie the
-location to be displayed in the visualization of the model in a
-program,) are defined in separate sections. This separation allows the
-transformation of the coordinate data without altering the geometry of
-the model elements. This means that the coordinates of the model
-elements can be rotated, scaled, and translated without effecting any of
-the geometry values relevant to the execution of the model.</p>
-<p>The anonymization procedure is as follows: 1. <strong>Rotate</strong> all coordinates
-by a common (random) angle between 0 and 360 degrees (The randomly
-generated rotation angle is not exposed.) 2. <strong>Scale</strong> all coordinates
-such that they are within a 100,000 x 100,000 unit box. 3. <strong>Translate</strong>
-coordinates to be within the bounding box defined by its two corners of
-(0,0) and (100000, 100000). 4. <strong>Output</strong> the anonymized coordinates to
-a new SWMM input file. By default comments are scrubbed from the input
-file, therefore no identifying metadata is kept in the anonymized
-version. 5. <strong>Inspect</strong> anonymized SWMM input file for any identifiable
-information remaining.</p>
-<p>More information on the anonymization routine and the code to do so can
-be found
+<p>In a SWMM input file the geometry of the model elements (length, elevation, cross section, etc.,) and their coordinate locations (i.e. the location to be displayed in the visualization of the model in a program) are defined in separate sections.
+This separation allows the transformation of the coordinate data without altering the geometry of the model elements.
+This means that the coordinates of the model elements can be rotated, scaled, and translated without effecting any of the geometry values relevant to the execution of the model.</p>
+<div class="section" id="anonymization-procedure">
+<h3>Anonymization procedure<a class="headerlink" href="#anonymization-procedure" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p><strong>Rotate</strong> all coordinates by a common (random) angle between 0 and 360 degrees. This randomly generated rotation angle is not exposed.</p></li>
+<li><p><strong>Scale</strong> all coordinates such that they are within a 100,000 x 100,000 unit box.</p></li>
+<li><p><strong>Translate</strong> coordinates to be within the bounding box defined by its two corners of (0,0) and (100000, 100000).</p></li>
+<li><p><strong>Output</strong> the anonymized coordinates to a new SWMM input file. By default comments are scrubbed from the input file, therefore no identifying metadata is kept in the anonymized version.</p></li>
+<li><p><strong>Inspect</strong> anonymized SWMM input file for any identifiable information remaining.</p></li>
+</ol>
+</div></blockquote>
+<p>More information on the anonymization routine and the code to do so can be found
 <a class="reference external" href="https://github.com/kLabUM/AnonymizeINP/blob/master/AnonymizeFullRoutine.ipynb">here</a>.</p>
-<p>Once the network is anonymized, the names of the nodes, links, or any
-components that can be traced back to the original model have to be
-updated. Currently, we do not have a proper nomenclature style for
-renaming the network components.</p>
+<p>Once the network is anonymized, the names of the nodes, links, or any components that can be traced back to the original model have to be updated.
+Currently, we do not have a proper nomenclature style for renaming the network components, so we leave this up to the better judgement of the users.</p>
 </div>
-<div class="section" id="choose-the-event-driver">
-<h3>Choose the event driver<a class="headerlink" href="#choose-the-event-driver" title="Permalink to this headline">¶</a></h3>
-<p>The event driver can be a rainfall event, time series data of flows, or
-some initial volumes in nodes. Refer to the section on handling event
-drivers for more details.</p>
 </div>
-<div class="section" id="pick-the-control-objective-and-performance-metric">
-<h3>Pick the control objective and performance metric<a class="headerlink" href="#pick-the-control-objective-and-performance-metric" title="Permalink to this headline">¶</a></h3>
-<p>The performance measure quantifies the ability of the control algorithm
-in achieving its objective. For example, if your objective was to
-minimize the CSO volume, a performance measure could be the CSO volume
-that occurs with the implementation of control.</p>
+<div class="section" id="event-driver">
+<h2>Event driver<a class="headerlink" href="#event-driver" title="Permalink to this headline">¶</a></h2>
+<p>The event driver can be a rainfall event, time series data of flows, or some initial volumes in nodes.
+Basically, anything that is supported by the stormwater simulation engine.</p>
+</div>
+<div class="section" id="control-objective-and-performance-metric">
+<h2>Control objective and performance metric<a class="headerlink" href="#control-objective-and-performance-metric" title="Permalink to this headline">¶</a></h2>
+<p>The performance measure quantifies the ability of the control algorithm in achieving its objective.
+For example, if your objective was to minimize the CSO volume, a performance measure could be the CSO volume that occurs with the implementation of control.</p>
 </div>
 <div class="section" id="choose-the-state-and-action-space">
-<h3>Choose the state and action space<a class="headerlink" href="#choose-the-state-and-action-space" title="Permalink to this headline">¶</a></h3>
-<p>After choosing an appropriate performance measure for quantifying the
-control objective, pick the states (i.e., the network elements at which
-certain states, such as flow, water level, or pollutant concentrations,
-are measured) and the action space (i.e., controllable network assets).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">MyAwesomeScenario</span><span class="p">:</span> <span class="c1"># Choose a name for your Scearnio. Please stick to Camel Case for ease of readability.</span>
+<h2>Choose the state and action space<a class="headerlink" href="#choose-the-state-and-action-space" title="Permalink to this headline">¶</a></h2>
+<p>After choosing an appropriate performance measure for quantifying the control objective, pick the states (i.e., the network elements where certain states, such as flow, water level, or pollutant concentrations, are measured) and the action space (i.e., controllable network assets).</p>
+</div>
+<div class="section" id="building-pystorms-scenario-class">
+<h2>Building <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> scenario class<a class="headerlink" href="#building-pystorms-scenario-class" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">MyAwesomeScenario</span><span class="p">:</span> <span class="c1"># Choose a name for your Scenario</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Benchmarking scenario with a predefined network and ___ rainevent.</span>
+<span class="sd">    description of scenario</span>
 
 
 <span class="sd">    Methods</span>
 <span class="sd">    -------</span>
-<span class="sd">    step(actions)</span>
-<span class="sd">        Steps the simulation forward by implementing the actions and computes the performance</span>
-<span class="sd">    performance(metric)</span>
-<span class="sd">    Returns the performance of the control algorithm</span>
+<span class="sd">    &lt; make a note of any new methods implemented for the class &gt;</span>
 
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    &lt; any additional information you would want to provide about the scenario &gt;</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># The scenario class ideally should not take any arguments</span>
 
-        <span class="c1"># Define your network parameters here.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># Dictionary for emebedding all the physical information of the network</span>
+        <span class="c1"># Scenario meta data is defined in the yaml file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">PATH</span> <span class="o">+</span> <span class="s2">&quot;/config/&lt;scenario name&gt;.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">),</span> <span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span> <span class="c1"># Meta data is loaded into the class as a dict file, which can be modified by the users.</span>
 
-        <span class="c1"># Load the network</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;swmm_input&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">benchmarking</span><span class="o">.</span><span class="n">load_network</span><span class="p">(</span><span class="s2">&quot;myawesome&quot;</span><span class="p">)</span> <span class="c1"># Pick one of the available networks</span>
+        <span class="c1"># Load the network input file.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;swmm_input&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;swmm_input&quot;</span><span class="p">])</span>
         <span class="c1"># Refer to adding a network for more details on how to contribute a network to the library</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;states&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;J1&quot;</span><span class="p">,</span> <span class="s2">&quot;depthN&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span><span class="s2">&quot;flow&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;C3&quot;</span><span class="p">,</span> <span class="s2">&quot;depthL&quot;</span><span class="p">)]</span> <span class="c1"># Predefined tuples of node IDs</span>
-        <span class="c1"># and attributes</span>
-        <span class="c1"># State dimensions will be returned in the order in which they are defined</span>
-        <span class="c1"># Refer to the section state space for more information</span>
+        <span class="c1"># Create the simulation environment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">environment</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">ctrl</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;action_space&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;O1&quot;</span><span class="p">,</span> <span class="s2">&quot;O2&quot;</span><span class="p">]</span> <span class="c1"># Control points in the network</span>
-        <span class="c1"># This will also be controlled in the order in which they are defined in the network</span>
-
-        <span class="c1"># Create the swmm object based on the input file; this will be passed along though the class</span>
-        <span class="c1"># Users can use object to get access to all pyswmm and pyswmm_lite functionality</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">pyswmm_lite</span><span class="o">.</span><span class="n">environment</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-
-        <span class="c1"># Define the objects on which performance of the controller will be computed</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;performance_targets&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="s2">&quot;flow&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;J1&quot;</span><span class="p">,</span> <span class="s2">&quot;flooding&quot;</span><span class="p">)]</span>
-        <span class="c1"># Performance will be measured based on the attribute listed in the performance target</span>
-
-        <span class="c1"># Set up thresholds for your performance measures; you can have one for each metric</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;performance_thresholds&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;C2&quot;</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)]</span>
-
-        <span class="c1"># Create an object for handling the performance measure and states to store</span>
+        <span class="c1"># Create an object for logging data, this can include all the data being used for computing performance metrics and data that can be used for debugging</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_log</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;performance_measure&quot;</span> <span class="p">:</span> <span class="p">[],</span>
                          <span class="s2">&quot;flows&quot;</span> <span class="p">:</span> <span class="p">{},</span>
                          <span class="s2">&quot;flooding&quot;</span> <span class="p">:</span> <span class="p">{}}</span>
-        <span class="c1"># Data logger to storing performance data</span>
-        <span class="c1"># Currently we only log the performance_targets, but this can be augmented to include</span>
-        <span class="c1"># some other nodes</span>
+
+        <span class="c1"># Populate the data_log with elements whose measurements have to be recorded.</span>
         <span class="k">for</span> <span class="n">ID</span><span class="p">,</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;performance_targets&quot;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data_log</span><span class="p">[</span><span class="n">attribute</span><span class="p">][</span><span class="n">ID</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
-
-
-    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        TODO add numpy docstring</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
         <span class="c1"># Step ahead and update the state</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">done</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
 
         <span class="c1"># A logger of the states, actions, performance targets, and any other useful information</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="p">()</span>
 
         <span class="c1"># Create a performance measure</span>
-        <span class="n">_perform</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">__performance</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-        <span class="c1"># Performance objective</span>
-        <span class="n">_index</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">ID</span><span class="p">,</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;performance_targets&quot;</span><span class="p">]:</span>
-
-            <span class="c1"># Penalize flooding</span>
-            <span class="k">if</span> <span class="n">attribute</span> <span class="o">==</span> <span class="s2">&quot;flooding&quot;</span><span class="p">:</span>
-                <span class="n">flood</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="n">attribute</span><span class="p">](</span><span class="n">ID</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">flood</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
-                    <span class="n">_perform</span> <span class="o">+=</span> <span class="mi">10</span><span class="o">**</span><span class="mi">6</span>
-            <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Compute the performance threshold</span>
-            <span class="n">_perform</span> <span class="o">+=</span> <span class="n">benchmarking</span><span class="o">.</span><span class="n">performance_measure</span><span class="o">.</span><span class="n">threshold</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="n">attribute</span><span class="p">](</span><span class="n">ID</span><span class="p">),</span>
-                                                                  <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;performance_thresholds&quot;</span><span class="p">][</span><span class="n">_index</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">_index</span> <span class="o">+=</span> <span class="mi">1</span> <span class="c1"># Iteration for performance threshold</span>
-
-            <span class="c1"># Record the performance</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_log</span><span class="p">[</span><span class="s2">&quot;performance_measure&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_perform</span><span class="p">)</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Implement your performance evaluation here.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_log</span><span class="p">[</span><span class="s2">&quot;performance_measure&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">__performance</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">done</span>
-
-    <span class="k">def</span> <span class="nf">_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Logs the information from the simulation into the data log</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">ID</span><span class="p">,</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;performance_targets&quot;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_log</span><span class="p">[</span><span class="n">attribute</span><span class="p">][</span><span class="n">ID</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="n">attribute</span><span class="p">](</span><span class="n">ID</span><span class="p">))</span>
-
-    <span class="k">def</span> <span class="nf">performance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return performance measure, numpy docstring</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">performance_measure</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Run step; performance metrics have not been computed&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">performance_measure</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">performance_measure</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;cumulative&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">performance_measure</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;recent&quot;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">performance_measure</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;mean, cumulative,and recent are the only valid metrics&quot;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Refer to pyswmm_lite documentation for more details on the implementation of state function.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">_state</span><span class="p">()</span>
 </pre></div>
-</div>
 </div>
 </div>
 </div>

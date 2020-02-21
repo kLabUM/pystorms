@@ -3,17 +3,17 @@ Defining States
 
 .. code:: python
 
-   import benchmarking
+   import pystorms
    import numpy as np
    import matplotlib.pyplot as plt
 
-In scenario gamma, states are defined as the depths in the ponds. If
-needed custom states can be defined by the users, overwriting or
-appending to the default states provided in the library.
+In scenario gamma, states are defined as the depths in the basins of the network.
+If needed custom states can be defined by the users, overwriting or
+appending to the default states provided in the library. Consider the following example, 
 
 .. code:: python
 
-   env = benchmarking.scenarios.gamma()
+   env = pystorms.scenarios.gamma()
 
 States defined in gamma scenario can be queried as follows,
 
@@ -85,7 +85,10 @@ vector of length 12.
 Users are not limited to the flows in the network. They are allowed to
 access any value computed by the swmm network.
 
-Supported state queries: \* ``depthN`` : Depth in nodes \* ``depthL`` :
-Depth in links \* ``flow`` : Flow in links/orifices/weir \* ``flooding``
-: Flooding in nodes \* ``pollutantN`` : Pollutant in nodes \*
-``pollutantL`` : Pollutant in links
+Supported state queries: 
+        * ``depthN`` : Depth in nodes
+        * ``depthL`` : Depth in links 
+        * ``flow`` : Flow in links/orifices/weir 
+        * ``flooding``: Flooding in nodes 
+        * ``pollutantN`` : Pollutant in nodes 
+        * ``pollutantL`` : Pollutant in links
