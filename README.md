@@ -9,13 +9,8 @@ It is a natural extension of the Open-Storm's mission to open up and ease access
  Our initial efforts allowed us to develop open source and free tools for anyone to be able to deploy flood sensors, measure green infrastructure, or even control storm or sewer systems.
  Now we have developed a tool to be able to test the performance of algorithms used to coordinate these different sensing and control technologies that have been deployed throughout urban water systems.    
 
-For the motivation behind this effort, we refer the reader to our manuscript [*pystorms*](https://dl.acm.org/citation.cfm?id=3313336). In general, this repo provides three components:
+For the motivation behind this effort, we refer the reader to our manuscript [*pystorms*](https://dl.acm.org/citation.cfm?id=3313336). In general, this repo provides a library of `scenarios` that are built to allow for systematic quantitative evaluation of stormwater control algorithms.
 
-1. A library of `scenarios` that are built to allow for systematic quantitative evaluation of stormwater control algorithms, 
-2. A stormwater hydraulic simulator named `pyswmm_lite` and forked heavily from OWA's [SWMM](https://github.com/kLabUM/Stormwater-Management-Model.git) and [pyswmm](https://github.com/kLabUM/pyswmm_lite.git), and
-3. An `environment` script that links the `pyswmm_lite` simulator to the `scenarios`, and can be edited/updated by users who might want to interface the `scenarios` with other stormwater simulator software (the `environment` script is included in `pyswmm-lite`).
-
-This is a alpha version of the library, eventually `pyswmm_lite` dependency would be deprecated in the favour of `pyswmm`
 
 ## Getting Started 
 
@@ -25,12 +20,15 @@ This is a alpha version of the library, eventually `pyswmm_lite` dependency woul
 
 - python 3+
 - numpy
+- yaml
 - pyswmm_lite
 
+This is a alpha version of the library, eventually `pyswmm_lite` dependency would be deprecated in the favour of `pyswmm`
+
 ```bash 
-pip install pyswmm_lite
 pip install pystorms
 ```
+
 Please raise an issue on the repository or reach out if you run into any issues installing the package. 
 
 ### Example 
