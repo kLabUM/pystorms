@@ -17,3 +17,8 @@ def test_load_network():
     assert "inp" == network[-3:]
     with pytest.raises(ValueError):
         pystorms.utilities.load_network("purushotham")
+
+
+def test_load_binary():
+    with pytest.raises(ValueError):
+        pystorms.utilities.load_binary("purushotham")
