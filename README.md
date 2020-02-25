@@ -21,9 +21,8 @@ For the motivation behind this effort, we refer the reader to our manuscript [*p
 - python 3+
 - numpy
 - yaml
-- pyswmm_lite
+- pyswmm
 
-This is a alpha version of the library, eventually `pyswmm_lite` dependency would be deprecated in the favour of `pyswmm`
 
 ```bash 
 pip install pystorms
