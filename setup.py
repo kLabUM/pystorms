@@ -17,7 +17,10 @@ setup(
         "pystorms": [
             "networks/*.inp",
             "storms/*.npy",
-            "config/*.yaml"
+            "config/*.yaml",
+            "binaries/pollutant_support/macos/libswmm5.so",
+            "binaries/pollutant_support/linux/libswmm5.so",
+            "binaries/pollutant_support/windows/swmm5.dll"
         ]
     },
     classifiers=[
@@ -26,6 +29,8 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        "numpy"
+        "numpy",
+        "pyswmm",
+        "pyyaml"
     ],
 )

@@ -2,6 +2,8 @@
 
 # swmm inp file 
 swmm_input: epsilon
+# binary 
+binary: pollutant_support
 # state definitions
 states:
         - !!python/tuple 
