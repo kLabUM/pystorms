@@ -1,4 +1,4 @@
-.DS_Store
-.rpt 
-.pyc
-.out
+*.DS_Store
+*.rpt 
+*.pyc
+*.out
