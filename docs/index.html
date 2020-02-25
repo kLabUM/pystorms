@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Benchmarking | Smart Stormwater</title>
+  <title>pystorms</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./css/bootstrap.css">
@@ -10,12 +10,21 @@
   <!--rel="stylesheet" href="site_css.css"-->
    <style type="text/css">
 	#title_setting {
-	    background-color: #222831;
+	    background-color: #f1f3f4;
 	}
 
 	.container-fluid {
 	    background-color: #EEEEEE;
 	}
+
+  .navbar-custom {
+      color: #FFFFFF;
+      background-color: rgb(0, 0, 0);
+  }
+
+.nav-link {
+    color: #FFFFFF;
+}
 
 	#logo {
 	    background-color: #FFFFFF; 
@@ -100,14 +109,14 @@
 <body>
 
 <!--   Navigation Bar TODO: Add a logo -->
-<nav class="navbar sticky-top navbar-expand-sm bg-dark navbar-dark">
+<nav class="navbar sticky-top navbar-expand-sm navbar-custom">
   <div class="collapse navbar-collapse" id="collapsibleNavbar">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link" href="./build/html/index.html" target="_blank">Documentation</a>
+        <a class="nav-link" href="./build/html/index.html" target="_blank"> <strong>Documentation</strong> </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#contact">Contact</a>
+        <a class="nav-link" href="#contact"> <strong>Contact</strong></a>
       </li>
     </ul>
   </div>  
@@ -115,7 +124,7 @@
 
 <div class="container-fluid" id="jumbotron-header">
   &nbsp;
-  <h1 align="center">Benchmarking Framework for Smart Stormwater Systems</h1>
+  <h1 align="center">pystorms : Simulation sandbox for the evaluation and control of stormwater networks</h1>
   <h5 align="center">⚔️ Want to know how your control algorithm stacks up against others in smart stormwater systems? ⚔️</h5>
   &nbsp;
 </div>
@@ -194,13 +203,13 @@
 </div>
 </div>
 <div class="container-fluid" id="getting_Started">
-  <p class="text-justify"><br>Welcome! We have built this benchmarking toolbox to encourage more researchers to have access to smart stormwater control problems. We want these problems accessible to all populations of researchers &mdash; those with experience in controls, but not stormwater; those with experience in stormwater, but not controls; and those without prior experience in either! We have streamlined all of the backend details of running a smart stormwater control problem so that all you have to do is focus on the control algorithm (see below for an example).</p>
+  <p class="text-justify"><br>Welcome! We have built this library to encourage more researchers to have access to smart stormwater control problems. We want these problems accessible to all populations of researchers &mdash; those with experience in controls, but not stormwater; those with experience in stormwater, but not controls; and those without prior experience in either! We have streamlined all of the backend details of running a smart stormwater control problem so that all you have to do is focus on the control algorithm (see below for an example).</p>
 </div>
 &nbsp;
 
 <div class="container-fluid" id="getting_Started">
   <h2 align="center"><strong>Getting Started</strong></h2>
-  <p class="text-justify">To try out how exactly to interact with stormwater networks using our benchmarking toolbox, we encourage you to first begin with our "toy control problem" which you can access <strong>here</strong>. Once you feel comfortable with how our toolbox works, we then encourage you really begin to have some fun by interacting with our five benchmarking scenarios: <span style="font-family: courier; font-weight: bold">alpha</span>, <span style="font-family: courier; font-weight: bold">beta</span>, <span style="font-family: courier; font-weight: bold">gamma</span>, <span style="font-family: courier; font-weight: bold">delta</span>, and <span style="font-family: courier; font-weight: bold">epsilon</span>. These benchmarking scenarios are built using real-world inspired stormwater networks, driving events, and control assets.
+  <p class="text-justify">To try out how exactly to interact with stormwater networks using our toolbox, we encourage you to first begin with our "toy control problem" which you can access <strong><a href="./build/html/ScenarioTheta.html">here</a> </strong>. Once you feel comfortable with how our toolbox works, we then encourage you really begin to have some fun by interacting with our five benchmarking scenarios: <span style="font-family: courier; font-weight: bold">alpha</span>, <span style="font-family: courier; font-weight: bold">beta</span>, <span style="font-family: courier; font-weight: bold">gamma</span>, <span style="font-family: courier; font-weight: bold">delta</span>, and <span style="font-family: courier; font-weight: bold">epsilon</span>. These benchmarking scenarios are built using real-world inspired stormwater networks, driving events, and control assets.
   <br><br>
   To learn more about this work, check out our github repository:
   <br>
@@ -223,7 +232,7 @@
      ">
      <pre style="margin: 0;
       line-height: 125%">
-<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">benchmarking</span>
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">pystorms</span>
 
 <span style="color: #008800; font-weight: bold">def</span> controller(state):
     <span style="color: #919191">"""
@@ -231,7 +240,7 @@
     """</span>
     <span style="color: #008800; font-weight: bold">return</span> actions
 
-env = benchmarking.scenarios.alpha()
+env = pystorms.scenarios.alpha()
 done = <span style="color: #007020">False</span>
 
 <span style="color: #008800; font-weight: bold">while</span> <span style="font-weight: bold">not</span> done:
