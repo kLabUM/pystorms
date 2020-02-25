@@ -1,5 +1,5 @@
-from pyswmm_lite import environment
-from pystorms.utilities import threshold, perf_metrics, load_network
+from pystorms.environment import environment
+from pystorms.utilities import threshold, perf_metrics, load_network, load_binary
 import yaml
 import abc
 import os
@@ -53,12 +53,13 @@ class epsilon(scenario):
         # Network configuration
         self.config = yaml.load(open(PATH + "/config/epsilon.yaml", "r"), yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["swmm_input"])
+        self.config["binary"] = load_binary(self.config["binary"])
 
         # Dry weather TSS loading, measured at the outlet of the network
         self._performormance_threshold = 1.075  # Kg/sec
 
         # Create the env based on the config file
-        self.env = environment(self.config, ctrl=True)
+        self.env = environment(self.config, ctrl=True, binary=self.config["binary"])
 
         # Create an object for storing data
         self.data_log = {
