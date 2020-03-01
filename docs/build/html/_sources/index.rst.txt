@@ -30,6 +30,7 @@ Welcome to Open-Storm Benchmarking's documentation!
    
    Installation
    StateVectors
+   PyswmmFeatures
    BuildingScenarios
    Contributing
    FAQ
@@ -39,7 +40,6 @@ Welcome to Open-Storm Benchmarking's documentation!
    :caption: Examples:
 
    Multiprocessing
-   PyswmmFeatures
    InfluxGrafana
 
 .. toctree::
