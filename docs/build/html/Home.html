@@ -89,7 +89,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#research-using-pystorms">Research using pystorms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#citation">Citation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#licence">Licence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
 </ul>
 </li>
 </ul>
@@ -187,8 +187,12 @@
 <h1>⛈ ⛈ Welcome to the <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> ⛈ ⛈<a class="headerlink" href="#cloud-with-lightning-and-rain-cloud-with-lightning-and-rain-welcome-to-the-pystorms-cloud-with-lightning-and-rain-cloud-with-lightning-and-rain" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="what-is-pystorms">
 <h2>What is pystorms?<a class="headerlink" href="#what-is-pystorms" title="Permalink to this headline">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">pystorms</span></code> is a python library for the development and evaluation of stormwater control algorithms created by the open-storm group. It is built on <a class="reference external" href="https://github.com/OpenWaterAnalytics/pyswmm">pyswmm</a>, a python wrapper for the interacting with EPA-SWMM.
-This library provides a collection of stormwater networks and streamlined programming interface that can be adopted for analyzing the performance of control algorithms.</p>
+<p>Flooding is the leading cause of natural disaster deaths worldwide. Simultaneously, untold quantities of metals, bacteria, nutrients, and other pollutants are washing-off during storms into our streams and rivers. As a result, many parts of the world are dealing with chronically impaired coastlines due to algal blooms and other ecological disasters. Many of these challenges are presently addressed through classic approaches and new infrastructure construction (larger pipes, bigger basins, storage tanks, etc.).</p>
+<p>Instead of building more, there is now an unprecedented opportunity to use internet-of-things and cyber-physical technologies to embed water systems with intelligence. The Internet-connected water systems of the future will control themselves (gates, valves, pumps), similar to self-driving cars, to reduce flooding and improve water quality. However, there is a dire need for more researchers to help enable the next generation of data and control algorithms for smart water systems.</p>
+<p>We developed <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> as a tool to collaboratively develop new algorithms for solving urban watershed specific control problems. In particular, we built this tool to bridge the gap between (i) experts in algorithms and control systems and (ii) experts in urban water systems (as well as anyone in between).</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a>pystorms`’ is an easy-to-use, open-source Python library to allow quick evaluation of control strategies on a set of real world-inspired smart stormwater scenarios. It includes (1) a collection of real-world inspired stormwater networks and (2) a streamlined programming interface to analyze performance of control algorithms on the included networks. The library has been written so that it can be easily adapted and used with other stormwater networks or simulators, while maintaining the focus on the control algorithm itself.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pystorms</span></code> is built on <a class="reference external" href="https://github.com/OpenWaterAnalytics/pyswmm">pyswmm</a>, which is a Python wrapper developed to interface with the United State’s Environmental Protection Agency Storm Water Management Model <a class="reference external" href="https://www.epa.gov/water-research/storm-water-management-model-swmm">EPA-SWMM</a>, thus allowing users to bypass the need for utilizing the EPA-SWMM GUI (available only on Windows operating systems) or compiling the EPA-SWMM source code for usage.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pystorms</span></code> is developed by Open-Storm, the open-source outreach efforts of a consortium of university researchers, industry experts, and municipal practitioners, and lead by the <a class="reference external" href="http://www-personal.umich.edu/~bkerkez/">Real-Time Water Systems Lab</a> at the University of Michigan.</p>
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
@@ -200,8 +204,10 @@ This library provides a collection of stormwater networks and streamlined progra
 </div>
 <div class="section" id="getting-started">
 <h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<p>The following code can be run to ensure the package has been successfully installed, and to learn the basics of how to use <code class="docutils literal notranslate"><span class="pre">pystorms</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pystorms</span>
 
+<span class="c1"># (3) Define the control algorithm</span>
 <span class="k">def</span> <span class="nf">controller</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
      <span class="n">actions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
      <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
@@ -210,8 +216,10 @@ This library provides a collection of stormwater networks and streamlined progra
              <span class="n">actions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
      <span class="k">return</span> <span class="n">actions</span>
 
+<span class="c1"># (1) Call and define the scenario</span>
 <span class="n">env</span> <span class="o">=</span> <span class="n">pystorms</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">theta</span><span class="p">()</span>
 
+<span class="c1"># (2) Run the simulation</span>
 <span class="n">done</span> <span class="o">=</span> <span class="bp">False</span>
 <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
     <span class="n">state</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">state</span><span class="p">()</span>
@@ -219,7 +227,26 @@ This library provides a collection of stormwater networks and streamlined progra
     <span class="n">done</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Scenarios are the fundamental components of the pystorms library. A scenario constitutes of a stormwater network, a driving rainevent, and a control objective. When <code class="code docutils literal notranslate"><span class="pre">env</span> <span class="pre">=</span> <span class="pre">pystorms.scenarios.theta()</span></code> is called, all the necessary simulation modules are initialized. Simulation can be controlled using the method calls of <code class="code docutils literal notranslate"><span class="pre">env</span></code> class. States in the stormwater network(e.g. water levels, flows, pollutant concentrations) can be queried at any point of the simulation using the <code class="code docutils literal notranslate"><span class="pre">env.state()</span></code> method. Control actions can be implemented in the network and simulation can be progressed a time-step using the <code class="code docutils literal notranslate"><span class="pre">env.step(&lt;your</span> <span class="pre">actions</span> <span class="pre">here&gt;)</span></code> call. Please refer to the scenarios section for more information.</p>
+<p>The code above can be broken down into the following components:</p>
+<ol class="arabic simple">
+<li><p>Define a scenario</p></li>
+</ol>
+<blockquote>
+<div><p>To run a stormwater control simulation using <code class="docutils literal notranslate"><span class="pre">pystorms</span></code>, a scenario must first be defined. Scenarios are the fundamental components of the pystorms library, and each consist of a stormwater network, a driving precipitation event, and a control objective.</p>
+<p>In the code above, a scenario is called by defining a class <code class="code docutils literal notranslate"><span class="pre">env</span></code> and initializing the default simulation modules specific for the <strong>theta</strong> scenario (i.e. <code class="code docutils literal notranslate"><span class="pre">env</span> <span class="pre">=</span> <span class="pre">pystorms.scenarios.theta()</span></code>). <strong>theta</strong> is a basic stormwater control scenario developed specifically for testing and debugging of new code and/or control algorithms in <code class="code docutils literal notranslate"><span class="pre">pystorms</span></code>.</p>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>Delineate a simulation</p></li>
+</ol>
+<blockquote>
+<div><p>A simulation can be delineated using the method calls of the <code class="code docutils literal notranslate"><span class="pre">env</span></code> class. States in the stormwater network (e.g. water levels, flows, pollutant concentrations) can be queried at any point of the simulation using the <code class="code docutils literal notranslate"><span class="pre">env.state()</span></code> method. Control actions can be implemented in the network and simulation can be progressed a time-step using the <code class="code docutils literal notranslate"><span class="pre">env.step(&lt;your</span> <span class="pre">actions</span> <span class="pre">here&gt;)</span></code> call. Please refer to the scenarios section for more information.</p>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li><p>Implement a control algorithm</p></li>
+</ol>
+<blockquote>
+<div><p>Here</p>
+</div></blockquote>
 </div>
 <div class="section" id="research-using-pystorms">
 <h2>Research using pystorms<a class="headerlink" href="#research-using-pystorms" title="Permalink to this headline">¶</a></h2>
@@ -245,8 +272,8 @@ series = <span class="nb">{</span>ICCPS ’19<span class="nb">}</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="licence">
-<h2>Licence<a class="headerlink" href="#licence" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
 <a class="reference internal image-reference" href="_images/gplv3-or-later.svg"><div align="left" class="align-left"><img alt="_images/gplv3-or-later.svg" src="_images/gplv3-or-later.svg" width="100" /></div>
 </a>
 </div>

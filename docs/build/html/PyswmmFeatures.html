@@ -189,18 +189,18 @@ represent frequently used parameters for making control decisions. Refer
 to the documentation on states for more details on the supported
 parameters. <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> architecture is designed to enable users easy
 access to all the existing pyswmm functionality.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pystorms</span>
-<span class="kn">import</span> <span class="nn">pyswmm.toolkitapi</span> <span class="k">as</span> <span class="nn">tkai</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import pystorms
+import pyswmm.toolkitapi as tkai
 </pre></div>
 </div>
 <p>This example demonstrates how pyswmm functionality can be invoked from
 <cite>pystorms</cite>.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">env</span> <span class="o">=</span> <span class="n">pystorms</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">theta</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>env = pystorms.scenarios.theta()
 </pre></div>
 </div>
 <p>All function calls being used in the environment for populating state
 vector are listed in the <code class="docutils literal notranslate"><span class="pre">env.env.methods</span></code> dictionary.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">env</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">methods</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>env.env.methods
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;depthN&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">bound</span> <span class="n">method</span> <span class="n">environment</span><span class="o">.</span><span class="n">_getNodeDepth</span> <span class="n">of</span> <span class="o">&lt;</span><span class="n">pystorms</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">environment</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x11929d690</span><span class="o">&gt;&gt;</span><span class="p">,</span>
@@ -214,30 +214,30 @@ vector are listed in the <code class="docutils literal notranslate"><span class=
 </div>
 <p>Let us say, we want to use volume as a state. All we have to do is add
 the function call reading volume to the dict.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_getNodeVolume</span><span class="p">(</span><span class="n">NodeID</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">env</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">getNodeResult</span><span class="p">(</span><span class="n">NodeID</span><span class="p">,</span> <span class="n">tkai</span><span class="o">.</span><span class="n">NodeResults</span><span class="o">.</span><span class="n">newVolume</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def _getNodeVolume(NodeID):
+    return env.env.sim._model.getNodeResult(NodeID, tkai.NodeResults.newVolume.value)
 </pre></div>
 </div>
 <p><cite>env</cite> refers to the scenario being initialized.
 For example, if the scenario was initialized as <cite>sce</cite> the first class in the return statement would be <cite>sce</cite>. env in <cite>&lt;scenario class&gt;.env</cite> refers to the environment class used to communicate with pyswmm/EPA-SWMM.
 <cite>sim._model</cite> refers to the EPA-SWMM simulation initialized by invoking the scenario class.
 <cite>getNodeResult</cite> is the functional call that queries the volume from the EPA-SWMM.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">env</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="s2">&quot;volumeN&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_getNodeVolume</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>env.env.methods[&quot;volumeN&quot;] = _getNodeVolume
 </pre></div>
 </div>
 <p>Lets add volume to the state vector</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">env</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;states&quot;</span><span class="p">]</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>env.config[&quot;states&quot;]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[(</span><span class="s1">&#39;P1&#39;</span><span class="p">,</span> <span class="s1">&#39;depthN&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;P2&#39;</span><span class="p">,</span> <span class="s1">&#39;depthN&#39;</span><span class="p">)]</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">env</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;states&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;P1&#39;</span><span class="p">,</span> <span class="s1">&#39;volumeN&#39;</span><span class="p">))</span>
-<span class="n">env</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;states&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;P2&#39;</span><span class="p">,</span> <span class="s1">&#39;volumeN&#39;</span><span class="p">))</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>env.config[&quot;states&quot;].append((&#39;P1&#39;, &#39;volumeN&#39;))
+env.config[&quot;states&quot;].append((&#39;P2&#39;, &#39;volumeN&#39;))
 </pre></div>
 </div>
 <p><em>NOTE:</em> Arguments to the volume function are tuple appended to the config dict. Refer to <a class="reference external" href="https://github.com/kLabUM/pystorms/blob/ffa3564ef5f80811ca246b10ffeb0e38f36befdb/pystorms/environment.py#L74">environment.py</a> for more details on how state vector is populated.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">env</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;states&quot;</span><span class="p">]</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>env.config[&quot;states&quot;]
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[(</span><span class="s1">&#39;P1&#39;</span><span class="p">,</span> <span class="s1">&#39;depthN&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;P2&#39;</span><span class="p">,</span> <span class="s1">&#39;depthN&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;P1&#39;</span><span class="p">,</span> <span class="s1">&#39;volumeN&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;P2&#39;</span><span class="p">,</span> <span class="s1">&#39;volumeN&#39;</span><span class="p">)]</span>
@@ -245,7 +245,7 @@ For example, if the scenario was initialized as <cite>sce</cite> the first class
 </div>
 <p>Now when <code class="docutils literal notranslate"><span class="pre">env.state()</span></code> is called, it returns all both depth and volume
 in nodes</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">env</span><span class="o">.</span><span class="n">state</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>env.state()
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
