@@ -19,8 +19,8 @@ For the motivation behind this effort, we refer the reader to our manuscript [*p
 **Requirements**
 
 - python 3+
+- PyYAML 5.1+
 - numpy
-- yaml
 - pyswmm
 
 
