@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Scenarios" href="Scenarios.html" />
-    <link rel="prev" title="Welcome to Open-Storm Benchmarking’s documentation!" href="index.html" /> 
+    <link rel="prev" title="Welcome to pystorms documentation!" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -84,11 +84,12 @@
               <p class="caption"><span class="caption-text">Getting Started:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">⛈ ⛈ Welcome to the <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> ⛈ ⛈</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#smart-stormwater-systems">Smart Stormwater Systems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-is-pystorms">What is pystorms?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#research-using-pystorms">Research using pystorms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#citation">Citation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#research-using-pystorms">Research using pystorms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
 </ul>
 </li>
@@ -97,11 +98,11 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Scenarios.html">Scenarios</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ScenarioTheta.html">Scenario Theta</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ScenarioGamma.html">Scenario Gamma</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ScenarioEpsilon.html">Scenario Epsilon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ScenarioAlpha.html">Scenario Alpha</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ScenarioBeta.html">Scenario Beta</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ScenarioGamma.html">Scenario Gamma</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ScenarioDelta.html">Scenario Delta</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ScenarioEpsilon.html">Scenario Epsilon</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Advanced:</span></p>
 <ul>
@@ -185,10 +186,18 @@
             
   <div class="section" id="cloud-with-lightning-and-rain-cloud-with-lightning-and-rain-welcome-to-the-pystorms-cloud-with-lightning-and-rain-cloud-with-lightning-and-rain">
 <h1>⛈ ⛈ Welcome to the <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> ⛈ ⛈<a class="headerlink" href="#cloud-with-lightning-and-rain-cloud-with-lightning-and-rain-welcome-to-the-pystorms-cloud-with-lightning-and-rain-cloud-with-lightning-and-rain" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="smart-stormwater-systems">
+<h2>Smart Stormwater Systems<a class="headerlink" href="#smart-stormwater-systems" title="Permalink to this headline">¶</a></h2>
+<p>Flooding is the leading cause of “natural disaster’’ deaths worldwide.
+Simultaneously, untold quantities of metals, bacteria, nutrients, and other pollutants are washing-off during storms into our streams and rivers.
+As a result, many parts of the world are dealing with chronically impaired coastlines due to algal blooms and other ecological disasters.
+Many of these challenges are presently addressed through classic approaches and new infrastructure construction (larger pipes, bigger basins, storage tanks, etc.).</p>
+<p>Instead of building more, there is now an unprecedented opportunity to use internet-of-things and cyber-physical technologies to embed water systems with intelligence.
+The Internet-connected water systems of the future will control themselves (gates, valves, pumps), similar to self-driving cars, to reduce flooding and improve water quality.
+However, there is a dire need for more researchers to help enable the next generation of data and control algorithms for smart water systems.</p>
+</div>
 <div class="section" id="what-is-pystorms">
 <h2>What is pystorms?<a class="headerlink" href="#what-is-pystorms" title="Permalink to this headline">¶</a></h2>
-<p>Flooding is the leading cause of <a href="#id1"><span class="problematic" id="id2">`</span></a>natural disaster’ deaths worldwide. Simultaneously, untold quantities of metals, bacteria, nutrients, and other pollutants are washing-off during storms into our streams and rivers. As a result, many parts of the world are dealing with chronically impaired coastlines due to algal blooms and other ecological disasters. Many of these challenges are presently addressed through classic approaches and new infrastructure construction (larger pipes, bigger basins, storage tanks, etc.).</p>
-<p>Instead of building more, there is now an unprecedented opportunity to use internet-of-things and cyber-physical technologies to embed water systems with intelligence. The Internet-connected water systems of the future will control themselves (gates, valves, pumps), similar to self-driving cars, to reduce flooding and improve water quality. However, there is a dire need for more researchers to help enable the next generation of data and control algorithms for smart water systems.</p>
 <p>We developed <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> as a tool to collaboratively develop new algorithms for solving urban watershed specific control problems. In particular, we built this tool to bridge the gap between (i) experts in algorithms and control systems and (ii) experts in urban water systems (as well as anyone in between).</p>
 <p><code class="docutils literal notranslate"><span class="pre">pystorms</span></code> is an easy-to-use, open-source Python library to allow quick evaluation of control strategies on a set of real world-inspired smart stormwater scenarios. It includes (1) a collection of real-world inspired stormwater networks and (2) a streamlined programming interface to analyze performance of control algorithms on the included networks. The library has been written so that it can be easily adapted and used with other stormwater networks or simulators, while maintaining the focus on the control algorithm itself.</p>
 <p><code class="docutils literal notranslate"><span class="pre">pystorms</span></code> is built on <a class="reference external" href="https://github.com/OpenWaterAnalytics/pyswmm">pyswmm</a>, which is a Python wrapper developed to interface with the United State’s Environmental Protection Agency Storm Water Management Model <a class="reference external" href="https://www.epa.gov/water-research/storm-water-management-model-swmm">EPA-SWMM</a>, thus allowing users to bypass the need for utilizing the EPA-SWMM GUI (available only on Windows operating systems) or compiling the EPA-SWMM source code for usage.</p>
@@ -258,9 +267,6 @@
 <p>We refer to the case when no control is implemented as the <strong>uncontrolled case</strong>. To run the uncontrolled case, simply progress the simulation without defining any actions in the step call (i.e. <code class="code docutils literal notranslate"><span class="pre">env.step()</span></code>).</p>
 </div></blockquote>
 </div>
-<div class="section" id="research-using-pystorms">
-<h2>Research using pystorms<a class="headerlink" href="#research-using-pystorms" title="Permalink to this headline">¶</a></h2>
-</div>
 <div class="section" id="citation">
 <h2>Citation<a class="headerlink" href="#citation" title="Permalink to this headline">¶</a></h2>
 <p>While <code class="docutils literal notranslate"><span class="pre">pystorms</span></code> can be used freely, we ask that the origins of this tool be credited by using the following reference:</p>
@@ -283,6 +289,12 @@ series = <span class="nb">{</span>ICCPS ’19<span class="nb">}</span>
 </pre></div>
 </div>
 </div>
+<div class="section" id="research-using-pystorms">
+<h2>Research using pystorms<a class="headerlink" href="#research-using-pystorms" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li><p>Sara C. Troutman, Nancy G. Love, and Branko Kerkez. Balancing water quality and flows incombined sewer systems using real-time control. <em>Environ. Sci.: Water Res. Technol</em> (2020)</p></li>
+</ol>
+</div>
 <div class="section" id="license">
 <h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">pystorms</span></code> is licensed under a GNU General Public License.</p>
@@ -302,7 +314,7 @@ series = <span class="nb">{</span>ICCPS ’19<span class="nb">}</span>
         <a href="Scenarios.html" class="btn btn-neutral float-right" title="Scenarios" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Open-Storm Benchmarking’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to pystorms documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -311,7 +323,7 @@ series = <span class="nb">{</span>ICCPS ’19<span class="nb">}</span>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Abhiram Mullapudi
+        &copy; Copyright 2049
 
     </p>
   </div>

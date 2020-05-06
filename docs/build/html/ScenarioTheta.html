@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Scenario Gamma" href="ScenarioGamma.html" />
+    <link rel="next" title="Scenario Alpha" href="ScenarioAlpha.html" />
     <link rel="prev" title="Scenarios" href="Scenarios.html" /> 
 </head>
 
@@ -95,11 +95,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#example-equal-filling-controller">Example: Equal-filling Controller</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="ScenarioGamma.html">Scenario Gamma</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ScenarioEpsilon.html">Scenario Epsilon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ScenarioAlpha.html">Scenario Alpha</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ScenarioBeta.html">Scenario Beta</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ScenarioGamma.html">Scenario Gamma</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ScenarioDelta.html">Scenario Delta</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ScenarioEpsilon.html">Scenario Epsilon</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Advanced:</span></p>
 <ul>
@@ -203,17 +203,17 @@ defined as the states in this scenario.</p>
 </div>
 <div class="section" id="example-equal-filling-controller">
 <h2>Example: Equal-filling Controller<a class="headerlink" href="#example-equal-filling-controller" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import pystorms
-import numpy as np
-import matplotlib.pyplot as plt
-%matplotlib notebook
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pystorms</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="o">%</span><span class="k">matplotlib</span> notebook
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>env = pystorms.scenarios.theta()
-done = False
-while not done:
-    done = env.step(np.ones(2))
-print(&quot;Uncontrolled Performance : {}&quot;.format(env.performance()))
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">env</span> <span class="o">=</span> <span class="n">pystorms</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">theta</span><span class="p">()</span>
+<span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+    <span class="n">done</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Uncontrolled Performance : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">performance</span><span class="p">()))</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Uncontrolled</span> <span class="n">Performance</span> <span class="p">:</span> <span class="mf">0.1296391721430919</span>
@@ -221,8 +221,8 @@ print(&quot;Uncontrolled Performance : {}&quot;.format(env.performance()))
 </div>
 <p><strong>Lets take a look at the network outflows in the uncontrolled
 response</strong></p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>plt.plot(env.data_log[&quot;flow&quot;][&quot;8&quot;])
-plt.ylabel(&quot;Outflows&quot;)
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">data_log</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">][</span><span class="s2">&quot;8&quot;</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Outflows&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;Outflows&#39;</span><span class="p">)</span>
@@ -236,46 +236,46 @@ the fundemental idea behind any of these algorithms would be to hold
 back water in the basins and coordinate the actions of these basin such
 that their cummulative outflows are below the desired threshold. In this
 example, we will design a simple algorithm that achives this.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>def controller(state, target, MAX=2.0):
-    fd = state / MAX
-    avg_fd = np.mean(fd)
-    potential = fd - avg_fd  # [&lt;0, 0, &lt;1]
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">controller</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">MAX</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
+    <span class="n">fd</span> <span class="o">=</span> <span class="n">state</span> <span class="o">/</span> <span class="n">MAX</span>
+    <span class="n">avg_fd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+    <span class="n">potential</span> <span class="o">=</span> <span class="n">fd</span> <span class="o">-</span> <span class="n">avg_fd</span>  <span class="c1"># [&lt;0, 0, &lt;1]</span>
 
-    for i in range(0, 2):
-        if potential[i] &lt; -0.001:
-            potential[i] = 0.0
-        elif potential[i] &lt; 0.001 and potential[i] &gt; -0.001:
-            potential[i] = avg_fd
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">0.001</span><span class="p">:</span>
+            <span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">elif</span> <span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.001</span> <span class="ow">and</span> <span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mf">0.001</span><span class="p">:</span>
+            <span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">avg_fd</span>
 
-    if sum(potential) &gt; 0.0:
-        potential = potential / sum(potential)
+    <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">potential</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">potential</span> <span class="o">=</span> <span class="n">potential</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">potential</span><span class="p">)</span>
 
-    actions = np.zeros(2)
-    if state[0] &gt; 0.00:
-        flow0 = target * potential[0]
-        actions[0] = min(1.0, flow0 / (1.00 * np.sqrt(2.0 * 9.81 * state[0])))
-    if state[1] &gt; 0.00:
-        flow1 = target * potential[1]
-        actions[1] = min(1.0, flow1 / (1.00 * np.sqrt(2.0 * 9.81 * state[1])))
-    return actions
+    <span class="n">actions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.00</span><span class="p">:</span>
+        <span class="n">flow0</span> <span class="o">=</span> <span class="n">target</span> <span class="o">*</span> <span class="n">potential</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">actions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">flow0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.00</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="mf">9.81</span> <span class="o">*</span> <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+    <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.00</span><span class="p">:</span>
+        <span class="n">flow1</span> <span class="o">=</span> <span class="n">target</span> <span class="o">*</span> <span class="n">potential</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">actions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">flow1</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.00</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="mf">9.81</span> <span class="o">*</span> <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+    <span class="k">return</span> <span class="n">actions</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>env_controlled = pystorms.scenarios.theta()
-done = False
-while not done:
-    state = env_controlled.state()
-    actions = controller(state, 0.50)
-    done = env_controlled.step(actions)
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">env_controlled</span> <span class="o">=</span> <span class="n">pystorms</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">theta</span><span class="p">()</span>
+<span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">env_controlled</span><span class="o">.</span><span class="n">state</span><span class="p">()</span>
+    <span class="n">actions</span> <span class="o">=</span> <span class="n">controller</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="mf">0.50</span><span class="p">)</span>
+    <span class="n">done</span> <span class="o">=</span> <span class="n">env_controlled</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>plt.plot(env_controlled.data_log[&quot;flow&quot;][&quot;8&quot;], label=&quot;Controlled&quot;)
-plt.plot(env.data_log[&quot;flow&quot;][&quot;8&quot;], label=&quot;Uncontrolled&quot;)
-plt.ylabel(&quot;Outflows&quot;)
-plt.legend()
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">env_controlled</span><span class="o">.</span><span class="n">data_log</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">][</span><span class="s2">&quot;8&quot;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Controlled&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">data_log</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">][</span><span class="s2">&quot;8&quot;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Uncontrolled&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Outflows&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
 </div>
 <img alt="_images/theta_controlled.png" src="_images/theta_controlled.png" />
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>print(&quot;Controlled performance: {} \nUncontrolled performance: {}&quot;.format(env_controlled.performance(), env.performance()))
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Controlled performance: </span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">Uncontrolled performance: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">env_controlled</span><span class="o">.</span><span class="n">performance</span><span class="p">(),</span> <span class="n">env</span><span class="o">.</span><span class="n">performance</span><span class="p">()))</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Controlled</span> <span class="n">performance</span><span class="p">:</span> <span class="mf">0.0</span>
@@ -294,7 +294,7 @@ plt.legend()
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="ScenarioGamma.html" class="btn btn-neutral float-right" title="Scenario Gamma" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="ScenarioAlpha.html" class="btn btn-neutral float-right" title="Scenario Alpha" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="Scenarios.html" class="btn btn-neutral float-left" title="Scenarios" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -306,7 +306,7 @@ plt.legend()
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Abhiram Mullapudi
+        &copy; Copyright 2049
 
     </p>
   </div>

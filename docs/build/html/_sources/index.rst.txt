@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Open-Storm Benchmarking's documentation!
-===================================================
+Welcome to ``pystorms`` documentation!
+======================================
 
 .. toctree::
    :maxdepth: 2
@@ -18,11 +18,12 @@ Welcome to Open-Storm Benchmarking's documentation!
    
    Scenarios
    ScenarioTheta
-   ScenarioGamma
-   ScenarioEpsilon
    ScenarioAlpha
    ScenarioBeta
+   ScenarioGamma
    ScenarioDelta
+   ScenarioEpsilon
+
 
 .. toctree::
    :maxdepth: 2

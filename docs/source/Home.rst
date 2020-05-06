@@ -1,11 +1,20 @@
 |:cloud_with_lightning_and_rain:| |:cloud_with_lightning_and_rain:| Welcome to the ``pystorms`` |:cloud_with_lightning_and_rain:| |:cloud_with_lightning_and_rain:|
 ===================================================================================================================================================================
 
+Smart Stormwater Systems
+------------------------
+
+Flooding is the leading cause of "natural disaster'' deaths worldwide.
+Simultaneously, untold quantities of metals, bacteria, nutrients, and other pollutants are washing-off during storms into our streams and rivers.
+As a result, many parts of the world are dealing with chronically impaired coastlines due to algal blooms and other ecological disasters.
+Many of these challenges are presently addressed through classic approaches and new infrastructure construction (larger pipes, bigger basins, storage tanks, etc.).
+
+Instead of building more, there is now an unprecedented opportunity to use internet-of-things and cyber-physical technologies to embed water systems with intelligence.
+The Internet-connected water systems of the future will control themselves (gates, valves, pumps), similar to self-driving cars, to reduce flooding and improve water quality.
+However, there is a dire need for more researchers to help enable the next generation of data and control algorithms for smart water systems.
+
 What is pystorms?
 -----------------
-Flooding is the leading cause of `natural disaster' deaths worldwide. Simultaneously, untold quantities of metals, bacteria, nutrients, and other pollutants are washing-off during storms into our streams and rivers. As a result, many parts of the world are dealing with chronically impaired coastlines due to algal blooms and other ecological disasters. Many of these challenges are presently addressed through classic approaches and new infrastructure construction (larger pipes, bigger basins, storage tanks, etc.).
-
-Instead of building more, there is now an unprecedented opportunity to use internet-of-things and cyber-physical technologies to embed water systems with intelligence. The Internet-connected water systems of the future will control themselves (gates, valves, pumps), similar to self-driving cars, to reduce flooding and improve water quality. However, there is a dire need for more researchers to help enable the next generation of data and control algorithms for smart water systems.
 
 We developed ``pystorms`` as a tool to collaboratively develop new algorithms for solving urban watershed specific control problems. In particular, we built this tool to bridge the gap between (i) experts in algorithms and control systems and (ii) experts in urban water systems (as well as anyone in between).
 
@@ -80,10 +89,6 @@ We break the above code snippet into three parts:
   We refer to the case when no control is implemented as the **uncontrolled case**. To run the uncontrolled case, simply progress the simulation without defining any actions in the step call (i.e. :code:`env.step()`).
 
 
-Research using pystorms
------------------------
-
-
 Citation
 --------
 While ``pystorms`` can be used freely, we ask that the origins of this tool be credited by using the following reference:
@@ -106,6 +111,16 @@ While ``pystorms`` can be used freely, we ask that the origins of this tool be c
         location = {Montreal, Quebec, Canada},
         series = {ICCPS ’19}
         }
+
+
+
+
+
+
+Research using pystorms
+-----------------------
+
+1. Sara C. Troutman, Nancy G. Love, and Branko Kerkez. Balancing water quality and flows incombined sewer systems using real-time control. *Environ. Sci.: Water Res. Technol* (2020)
 
 
 License

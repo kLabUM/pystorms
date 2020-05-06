@@ -19,8 +19,8 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 
 project = "pystorms"
-copyright = "2019, Abhiram Mullapudi"
-author = "Abhiram Mullapudi"
+copyright = "2049"
+author = "Abhiram Mullapudi, Sara P. Rimer, Sara C. Troutman"
 
 # The full version, including alpha/beta/rc tags
 release = "0.0.1"
@@ -35,7 +35,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
     "sphinx.ext.mathjax",
-    "sphinxemoji.sphinxemoji",
+    "sphinxemoji.sphinxemoji"
 ]
 
 # Add any paths that contain templates here, relative to this directory.
