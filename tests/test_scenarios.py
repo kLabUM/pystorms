@@ -17,26 +17,13 @@ def test_gamma():
         if steps < 1:
             with pytest.raises(ValueError):
                 env.performance()
-        actions = np.ones(11)
-        done = env.step(actions)
+        done = env.step()
         steps += 1
         # Check for length of state being returned
         assert len(state) == 11
         # Check if data log is working
         assert len(env.data_log["performance_measure"]) == steps
 
-
-def test_gamma_controller():
-    """
-    Test Gamma Controlled Performance
-    1. Uncontrolled
-    2. Closed
-    """
-    env = pystorms.scenarios.gamma()
-    done = False
-    while not done:
-        done = env.step(np.ones(11))
-    assert env.performance() > 10 ** 3
     # All valves closed - remanent water in basins
     env = pystorms.scenarios.gamma()
     done = False
@@ -47,7 +34,7 @@ def test_gamma_controller():
 
 def test_theta():
     """
-    Tests for Alpha Scenario
+    Tests for Theta Scenario
     """
     # Initalize your environment
     env = pystorms.scenarios.theta()
@@ -59,8 +46,7 @@ def test_theta():
         if steps < 1:
             with pytest.raises(ValueError):
                 env.performance()
-        actions = np.ones(2)
-        done = env.step(actions)
+        done = env.step()
         steps += 1
         # Check for length of state being returned
         assert len(state) == 2
@@ -70,7 +56,7 @@ def test_theta():
 
 def test_epsion():
     """
-    Tests for Alpha Scenario
+    Tests for Epsilon Scenario
     """
     # Initalize your environment
     env = pystorms.scenarios.epsilon()
@@ -82,8 +68,7 @@ def test_epsion():
         if steps < 1:
             with pytest.raises(ValueError):
                 env.performance()
-        actions = np.ones(11)
-        done = env.step(actions)
+        done = env.step()
         steps += 1
         # Check for length of state being returned
         assert len(state) == 13

@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="pystorms",
-    version="0.1.2",
+    version="0.1.3",
     description="Simulation Sandbox for the development and evaluation of stormwater control algorithms",
     author="Abhiram Mullapudi, Sara C. Troutman, Sara Rimer, Branko Kerkez",
     author_email="abhiramm@umich.edu, stroutm@umich.edu",
@@ -16,8 +16,12 @@ setup(
     package_data={
         "pystorms": [
             "networks/*.inp",
-            "storms/*.npy",
+            "networks/*.py",
+            "event_drivers/*.npy",
             "config/*.yaml",
+            "config/*.py",
+            "scenarios/*.py",
+            "binaries/*.py",
             "binaries/pollutant_support/macos/libswmm5.so",
             "binaries/pollutant_support/linux/libswmm5.so",
             "binaries/pollutant_support/windows/swmm5.dll"
@@ -29,8 +33,8 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        "numpy",
+        "numpy>=1.18.4",
         "pyswmm",
-        "pyyaml"
+        "pyyaml>=5.3"
     ],
 )

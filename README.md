@@ -18,9 +18,8 @@ For the motivation behind this effort, we refer the reader to our manuscript [*p
 
 **Requirements**
 
-- python 3+
-- numpy
-- yaml
+- PyYAML >= 5.3
+- numpy >= 18.4
 - pyswmm
 
 

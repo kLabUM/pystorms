@@ -1,7 +1,6 @@
 [TITLE]
 ;;Project Title/Notes
-Ep
-silon
+Epsilon
 
 [OPTIONS]
 ;;Option             Value
@@ -18,7 +17,7 @@ IGNORE_GROUNDWATER   YES
 START_DATE           01/01/2017
 START_TIME           00:00:00
 REPORT_START_DATE    01/01/2017
-REPORT_START_TIME    00:00:00	
+REPORT_START_TIME    00:00:00
 END_DATE             01/16/2017
 END_TIME             00:00:00
 SWEEP_START          01/01
@@ -294,20 +293,20 @@ SU012            599.06   24.7       0          TABULAR    SUC012               
 065              SU012            063              9699       .013       0          0          0          0         
 066              065              SU012            37396      .013       0          0          0          0         
 
-[ORIFICES]
-;;Name           From Node        To Node          Type         Offset     Qcoeff     Gated    CloseTime 
-;;-------------- ---------------- ---------------- ------------ ---------- ---------- -------- ----------
-ISD001           004              003              SIDE         0          0.61       NO       0         
-ISD002           006              005              SIDE         0          0.61       NO       0         
-ISD003           011              010              SIDE         0          0.61       NO       0         
-ISD004           022              021              SIDE         0          0.61       NO       0         
-ISD005           027              026              SIDE         0          0.61       NO       0         
-ISD006           030              029              SIDE         0          0.61       NO       0         
-ISD007           033              032              SIDE         0          0.61       NO       0         
-ISD008           039              038              SIDE         0          0.61       NO       0         
-ISD009           044              043              SIDE         0          0.61       NO       0         
-ISD010           050              049              SIDE         0          0.61       NO       0         
-ISD011           060              059              SIDE         0          0.61       NO       0         
+[WEIRS]
+;;Name           From Node        To Node          Type         CrestHt    Qcoeff     Gated    EndCon   EndCoeff   Surcharge  RoadWidth  RoadSurf  
+;;-------------- ---------------- ---------------- ------------ ---------- ---------- -------- -------- ---------- ---------- ---------- ----------
+ISD001           004              003              TRANSVERSE   0          3.33       NO       0        0          YES       
+ISD002           006              005              TRANSVERSE   0          3.33       NO       0        0          YES       
+ISD003           011              010              TRANSVERSE   0          3.33       NO       0        0          YES       
+ISD004           022              021              TRANSVERSE   0          3.33       NO       0        0          YES       
+ISD005           027              026              TRANSVERSE   0          3.33       NO       0        0          YES       
+ISD006           030              029              TRANSVERSE   0          3.33       NO       0        0          YES       
+ISD007           033              032              TRANSVERSE   0          3.33       NO       0        0          YES       
+ISD008           039              038              TRANSVERSE   0          3.33       NO       0        0          YES       
+ISD009           044              043              TRANSVERSE   0          3.33       NO       0        0          YES       
+ISD010           050              049              TRANSVERSE   0          3.33       NO       0        0          YES       
+ISD011           060              059              TRANSVERSE   0          3.33       NO       0        0          YES       
 
 [XSECTIONS]
 ;;Link           Shape        Geom1            Geom2      Geom3      Geom4      Barrels    Culvert   
@@ -378,21 +377,22 @@ ISD011           060              059              SIDE         0          0.61 
 064              CIRCULAR     20               0          0          0          1                    
 065              CIRCULAR     11.5             0          0          0          1                    
 066              CIRCULAR     20               0          0          0          1                    
-ISD001           RECT_CLOSED  14.7             14.7       0          0
-ISD002           RECT_CLOSED  9                9          0          0
-ISD003           RECT_CLOSED  14               14         0          0
-ISD004           RECT_CLOSED  15.5             15.5       0          0
-ISD005           RECT_CLOSED  15.5             15.5       0          0
-ISD006           RECT_CLOSED  15.5             15.5       0          0
-ISD007           RECT_CLOSED  15.5             15.5       0          0
-ISD008           RECT_CLOSED  12.25            12.25      0          0
-ISD009           RECT_CLOSED  15.5             15.5       0          0
-ISD010           RECT_CLOSED  10.5             10.5       0          0
-ISD011           RECT_CLOSED  11.5             11.5       0          0
+ISD001           RECT_OPEN    14.7             14.7       0          0         
+ISD002           RECT_OPEN    9                9          0          0         
+ISD003           RECT_OPEN    14               14         0          0         
+ISD004           RECT_OPEN    15.5             15.5       0          0         
+ISD005           RECT_OPEN    15.5             15.5       0          0         
+ISD006           RECT_OPEN    15.5             15.5       0          0         
+ISD007           RECT_OPEN    15.5             15.5       0          0         
+ISD008           RECT_OPEN    12.25            12.25      0          0         
+ISD009           RECT_OPEN    15.5             15.5       0          0         
+ISD010           RECT_OPEN    10.5             10.5       0          0         
+ISD011           RECT_OPEN    11.5             11.5       0          0         
 
 [CONTROLS]
 ;; FILLER
 ;; FILLER
+
 
 
 [POLLUTANTS]
