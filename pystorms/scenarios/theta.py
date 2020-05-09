@@ -43,9 +43,9 @@ class theta(scenario):
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
 
-    def step(self, actions, log=True):
+    def step(self, actions=None, log=True):
         # Implement the actions and take a step forward
-        _, done = self.env.step(actions)
+        done = self.env.step(actions)
 
         # Log the flows in the networks
         if log:
@@ -70,6 +70,6 @@ class theta(scenario):
 
         # Terminate the simulation
         if done:
-            self.env._terminate()
+            self.env.terminate()
 
         return done

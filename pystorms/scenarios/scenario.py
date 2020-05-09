@@ -6,7 +6,7 @@ from pystorms.utilities import perf_metrics
 class scenario(abc.ABC):
     @abc.abstractmethod
     # Specific to the scenario
-    def step(self, actions, log=True):
+    def step(self, actions=None, log=True):
         pass
 
     def _logger(self):

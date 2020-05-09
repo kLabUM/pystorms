@@ -109,23 +109,15 @@ class environment:
         done : boolean
             event termination indicator
         """
-        if self.ctrl:
-            if actions is not None:
-                # implement the actions
-                for asset, valve_position in zip(self.config["action_space"], actions):
-                    self._setValvePosition(asset, valve_position)
+        if (self.ctrl) and (actions is not None):
+            # implement the actions
+            for asset, valve_position in zip(self.config["action_space"], actions):
+                self._setValvePosition(asset, valve_position)
 
-                # take the step !
-                time = self.sim._model.swmm_step()
-                done = False if time > 0 else True
-
-                new_state = self._state()
-                return new_state, done
-        else:
-            # take the step !
-            time = self.sim._model.swmm_step()
-            done = False if time > 0 else True
-            return done
+        # take the step !
+        time = self.sim._model.swmm_step()
+        done = False if time > 0 else True
+        return done
 
     def reset(self):
         r"""
@@ -137,8 +129,7 @@ class environment:
             initial state in the network
 
         """
-        self.sim._model.swmm_end()
-        self.sim._model.swmm_close()
+        self.terminate()
 
         # Start the next simulation
         self.sim._model.swmm_open()
@@ -148,7 +139,7 @@ class environment:
         state = self._state()
         return state
 
-    def _terminate(self):
+    def terminate(self):
         r"""
         Terminates the simulation
         """

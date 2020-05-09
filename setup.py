@@ -33,8 +33,8 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        "numpy",
+        "numpy>=1.18.4",
         "pyswmm",
-        "pyyaml"
+        "pyyaml>=5.3"
     ],
 )
