@@ -20,5 +20,5 @@ class scenario(abc.ABC):
     def state(self):
         return self.env._state()
 
-    def performance(self, metric="mean"):
+    def performance(self, metric="cumulative"):
         return perf_metrics(self.data_log["performance_measure"], metric)
