@@ -68,14 +68,13 @@ class epsilon(scenario):
                 if flood > 0.0:
                     __performance += 10 ** 9
             elif attribute == "loading":
-                _target = self._performormance_threshold
                 pollutantLoading = (
                     self.env.methods["pollutantL"](ID, 0)
                     * self.env.methods["flow"](ID)
                     * 28.3168
                     / (10 ** 6)
                 )
-                __performance += threshold(pollutantLoading, _target)
+                __performance += threshold(pollutantLoading, self._performormance_threshold)
 
         # Record the _performormance
         self.data_log["performance_measure"].append(__performance)
@@ -92,7 +91,7 @@ class epsilon(scenario):
         for ID, attribute in self.config["performance_targets"]:
             if attribute == "loading":
                 pollutantLoading = (
-                    self.env.methods["pollutantL"](ID, 1)
+                    self.env.methods["pollutantL"](ID, 0)
                     * self.env.methods["flow"](ID)
                     * 28.3168
                     / (10 ** 6)
