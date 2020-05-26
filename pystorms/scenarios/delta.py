@@ -2,7 +2,7 @@ from pystorms.environment import environment
 from pystorms.networks import load_network
 from pystorms.config import load_config
 from pystorms.scenarios import scenario
-from pystorms.utilities import threshold
+from pystorms.utilities import threshold, exponentialpenalty
 import yaml
 
 
@@ -50,13 +50,18 @@ class delta(scenario):
         }
 
         # Additional penality defination
-        self.penalty = lambda x: 0.0001 * (np.exp(10 * x) - 1)
+        self.max_penalty = 10 ** 6
 
         # Create the environment based on the physical parameters
         self.env = environment(self.config, ctrl=True)
 
         # Create an object for storing the data points
-        self.data_log = {"performance_measure": [], "flow": {}, "flooding": {}}
+        self.data_log = {
+            "performance_measure": [],
+            "flow": {},
+            "flooding": {},
+            "depthN": {}
+        }
 
         # Data logger for storing _performance data
         for ID, attribute in self.config["performance_targets"]:
@@ -82,7 +87,7 @@ class delta(scenario):
             # compute penalty for flow out of network above threshold
             if attribute == "flow":
                 __flow = self.env.methods[attribute](ID)
-                _performance = threshold(
+                __performance += threshold(
                     value=__flow, target=self.threshold, scaling=10.0
                 )
             # compute penalty for depth at basins above/below predefined ranges
@@ -94,7 +99,9 @@ class delta(scenario):
                         __performance += 10 ** 6
                     elif depth > temp[0]:
                         __temp = (depth - temp[0]) / (temp[1] - temp[0])
-                        __performance += self.penalty(__temp)
+                        __performance += exponentialpenalty(
+                            value=__temp, max_penalty=self.max_penalty, scaling=1.0
+                        )
                     else:
                         __performance += 0.0
                 else:
@@ -102,10 +109,14 @@ class delta(scenario):
                         __performance += 10 ** 6
                     elif depth > temp[2]:
                         __temp = (depth - temp[2]) / (temp[0] - temp[2])
-                        __performance += self.penalty(__temp)
+                        __performance += exponentialpenalty(
+                            value=__temp, max_penalty=self.max_penalty, scaling=1.0
+                        )
                     elif depth < temp[3]:
                         __temp = (temp[3] - depth) / (temp[3] - temp[1])
-                        __performance += self.penalty(__temp)
+                        __performance += exponentialpenalty(
+                            value=__temp, max_penalty=self.max_penalty, scaling=1.0
+                        )
                     else:
                         __performance += 0.0
 

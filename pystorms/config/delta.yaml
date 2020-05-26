@@ -118,9 +118,6 @@ performance_targets:
           - "basin_N3"
           - depthN
         - !!python/tuple
-          - "basin_N4"
-          - depthN
-        - !!python/tuple
           - "basin_C"
           - depthN
         - !!python/tuple
