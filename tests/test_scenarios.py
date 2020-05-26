@@ -54,7 +54,7 @@ def test_theta():
         assert len(env.data_log["performance_measure"]) == steps
 
 
-def test_epsion():
+def test_epsilon():
     """
     Tests for Epsilon Scenario
     """
@@ -72,5 +72,26 @@ def test_epsion():
         steps += 1
         # Check for length of state being returned
         assert len(state) == 13
+        # Check if data log is working
+        assert len(env.data_log["performance_measure"]) == steps
+
+def test_delta():
+    """
+    Tests for Delta Scenario
+    """
+    # Initalize your environment
+    env = pystorms.scenarios.delta()
+    done = False
+    steps = 0
+    while not done:
+        state = env.state()
+        # Check if performance measure is raising error
+        if steps < 1:
+            with pytest.raises(ValueError):
+                env.performance()
+        done = env.step()
+        steps += 1
+        # Check for length of state being returned
+        assert len(state) == 31
         # Check if data log is working
         assert len(env.data_log["performance_measure"]) == steps

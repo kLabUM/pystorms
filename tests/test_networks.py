@@ -9,5 +9,7 @@ def test_load_network():
     assert "inp" == network[-3:]
     network = pystorms.networks.load_network("theta")
     assert "inp" == network[-3:]
+    network = pystorms.networks.load_network("delta")
+    assert "inp" == network[-3:]
     with pytest.raises(ValueError):
         pystorms.networks.load_network("purushotham")
