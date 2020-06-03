@@ -4,7 +4,7 @@ on: push
 jobs:
   build-n-publish:
     name: Build and publish ⛈️⛈️  pystorms ⛈️ ⛈️  to pypi 📦 
-    runs-on: macOS-latest
+    runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@master
     - name: Set up Python 3.7
