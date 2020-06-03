@@ -1,3 +1,6 @@
+name: Publish Python 🐍
+on: push
+
 jobs:
   build-n-publish:
     name: Build and publish ⛈️⛈️  pystorms ⛈️ ⛈️  to pypi 📦 
