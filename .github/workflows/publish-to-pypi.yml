@@ -6,9 +6,8 @@ jobs:
     name: Publish ⛈️⛈️  pystorms ⛈️ ⛈️  to pypi 📦 
     runs-on: ubuntu-18.04
     steps:
-    - uses: actions/checkout@master
     - name: Publish distribution 📦 to PyPI
-      if: startsWith(github.event.ref, 'refs/tags')
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
       with:
         password: ${{ secrets.pypi_password }}
