@@ -218,11 +218,3 @@ class environment:
 
     def _getLinkFlow(self, ID):
         return self.sim._model.getLinkResult(ID, tkai.LinkResults.newFlow.value)
-
-    def _getRainfall(self, gage):
-        # TODO : Add rainfall getter
-        pass
-
-    def _setRainfall(self, gage, value):
-        # TODO : Add rainfall setter
-        pass
