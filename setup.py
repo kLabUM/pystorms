@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="pystorms",
-    version="0.1.7",
+    version="0.1.8",
     description="Simulation Sandbox for the development and evaluation of stormwater control algorithms",
     author="Abhiram Mullapudi, Sara C. Troutman, Sara Rimer, Branko Kerkez",
     author_email="abhiramm@umich.edu, stroutm@umich.edu",

@@ -3,14 +3,10 @@ on: push
 
 jobs:
   build-n-publish:
-    name: Build and publish ⛈️⛈️  pystorms ⛈️ ⛈️  to pypi 📦 
+    name: Publish ⛈️⛈️  pystorms ⛈️ ⛈️  to pypi 📦 
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@master
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.7
     - name: Publish distribution 📦 to PyPI
       if: startsWith(github.event.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
