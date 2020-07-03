@@ -42,11 +42,11 @@ class delta(scenario):
         self.threshold = 12.0
 
         self.depth_thresholds = {
-            "basin_N3": (11.99, 5.28, 5.92, 5.32),
-            "basin_N2": (6.59, 4.04, 5.04, 4.44),
-            "basin_N1": (5.92, 2.11, 5.8, 5.2),
             "basin_C": (5.7, 2.21, 3.8, 3.28),
-            "basin_S": (6.55, 9.5)
+            "basin_S": (6.55, 9.5),
+            "basin_N1": (5.92, 2.11, 5.8, 5.2),
+            "basin_N2": (6.59, 4.04, 5.04, 4.44),
+            "basin_N3": (11.99, 5.28, 5.92, 5.32)
         }
 
         # Additional penality defination
@@ -58,9 +58,9 @@ class delta(scenario):
         # Create an object for storing the data points
         self.data_log = {
             "performance_measure": [],
+            "depthN": {},
             "flow": {},
-            "flooding": {},
-            "depthN": {}
+            "flooding": {}
         }
 
         # Data logger for storing _performance data
