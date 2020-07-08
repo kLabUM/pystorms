@@ -118,3 +118,30 @@ def threshold(value, target=0.10, scaling=1.0):
     else:
         performance += (value - target) * scaling
     return performance
+
+def exponentialpenalty(value, max_penalty = 10 ** 6, scaling=1.0):
+    r"""
+
+    measure the deviation from flow
+
+    Parameters
+    ----------
+    value
+        value between 0 - 1 that represents a fraction of a value within a given range
+    max_penalty
+        the penalty at the upper end of the range,
+            i.e. if value=1, then performance=max_penalty, and
+                 if value=0, then performance=0
+    scaling
+        scaling factor to increase penalty magnitude (should stay at default 1.0)
+
+    Returns
+    -------
+    performace
+        exponential penalty scale
+
+    """
+    performance = 0.0
+    a = np.log(max_penalty + 1) - 1
+    performance += scaling * (np.exp(a * value) - 1)
+    return performance
