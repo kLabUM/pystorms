@@ -92,6 +92,6 @@ def test_delta():
         done = env.step()
         steps += 1
         # Check for length of state being returned
-        assert len(state) == 31
+        assert len(state) == 6
         # Check if data log is working
         assert len(env.data_log["performance_measure"]) == steps
