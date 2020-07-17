@@ -75,6 +75,7 @@ def test_epsilon():
         # Check if data log is working
         assert len(env.data_log["performance_measure"]) == steps
 
+
 def test_delta():
     """
     Tests for Delta Scenario

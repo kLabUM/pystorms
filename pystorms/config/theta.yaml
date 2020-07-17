@@ -1,7 +1,7 @@
 # Configuration file for scenario theta 
 
-# swmm inp file 
-swmm_input: theta
+# name of scearnio 
+name: theta
 # state definitions
 states:
         - !!python/tuple 

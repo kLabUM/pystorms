@@ -27,7 +27,7 @@ class gamma(scenario):
     def __init__(self):
         # Network configuration
         self.config = yaml.load(open(load_config("gamma"), "r"), yaml.FullLoader)
-        self.config["swmm_input"] = load_network(self.config["swmm_input"])
+        self.config["swmm_input"] = load_network(self.config["name"])
 
         # Common threhold for the network, can be done independently
         self._performormance_threshold = 4.0

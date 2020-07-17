@@ -18,7 +18,7 @@ class delta(scenario):
 
     Methods
     ----------
-    step:
+    step: implement actions, progress simulation by a timestep, and compute performance metric
 
     Notes
     -----
@@ -28,7 +28,8 @@ class delta(scenario):
 
     Performance is measured as the following:
     1. First, deviation of depth above/below the "desired" depth range for the three detention ponds,
-    2. Second, deviation of depth above/below "maximum/minimum" depth ranges for the three detention ponds and one other infiltration pond,
+    2. Second, deviation of depth above/below "maximum/minimum" depth ranges for the three detention ponds
+        and one other infiltration pond,
     3. Any flooding through the network, and
     4. Any deviation above the threshold of the outflow.
 
@@ -37,7 +38,7 @@ class delta(scenario):
     def __init__(self):
         # Network configuration
         self.config = yaml.load(open(load_config("delta"), "r"), yaml.FullLoader)
-        self.config["swmm_input"] = load_network(self.config["swmm_input"])
+        self.config["swmm_input"] = load_network(self.config["name"])
 
         self.threshold = 12.0
 
@@ -46,10 +47,10 @@ class delta(scenario):
             "basin_S": (6.55, 9.5),
             "basin_N1": (5.92, 2.11, 5.8, 5.2),
             "basin_N2": (6.59, 4.04, 5.04, 4.44),
-            "basin_N3": (11.99, 5.28, 5.92, 5.32)
+            "basin_N3": (11.99, 5.28, 5.92, 5.32),
         }
 
-        # Additional penality defination
+        # Additional penalty definition
         self.max_penalty = 10 ** 6
 
         # Create the environment based on the physical parameters
@@ -60,7 +61,7 @@ class delta(scenario):
             "performance_measure": [],
             "depthN": {},
             "flow": {},
-            "flooding": {}
+            "flooding": {},
         }
 
         # Data logger for storing _performance data
@@ -95,7 +96,7 @@ class delta(scenario):
                 depth = self.env.methods[attribute](ID)
                 temp = self.depth_thresholds[ID]
                 if ID == "basin_S":
-                    if depth > temp[1]: # flooding value
+                    if depth > temp[1]:  # flooding value
                         __performance += 10 ** 6
                     elif depth > temp[0]:
                         __temp = (depth - temp[0]) / (temp[1] - temp[0])

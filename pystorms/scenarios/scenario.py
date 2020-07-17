@@ -1,4 +1,5 @@
 import abc
+import numpy as np
 from pystorms.utilities import perf_metrics
 
 
@@ -22,3 +23,8 @@ class scenario(abc.ABC):
 
     def performance(self, metric="cumulative"):
         return perf_metrics(self.data_log["performance_measure"], metric)
+
+    def save(self, path=None):
+        if path is None:
+            path = "{0}/data_{1}.npy".format("./", self.config["name"])
+        return np.save(path, self.data_log)

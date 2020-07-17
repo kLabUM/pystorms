@@ -29,7 +29,7 @@ class epsilon(scenario):
     def __init__(self):
         # Network configuration
         self.config = yaml.load(open(load_config("epsilon"), "r"), yaml.FullLoader)
-        self.config["swmm_input"] = load_network(self.config["swmm_input"])
+        self.config["swmm_input"] = load_network(self.config["name"])
         self.config["binary"] = load_binary(self.config["binary"])
 
         # Dry weather TSS loading, measured at the outlet of the network

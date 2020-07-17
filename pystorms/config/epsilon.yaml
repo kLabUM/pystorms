@@ -1,7 +1,7 @@
 # Configuration file for scenario theta 
 
-# swmm inp file 
-swmm_input: epsilon
+# name of scearnio 
+name: epsilon
 # binary 
 binary: pollutant_support
 # state definitions
