@@ -17,7 +17,7 @@ class gamma(scenario):
 
     Methods
     ----------
-    step :
+    step: implement actions, progress simulation by a timestep, and compute performance metric
 
     Notes
     -----
