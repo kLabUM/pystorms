@@ -119,7 +119,8 @@ def threshold(value, target=0.10, scaling=1.0):
         performance += (value - target) * scaling
     return performance
 
-def exponentialpenalty(value, max_penalty = 10 ** 6, scaling=1.0):
+
+def exponentialpenalty(value, max_penalty=10 ** 6, scaling=1.0):
     r"""
 
     measure the deviation from flow
