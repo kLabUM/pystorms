@@ -10,7 +10,7 @@ def load_config(name):
     Parameters
     ----------
     name : str
-        name of the scenario. *alpha*, *beta*, *gamma*, *delta*, *epsilon*, and 'zeta' are valid
+        name of the scenario. *alpha*, *beta*, *gamma*, *delta*, *epsilon*, and *zeta* are valid
         keywords
 
     Returns

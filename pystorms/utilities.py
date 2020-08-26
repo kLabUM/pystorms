@@ -100,7 +100,7 @@ def threshold(value, target=0.10, scaling=1.0):
     Parameters
     ----------
     value
-        value whose diviation should be measured
+        value whose deviation should be measured
     target
         threshold value
     scaling
