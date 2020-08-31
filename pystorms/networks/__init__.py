@@ -10,7 +10,7 @@ def load_network(name):
     Parameters
     ----------
     name : str
-        name of the network. *alpha*, *beta*, *gamma*, *delta*, *epsilon*, and 'zeta' are valid
+        name of the network. *alpha*, *beta*, *gamma*, *delta*, *epsilon*, and *zeta* are valid
         keywords
 
     Returns

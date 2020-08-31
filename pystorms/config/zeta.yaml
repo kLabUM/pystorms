@@ -1,0 +1,101 @@
+# Configuration file for scenario zeta
+
+# name of scearnio
+name: zeta
+# state definitions
+states:
+      - !!python/tuple
+        - "T1"
+        - depthN
+      - !!python/tuple
+        - "T2"
+        - depthN
+      - !!python/tuple
+        - "T3"
+        - depthN
+      - !!python/tuple
+        - "T4"
+        - depthN
+      - !!python/tuple
+        - "T5"
+        - depthN
+      - !!python/tuple
+        - "T6"
+        - depthN
+
+# Action space
+action_space:
+      - "V2"
+      - "V3"
+      - "V4"
+      - "V6"
+
+# Performance Targets
+performance_targets:
+      # CSOs to river
+      - !!python/tuple
+        - "T1"
+        - flooding
+      - !!python/tuple
+        - "T2"
+        - flooding
+      - !!python/tuple
+        - "T3"
+        - flooding
+      - !!python/tuple
+        - "T4"
+        - flooding
+      - !!python/tuple
+        - "T5"
+        - flooding
+      - !!python/tuple
+        - "CSO8"
+        - flooding
+      - !!python/tuple
+        - "CSO10"
+        - flooding
+      # CSOs to creek
+      - !!python/tuple
+        - "T6"
+        - flooding
+      - !!python/tuple
+        - "CSO7"
+        - flooding
+      - !!python/tuple
+        - "CSO9"
+        - flooding
+      # flow to WWTP
+      - !!python/tuple # Conduit that connects upstream to "Out_to_WWTP" node
+        - "C14"
+        - "flow"
+      # control roughness
+      - !!python/tuple # flow out of CSO7
+        - "C5"
+        - "flow"
+      - !!python/tuple # flow out of CSO8
+        - "C15"
+        - "flow"
+      - !!python/tuple # flow out of CSO9
+        - "C8"
+        - "flow"
+      - !!python/tuple # flow out of CSO10
+        - "C21"
+        - "flow"
+      - !!python/tuple # flow out of Tank1
+        - "V1"
+        - "flow"
+      - !!python/tuple # flow out of Tank2
+        - "V2"
+        - "flow"
+      - !!python/tuple # flow out of Tank3
+        - "V3"
+        - "flow"
+      - !!python/tuple # flow out of Tank4
+        - "V4"
+        - "flow"
+      - !!python/tuple # flow out of Tank5
+        - "V5"
+        - "flow"
+      - !!python/tuple # flow out of Tank6
+        - "V6"
+        - "flow"

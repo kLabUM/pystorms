@@ -12,7 +12,7 @@ class scenario(abc.ABC):
 
     def _logger(self):
         for attribute in self.data_log.keys():
-            if attribute != "performance_measure":
+            if attribute not in ["performance_measure", "simulation_time"]:
                 for element in self.data_log[attribute].keys():
                     self.data_log[attribute][element].append(
                         self.env.methods[attribute](element)
