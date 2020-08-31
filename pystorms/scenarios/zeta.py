@@ -3,6 +3,7 @@ from pystorms.networks import load_network
 from pystorms.config import load_config
 from pystorms.scenarios import scenario
 from pystorms.utilities import threshold, exponentialpenalty
+
 import yaml
 
 
@@ -69,6 +70,9 @@ class zeta(scenario):
             "depthN": {},
         }
 
+        # Log the initial simulation time
+        self.data_log["simulation_time"].append(self.env.sim._model.getCurrentSimulationTime())
+
         # Data logger for storing _performance data
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
@@ -81,20 +85,22 @@ class zeta(scenario):
         if log:
             self._logger()
 
+        # Log in the simulation time
+        self.data_log["simulation_time"].append(self.env.sim._model.getCurrentSimulationTime())
+
         # Initialize temporary variables
         __performance = 0.0 #
-        #__simtime = self.sim._model.swmm_step() #TODO
-        #__prevsimtime = self.data_log["simulation_time"][-1] #TODO
-        #__timestep = (__simtime - __prevsimtime)/pd.Timedelta(1, unit='s') #TODO
-        __timestep = 30 # seconds
+        __currentsimtime = self.data_log["simulation_time"][-1]
+        __prevsimtime = self.data_log["simulation_time"][-2]
+        __timestep = (__currentsimtime - __prevsimtime).total_seconds()
 
         for ID, attribute in self.config["performance_targets"]:
             __floodrate = 0.0
-            __throttleflow = 0.0
-            __weight = 0.0
-            __volume = 0.0
             __prevflow = 0.0
+            __throttleflow = 0.0
             __flowrate = 0.0
+            __volume = 0.0
+            __weight = 0.0
             if attribute == "flooding":  # compute penalty for CSO overflow
                 __floodrate = self.env.methods[attribute](ID) # flooding rate
                 __volume = __floodrate * __timestep # flooding volume
@@ -108,16 +114,17 @@ class zeta(scenario):
                     __volume = __flowrate * __timestep
                     __weight = -1
                 else:
-                    __prevflowrate = self.data_log[attribute][ID][-1]
-                    __throttleflowrate = np.abs(__prevflowrate - __flowrate)
+                    if len(self.data_log[attribute][ID]) > 1:
+                        __prevflow = self.data_log[attribute][ID][-2]
+                    else:
+                        __prevflow = __flowrate
+                    __throttleflowrate = abs(__prevflow - __flowrate)
                     __volume = __throttleflowrate * __timestep
                     __weight = 0.01
             __performance += __volume * __weight
 
-
         # Record the _performance
         self.data_log["performance_measure"].append(__performance)
-        #log the timestep here?
 
         # Terminate the simulation
         if done:
