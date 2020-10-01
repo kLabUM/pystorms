@@ -53,12 +53,12 @@ class zeta(scenario):
         self.env = environment(self.config, ctrl=True)
 
         self.penalty_weight = {
-            "T1": 1,
-            "T2": 5,
-            "T3": 5,
-            "T4": 5,
-            "T5": 5,
-            "T6": 10
+            "T1": 1000,
+            "T2": 5000,
+            "T3": 5000,
+            "T4": 5000,
+            "T5": 5000,
+            "T6": 10000
         }
 
         # Create an object for storing the data points
