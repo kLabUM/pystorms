@@ -58,4 +58,4 @@ performance = env.performance()
 
 ```
 
-Detailed documentation can be found on the [webpage](https://klabum.github.io/pystorms/)
+Detailed documentation can be found on the [webpage](https://www.pystorms.org)
