@@ -64,6 +64,8 @@ class environment:
         self.methods = {
             "depthN": self._getNodeDepth,
             "depthL": self._getLinkDepth,
+            "volumeN": self._getNodeVolume,
+            "volumeL": self._getLinkVolume,
             "flow": self._getLinkFlow,
             "flooding": self._getNodeFlooding,
             "inflow": self._getNodeInflow,
@@ -167,6 +169,9 @@ class environment:
 
     def _getNodeLosses(self, ID):
         return self.sim._model.getNodeResult(ID, tkai.NodeResults.losses.value)
+    
+    def _getNodeVolume(self.ID):
+        return self.sim._model.getNodeResult(ID, tkai.NodeResults.newVolume.value)
 
     def _getNodeInflow(self, ID):
         return self.sim._model.getNodeResult(ID, tkai.NodeResults.totalinflow.value)
@@ -213,8 +218,11 @@ class environment:
         self.sim._model._error_check(errorcode)
         return result.value
 
-    def _getLinkDepth(self, link_id):
-        return self.sim._model.getLinkResult(link_id, tkai.LinkResults.newDepth.value)
+    def _getLinkDepth(self, ID):
+        return self.sim._model.getLinkResult(ID, tkai.LinkResults.newDepth.value)
+
+    def _getLinkVolume(self, ID):
+        return self.sim._model.getLinkResult(ID, tkai.LinkResults.newVolume.value)
 
     def _getLinkFlow(self, ID):
         return self.sim._model.getLinkResult(ID, tkai.LinkResults.newFlow.value)
