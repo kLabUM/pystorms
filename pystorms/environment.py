@@ -170,7 +170,7 @@ class environment:
     def _getNodeLosses(self, ID):
         return self.sim._model.getNodeResult(ID, tkai.NodeResults.losses.value)
     
-    def _getNodeVolume(self.ID):
+    def _getNodeVolume(self, ID):
         return self.sim._model.getNodeResult(ID, tkai.NodeResults.newVolume.value)
 
     def _getNodeInflow(self, ID):
