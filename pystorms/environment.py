@@ -157,7 +157,6 @@ class environment:
         initial_state : array
             initial state in the network
         """
-
         return self._state()
 
     # ------ Node Parameters  ----------------------------------------------
@@ -226,3 +225,28 @@ class environment:
 
     def _getLinkFlow(self, ID):
         return self.sim._model.getLinkResult(ID, tkai.LinkResults.newFlow.value)
+
+    # ------- Obtain the current simulation time to compute the timestep ----------
+    def getCurrentSimulationDateTime(self):
+        r"""
+        Get the current time of the simulation for this timestep. 
+        Can be used to compute the current timestep. 
+
+        Returns
+        -------
+        :return: current simulation datetime 
+        :rtype: datetime
+        """
+        return self.sim._model.getCurrentSimulationTime()
+
+    def getInitialSimulationDateTime(self):
+        r"""
+        Get the initial datetime of the simulation. 
+        Can be used to compute the initial timestep.
+
+        Returns
+        -------
+        :return: initial simulation datetime 
+        :rtype: datetime
+        """
+        return self.sim._model.getSimulationDateTime(tkai.SimulationTime.StartDateTime.value)

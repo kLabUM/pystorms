@@ -1,0 +1,109 @@
+# Configuration file for scenario theta
+
+# name of scearnio 
+name: alpha
+# state definitions
+states:
+      # depth at runoff entry point into network
+      - !!python/tuple
+        - "J1"
+        - depthN
+      - !!python/tuple
+        - "J2"
+        - depthN
+      - !!python/tuple
+        - "J3"
+        - depthN
+      - !!python/tuple
+        - "J4"
+        - depthN
+      - !!python/tuple
+        - "J5a"
+        - depthN
+      - !!python/tuple
+        - "JC5"
+        - depthN
+      - !!python/tuple
+        - "JC4c"
+        - depthN                
+      # depth at regulator nodes
+      - !!python/tuple
+        - "R1"
+        - depthN
+      - !!python/tuple
+        - "R2"
+        - depthN
+      - !!python/tuple
+        - "R3"
+        - depthN
+      - !!python/tuple
+        - "R4"
+        - depthN
+      - !!python/tuple
+        - "R5"
+        - depthN      
+      # depth at nodes connecting weirs and waterway
+      - !!python/tuple
+        - "JC1b"
+        - depthN
+      - !!python/tuple
+        - "JC2"
+        - depthN
+      - !!python/tuple
+        - "JC3a"
+        - depthN
+      - !!python/tuple
+        - "JC4c"
+        - depthN
+      - !!python/tuple
+        - "JC5"
+        - depthN
+      # depth at end of waterway
+      - !!python/tuple
+        - "JCout"
+        - depthN
+
+# Action space
+action_space:
+        - "Or1"
+        - "Or2"
+        - "Or3"
+        - "Or4"
+        - "Or5"
+
+# Performance Targets
+performance_targets:
+        # CSO overflow
+        - !!python/tuple
+          - "W1"
+          - flow
+        - !!python/tuple
+          - "W2"
+          - flow
+        - !!python/tuple
+          - "W3"
+          - flow
+        - !!python/tuple
+          - "W4"
+          - flow
+        - !!python/tuple
+          - "W5"
+          - flow
+        # flooding
+        - !!python/tuple
+          - "R1"
+          - flooding
+        - !!python/tuple
+          - "R2"
+          - flooding
+        - !!python/tuple
+          - "R3"
+          - flooding
+        - !!python/tuple
+          - "R4"
+          - flooding
+        - !!python/tuple
+          - "R5"
+          - flooding    
+       
+
