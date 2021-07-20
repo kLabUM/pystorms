@@ -1,0 +1,73 @@
+# Configuration file for scenario theta 
+
+# name of scearnio 
+name: beta
+
+# state definitions
+states:
+        - !!python/tuple 
+          - "J33"
+          - depthN
+        - !!python/tuple
+          - "J64"
+          - depthN
+        - !!python/tuple 
+          - "J98"
+          - depthN
+        - !!python/tuple
+          - "J102"
+          - depthN
+        - !!python/tuple 
+          - "OUT0"
+          - depthN
+        - !!python/tuple
+          - "ST0"
+          - depthN
+        - !!python/tuple 
+          - "ST2"
+          - depthN
+
+# Action space 
+action_space:
+        - R2
+        - P0
+        - W0
+
+# Performance Targets
+performance_targets:
+        - !!python/tuple
+          - J4
+          - flooding
+        - !!python/tuple
+          - J8
+          - flooding
+        - !!python/tuple
+          - J13
+          - flooding          
+        - !!python/tuple
+          - J33
+          - flooding
+        - !!python/tuple
+          - J53
+          - flooding
+        - !!python/tuple
+          - J54
+          - flooding 
+        - !!python/tuple
+          - J64
+          - flooding
+        - !!python/tuple
+          - J65
+          - flooding
+        - !!python/tuple
+          - J98
+          - flooding 
+        - !!python/tuple
+          - J102
+          - flooding
+        - !!python/tuple
+          - J145
+          - flooding
+        - !!python/tuple
+          - J146
+          - flooding

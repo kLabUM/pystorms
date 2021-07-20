@@ -71,7 +71,7 @@ class zeta(scenario):
         }
 
         # Log the initial simulation time
-        self.data_log["simulation_time"].append(self.env.sim._model.getCurrentSimulationTime())
+        self.data_log["simulation_time"].append(self.env.getInitialSimulationDateTime())
 
         # Data logger for storing _performance data
         for ID, attribute in self.config["performance_targets"]:
@@ -85,22 +85,17 @@ class zeta(scenario):
         if log:
             self._logger()
 
-        # Log in the simulation time
-        self.data_log["simulation_time"].append(self.env.sim._model.getCurrentSimulationTime())
-
         # Initialize temporary variables
         __performance = 0.0 #
-        __currentsimtime = self.data_log["simulation_time"][-1]
-        __prevsimtime = self.data_log["simulation_time"][-2]
-        __timestep = (__currentsimtime - __prevsimtime).total_seconds()
+
+        # Determine current timestep in simulation by 
+        # obtaining the differeence between the current time 
+        # and previous time, and converting to seconds
+        __currentsimtime = self.env.getCurrentSimulationDateTime()
+        __prevsimtime = self.data_log["simulation_time"][-1]
+        __timestep = (__currentsimtime - __prevsimtime).total_seconds()        
 
         for ID, attribute in self.config["performance_targets"]:
-            __floodrate = 0.0
-            __prevflow = 0.0
-            __throttleflow = 0.0
-            __flowrate = 0.0
-            __volume = 0.0
-            __weight = 0.0
             if attribute == "flooding":  # compute penalty for CSO overflow
                 __floodrate = self.env.methods[attribute](ID) # flooding rate
                 __volume = __floodrate * __timestep # flooding volume
@@ -115,16 +110,19 @@ class zeta(scenario):
                     __weight = -1
                 else:
                     if len(self.data_log[attribute][ID]) > 1:
-                        __prevflow = self.data_log[attribute][ID][-2]
+                        __prevflowrate = self.data_log[attribute][ID][-2]
                     else:
-                        __prevflow = __flowrate
-                    __throttleflowrate = abs(__prevflow - __flowrate)
+                        __prevflowrate = __flowrate
+                    __throttleflowrate = abs(__prevflowrate - __flowrate)
                     __volume = __throttleflowrate * __timestep
                     __weight = 0.01
             __performance += __volume * __weight
 
         # Record the _performance
         self.data_log["performance_measure"].append(__performance)
+
+        # Log the simulation time
+        self.data_log["simulation_time"].append(__currentsimtime)        
 
         # Terminate the simulation
         if done:

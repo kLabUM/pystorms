@@ -5,6 +5,8 @@ import pytest
 def test_load_network():
     network = pystorms.networks.load_network("alpha")
     assert "inp" == network[-3:]
+    network = pystorms.networks.load_network("beta")
+    assert "inp" == network[-3:]
     network = pystorms.networks.load_network("gamma")
     assert "inp" == network[-3:]
     network = pystorms.networks.load_network("epsilon")

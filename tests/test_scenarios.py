@@ -5,7 +5,7 @@ import pytest
 
 def test_alpha():
     """
-    Tests for Theta Scenario
+    Tests for Alpha Scenario
     """
     # Initalize your environment
     env = pystorms.scenarios.alpha()
@@ -23,6 +23,28 @@ def test_alpha():
         assert len(state) == 18
         # Check if data log is working
         assert len(env.data_log["performance_measure"]) == steps
+
+def test_beta():
+    """
+    Tests for Beta Scenario
+    """
+    # Initalize your environment
+    env = pystorms.scenarios.beta()
+    done = False
+    steps = 0
+    while not done:
+        state = env.state()
+        # Check if performance measure is raising error
+        if steps < 1:
+            with pytest.raises(ValueError):
+                env.performance()
+        done = env.step()
+        steps += 1
+        # Check for length of state being returned
+        assert len(state) == 7
+        # Check if data log is working
+        assert len(env.data_log["performance_measure"]) == steps
+
 
 def test_gamma():
     """
