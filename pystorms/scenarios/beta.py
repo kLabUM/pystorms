@@ -37,12 +37,12 @@ class beta(scenario):
         # Create an object for storing data
         self.data_log = {
             "performance_measure": [],
-            "simulation_datetime": [],            
+            "simulation_time": [],            
             "flooding": {},
         }
 
         # Log the initial simulation time
-        self.data_log["simulation_datetime"].append(self.env.getInitialSimulationDateTime())
+        self.data_log["simulation_time"].append(self.env.getInitialSimulationDateTime())
 
         # Data logger for storing _performance data
         for ID, attribute in self.config["performance_targets"]:
@@ -63,7 +63,7 @@ class beta(scenario):
         # obtaining the differeence between the current time 
         # and previous time, and converting to seconds
         __currentsimtime = self.env.getCurrentSimulationDateTime()
-        __prevsimtime = self.data_log["simulation_datetime"][-1]
+        __prevsimtime = self.data_log["simulation_time"][-1]
         __timestep = (__currentsimtime - __prevsimtime).total_seconds() 
 
         # cycle through performance targets 
