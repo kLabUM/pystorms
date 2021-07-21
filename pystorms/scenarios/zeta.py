@@ -115,7 +115,8 @@ class zeta(scenario):
                         __prevflowrate = __flowrate
                     __throttleflowrate = abs(__prevflowrate - __flowrate)
                     __volume = __throttleflowrate * __timestep
-                    __weight = 0.01
+                    #__weight = 0.01
+                    __weight = 0.0
             __performance += __volume * __weight
 
         # Record the _performance
