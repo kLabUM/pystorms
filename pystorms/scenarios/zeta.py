@@ -53,12 +53,16 @@ class zeta(scenario):
         self.env = environment(self.config, ctrl=True)
 
         self.penalty_weight = {
-            "T1": 1000,
-            "T2": 5000,
-            "T3": 5000,
-            "T4": 5000,
-            "T5": 5000,
-            "T6": 10000
+            "T1": 1,
+            "T2": 5,
+            "T3": 5,
+            "T4": 5,
+            "T5": 5,
+            "T6": 10,
+            "CSO7": 10, 
+            "CSO8": 5, 
+            "CSO9": 10,
+            "CSO10": 1, 
         }
 
         # Create an object for storing the data points
@@ -99,15 +103,12 @@ class zeta(scenario):
             if attribute == "flooding":  # compute penalty for CSO overflow
                 __floodrate = self.env.methods[attribute](ID) # flooding rate
                 __volume = __floodrate * __timestep # flooding volume
-                if ID in ["T1", "T2", "T3", "T4", "T5", "T6"]:
-                    __weight = self.penalty_weight[ID]
-                else:
-                    __weight = 1
+                __weight = 1                                       
             else:  # compute reward for flow to WWTP, and penalty for change in flow from previous timestep due to control (i.e. throttle flow)
                 __flowrate = self.env.methods[attribute](ID)
                 if ID == "C14": #conduit connected to "Out_to_WWTP" node
                     __volume = __flowrate * __timestep
-                    __weight = -1
+                    __weight = -0.1
                 else:
                     if len(self.data_log[attribute][ID]) > 1:
                         __prevflowrate = self.data_log[attribute][ID][-2]
@@ -115,8 +116,7 @@ class zeta(scenario):
                         __prevflowrate = __flowrate
                     __throttleflowrate = abs(__prevflowrate - __flowrate)
                     __volume = __throttleflowrate * __timestep
-                    #__weight = 0.01
-                    __weight = 0.0
+                    __weight = 0.01
             __performance += __volume * __weight
 
         # Record the _performance
