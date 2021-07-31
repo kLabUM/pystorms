@@ -59,10 +59,10 @@ class zeta(scenario):
             "T4": 5,
             "T5": 5,
             "T6": 10,
-            "CSO7": 10, 
-            "CSO8": 5, 
+            "CSO7": 10,
+            "CSO8": 5,
             "CSO9": 10,
-            "CSO10": 1, 
+            "CSO10": 1,
         }
 
         # Create an object for storing the data points
@@ -74,9 +74,6 @@ class zeta(scenario):
             "depthN": {},
         }
 
-        # Log the initial simulation time
-        self.data_log["simulation_time"].append(self.env.getInitialSimulationDateTime())
-
         # Data logger for storing _performance data
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
@@ -85,28 +82,33 @@ class zeta(scenario):
         # Implement the actions and take a step forward
         done = self.env.step(actions)
 
+        # Initialize temporary variables
+        __performance = 0.0  #
+
+        # Determine current timestep in simulation by
+        # obtaining the differeence between the current time
+        # and previous time, and converting to seconds
+        __currentsimtime = self.env._getCurrentSimulationDateTime()
+
+        if len(self.data_log["simulation_time"]) > 1:
+            __prevsimtime = self.data_log["simulation_time"][-1]
+        else:
+            __prevsimtime = self.env._getInitialSimulationDateTime()
+
+        __timestep = (__currentsimtime - __prevsimtime).total_seconds()
+
         # Log the flows in the networks
         if log:
             self._logger()
 
-        # Initialize temporary variables
-        __performance = 0.0 #
-
-        # Determine current timestep in simulation by 
-        # obtaining the differeence between the current time 
-        # and previous time, and converting to seconds
-        __currentsimtime = self.env.getCurrentSimulationDateTime()
-        __prevsimtime = self.data_log["simulation_time"][-1]
-        __timestep = (__currentsimtime - __prevsimtime).total_seconds()        
-
         for ID, attribute in self.config["performance_targets"]:
             if attribute == "flooding":  # compute penalty for CSO overflow
-                __floodrate = self.env.methods[attribute](ID) # flooding rate
-                __volume = __floodrate * __timestep # flooding volume
-                __weight = 1                                       
+                __floodrate = self.env.methods[attribute](ID)  # flooding rate
+                __volume = __floodrate * __timestep  # flooding volume
+                __weight = 1
             else:  # compute reward for flow to WWTP, and penalty for change in flow from previous timestep due to control (i.e. throttle flow)
                 __flowrate = self.env.methods[attribute](ID)
-                if ID == "C14": #conduit connected to "Out_to_WWTP" node
+                if ID == "C14":  # conduit connected to "Out_to_WWTP" node
                     __volume = __flowrate * __timestep
                     __weight = -0.1
                 else:
@@ -123,7 +125,7 @@ class zeta(scenario):
         self.data_log["performance_measure"].append(__performance)
 
         # Log the simulation time
-        self.data_log["simulation_time"].append(__currentsimtime)        
+        self.data_log["simulation_time"].append(__currentsimtime)
 
         # Terminate the simulation
         if done:

@@ -4,4 +4,4 @@ from pystorms.environment import *
 from pystorms.networks import *
 from pystorms.config import *
 from pystorms.binaries import *
-__version__ = "0.1.2"
+__version__ = "0.5.0"

@@ -41,6 +41,7 @@ class gamma(scenario):
             "flow": {},
             "flooding": {},
             "depthN": {},
+            "simulation_time": [],
         }
 
         # Data logger for storing _performormance data

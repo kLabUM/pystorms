@@ -62,6 +62,7 @@ class delta(scenario):
             "depthN": {},
             "flow": {},
             "flooding": {},
+            "simulation_time": []
         }
 
         # Data logger for storing _performance data

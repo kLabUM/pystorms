@@ -1,11 +1,11 @@
 """
 Environment abstraction for SWMM.
 """
+import ctypes
 import numpy as np
-from pyswmm.simulation import Simulation
 import pyswmm.toolkitapi as tkai
 from pyswmm.lib import DLL_SELECTION
-import ctypes
+from pyswmm.simulation import Simulation
 
 
 class environment:
@@ -24,6 +24,8 @@ class environment:
         dictionary with swmm_ipunt and, action and state space `(ID, attribute)`
     ctrl : boolean
         if true, config has to be a dict, else config needs to be the path to the input file
+    binary: str
+        path to swmm binary; this enables users determine which version of swmm to use
 
     Methods
     ----------
@@ -38,29 +40,35 @@ class environment:
     """
 
     def __init__(self, config, ctrl=True, binary=None):
+
+        # control expects users to define the state and action space
+        # this is required for querying state and setting control actions
         self.ctrl = ctrl
         if self.ctrl:
-            # SWMM Config
+            # read config from dictionary;
+            # example config can be found in documentation
+            # TODO: Add link to config documentation
             self.config = config
 
-            # SWMM object
+            # load the swmm object based on the binary
             if binary is None:
                 self.sim = Simulation(self.config["swmm_input"])
             else:
+                # though this says DLL, it is os agnosistic
                 DLL_SELECTION.dll_loc = self.config["binary"]
                 self.sim = Simulation(self.config["swmm_input"])
-
-            self.sim.start()
-
         else:
-            # SWMM object
+            # load the swmm objection based on the inp file path
             if type(config) == str:
-                self.sim = Simulation(config)
-                self.sim.start()
+                self.sim = Simulation(INPPATH=config)
             else:
-                raise ValueError("Path to inp file not defined")
+                raise ValueError(f"Given input file path is not valid {config}")
 
-        # methods
+        # start the swmm simulation
+        # this reads the inp file and initializes elements in the model
+        self.sim.start()
+
+        # map class methods to individual class function calls
         self.methods = {
             "depthN": self._getNodeDepth,
             "depthL": self._getLinkDepth,
@@ -71,6 +79,7 @@ class environment:
             "inflow": self._getNodeInflow,
             "pollutantN": self._getNodePollutant,
             "pollutantL": self._getLinkPollutant,
+            "simulation_time": self._getCurrentSimulationDateTime,
         }
 
     def _state(self):
@@ -92,7 +101,8 @@ class environment:
             state = np.asarray(state)
             return state
         else:
-            raise NameError("State config not defined !")
+            print("State config not defined! \n ctrl is defined as False")
+            return np.array([])
 
     def step(self, actions=None):
         r"""
@@ -101,7 +111,7 @@ class environment:
 
         Parameters:
         ----------
-        actions : list or array
+        actions : list or array of dict
             actions to take as an array (1 x n)
 
         Returns:
@@ -111,10 +121,22 @@ class environment:
         done : boolean
             event termination indicator
         """
+
         if (self.ctrl) and (actions is not None):
-            # implement the actions
-            for asset, valve_position in zip(self.config["action_space"], actions):
-                self._setValvePosition(asset, valve_position)
+            # implement the actions based on type of argument passed
+            # if actions are an array or a list
+            if type(actions) == list or type(actions) == np.ndarray:
+                for asset, valve_position in zip(self.config["action_space"], actions):
+                    self._setValvePosition(asset, valve_position)
+            elif type(actions) == dict:
+                for valve_position, asset in enumerate(actions):
+                    self._setValvePosition(asset, valve_position)
+            else:
+                raise ValueError(
+                    "actions must be dict or list or np.ndarray \n got{}".format(
+                        type(actions)
+                    )
+                )
 
         # take the step !
         time = self.sim._model.swmm_step()
@@ -168,7 +190,7 @@ class environment:
 
     def _getNodeLosses(self, ID):
         return self.sim._model.getNodeResult(ID, tkai.NodeResults.losses.value)
-    
+
     def _getNodeVolume(self, ID):
         return self.sim._model.getNodeResult(ID, tkai.NodeResults.newVolume.value)
 
@@ -227,26 +249,28 @@ class environment:
         return self.sim._model.getLinkResult(ID, tkai.LinkResults.newFlow.value)
 
     # ------- Obtain the current simulation time to compute the timestep ----------
-    def getCurrentSimulationDateTime(self):
+    def _getCurrentSimulationDateTime(self):
         r"""
-        Get the current time of the simulation for this timestep. 
-        Can be used to compute the current timestep. 
+        Get the current time of the simulation for this timestep.
+        Can be used to compute the current timestep.
 
         Returns
         -------
-        :return: current simulation datetime 
+        :return: current simulation datetime
         :rtype: datetime
         """
         return self.sim._model.getCurrentSimulationTime()
 
-    def getInitialSimulationDateTime(self):
+    def _getInitialSimulationDateTime(self):
         r"""
-        Get the initial datetime of the simulation. 
+        Get the initial datetime of the simulation.
         Can be used to compute the initial timestep.
 
         Returns
         -------
-        :return: initial simulation datetime 
+        :return: initial simulation datetime
         :rtype: datetime
         """
-        return self.sim._model.getSimulationDateTime(tkai.SimulationTime.StartDateTime.value)
+        return self.sim._model.getSimulationDateTime(
+            tkai.SimulationTime.StartDateTime.value
+        )

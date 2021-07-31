@@ -45,6 +45,7 @@ class epsilon(scenario):
             "pollutantL": {},
             "flow": {},
             "flooding": {},
+            "simulation_time": []
         }
 
         # Data logger for storing _performormance data

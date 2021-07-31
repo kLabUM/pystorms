@@ -37,12 +37,9 @@ class beta(scenario):
         # Create an object for storing data
         self.data_log = {
             "performance_measure": [],
-            "simulation_time": [],            
+            "simulation_time": [],
             "flooding": {},
         }
-
-        # Log the initial simulation time
-        self.data_log["simulation_time"].append(self.env.getInitialSimulationDateTime())
 
         # Data logger for storing _performance data
         for ID, attribute in self.config["performance_targets"]:
@@ -52,26 +49,33 @@ class beta(scenario):
         # Implement the action and take a step forward
         done = self.env.step(actions)
 
+        # Initialize the time step temporary performance value
+        __performance = 0.0  # temporary variable
+
+        # Determine current timestep in simulation by
+        # obtaining the differeence between the current time
+        # and previous time, and converting to seconds
+        __currentsimtime = self.env._getCurrentSimulationDateTime()
+
+        if len(self.data_log["simulation_time"]) > 1:
+            __prevsimtime = self.data_log["simulation_time"][-1]
+        else:
+            __prevsimtime = self.env._getInitialSimulationDateTime()
+
+        __timestep = (__currentsimtime - __prevsimtime).total_seconds()
+
         # Log the flows in the networks
         if log:
             self._logger()
 
-        # Initialize the time step temporary performance value
-        __performance = 0.0  # temporary variable
-
-        # Determine current timestep in simulation by 
-        # obtaining the differeence between the current time 
-        # and previous time, and converting to seconds
-        __currentsimtime = self.env.getCurrentSimulationDateTime()
-        __prevsimtime = self.data_log["simulation_time"][-1]
-        __timestep = (__currentsimtime - __prevsimtime).total_seconds() 
-
-        # cycle through performance targets 
+        # cycle through performance targets
         for ID, attribute in self.config["performance_targets"]:
-            if attribute == 'flooding':
+            if attribute == "flooding":
                 __floodrate = self.env.methods[attribute](ID)
                 if __floodrate > 0.0:
-                    __floodvol = __floodrate * __timestep * 7.48 #convert the flooding rate to flooding volume in gallons (1 ft^3 is 7.43 gallons)
+                    __floodvol = (
+                        __floodrate * __timestep * 7.48
+                    )  # convert the flooding rate to flooding volume in gallons (1 ft^3 is 7.43 gallons)
                 else:
                     __floodvol = 0.0
             __performance += __floodvol
