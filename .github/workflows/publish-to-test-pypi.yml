@@ -12,13 +12,13 @@ jobs:
       with:
         python-version: 3.9
     - name: Install pypa/build
+      run: |
+        python -m pip install -U pip
       run: >-
         python -m
         pip install
         build
         --user
-        python -m
-        pip install -U pip
     - name: Build a binary wheel and a source tarball
       run: >-
         python -m
