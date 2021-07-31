@@ -1,6 +1,7 @@
 import os
 import pystorms
 import numpy as np
+import datetime
 
 
 def test_save():
@@ -30,3 +31,15 @@ def test_save1():
     data = np.load("./data_theta.npy", allow_pickle=True).item()
     assert len(data["performance_measure"]) == len(env.data_log["performance_measure"])
     os.remove("./data_theta.npy")
+
+
+def test_environment_simulation_time():
+    env = pystorms.scenarios.theta()
+    done = False
+    while not done:
+        done = env.step()
+
+    assert type(env.data_log["simulation_time"][0]) == datetime.datetime
+    assert len(env.data_log["simulation_time"]) == len(
+        env.data_log["performance_measure"]
+    )

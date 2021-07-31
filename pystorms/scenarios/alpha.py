@@ -9,7 +9,7 @@ import yaml
 class alpha(scenario):
     r"""Alpha Scenario
 
-    Separated stormwater network driven by a 2-year storm event. 
+    Separated stormwater network driven by a 2-year storm event.
     Scenario is adapted from SWMM Apps tutorial Example 8.
 
     Parameters
@@ -48,10 +48,8 @@ class alpha(scenario):
             "flow": {},
             "volume": {},
             "flooding": {},
+            "simulation_time": [],
         }
-
-        # Log the initial simulation time 
-        self.data_log["simulation_time"].append(self.env.getInitialSimulationDateTime())
 
         # Data logger for storing _performance data
         for ID, attribute in self.config["performance_targets"]:
@@ -61,19 +59,24 @@ class alpha(scenario):
         # Implement the actions and take a step forward
         done = self.env.step(actions)
 
+        # Temp variables
+        __performance = 0.0
+
+        # Determine current timestep in simulation by
+        # obtaining the differeence between the current time
+        # and previous time, and converting to seconds
+        __currentsimtime = self.env._getCurrentSimulationDateTime()
+
+        if len(self.data_log["simulation_time"]) > 1:
+            __prevsimtime = self.data_log["simulation_time"][-1]
+        else:
+            __prevsimtime = self.env._getInitialSimulationDateTime()
+
+        __timestep = (__currentsimtime - __prevsimtime).total_seconds()
+
         # Log the flows in the networks
         if log:
             self._logger()
-
-        ## Temp variables 
-        __performance = 0.0
-
-        # Determine current timestep in simulation by 
-        # obtaining the differeence between the current time 
-        # and previous time, and converting to seconds
-        __currentsimtime = self.env.getCurrentSimulationDateTime()
-        __prevsimtime = self.data_log["simulation_time"][-1]
-        __timestep = (__currentsimtime - __prevsimtime).total_seconds()        
 
         # Estimate the performance
         for ID, attribute in self.config["performance_targets"]:
@@ -83,17 +86,14 @@ class alpha(scenario):
                 if __flood > 0.0:
                     __performance += __flood * (10 ** 6)
             # compute penalty for CSO overflow
-            ## // TODO - decide if we want to have a penalty for negative flow
+            # TODO - decide if we want to have a penalty for negative flow
             if attribute == "flow":
                 __flow = self.env.methods[attribute](ID)
-                __volume = __timestep * __flow  
+                __volume = __timestep * __flow
                 __performance += threshold(value=__volume, target=0.0, scaling=1.0)
 
         # Record the _performance
         self.data_log["performance_measure"].append(__performance)
-
-        # Log the simulation time
-        self.data_log["simulation_time"].append(__currentsimtime)
 
         # Terminate the simulation
         if done:

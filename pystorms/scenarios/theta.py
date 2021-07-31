@@ -37,7 +37,12 @@ class theta(scenario):
         self.env = environment(self.config, ctrl=True)
 
         # Create an object for storing the data points
-        self.data_log = {"performance_measure": [], "flow": {}, "flooding": {}}
+        self.data_log = {
+            "performance_measure": [],
+            "flow": {},
+            "flooding": {},
+            "simulation_time": []
+        }
 
         # Data logger for storing _performance data
         for ID, attribute in self.config["performance_targets"]:

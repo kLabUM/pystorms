@@ -17,6 +17,8 @@ class scenario(abc.ABC):
                     self.data_log[attribute][element].append(
                         self.env.methods[attribute](element)
                     )
+            elif attribute == 'simulation_time':
+                self.data_log[attribute].append(self.env.methods[attribute]())
 
     def state(self):
         return self.env._state()
