@@ -124,8 +124,8 @@ class zeta(scenario):
         # Record the _performance
         self.data_log["performance_measure"].append(__performance)
 
-        # Log the simulation time
-        self.data_log["simulation_time"].append(__currentsimtime)
+        # # Log the simulation time
+        # self.data_log["simulation_time"].append(__currentsimtime)
 
         # Terminate the simulation
         if done:
