@@ -771,7 +771,7 @@ J205             -3.0       8.69       0.0        0.0        0.0
 [OUTFALLS]
 ;;Name           Elevation  Type       Stage Data       Gated    Route To        
 ;;-------------- ---------- ---------- ---------------- -------- ----------------
-OUT0             -3.54      TIMESERIES base_35          YES                      
+OUT0             -3.54      TIMESERIES base_30          YES                      
 
 [STORAGE]
 ;;Name           Elev.    MaxDepth   InitDepth  Shape      Curve Name/Params            N/A      Fevap    Psi      Ksat     IMD     

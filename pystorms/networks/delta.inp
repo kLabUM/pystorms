@@ -13,11 +13,11 @@ MIN_SLOPE            0
 ALLOW_PONDING        YES
 SKIP_STEADY_STATE    NO
 
-START_DATE           06/23/2013
+START_DATE           04/22/2016
 START_TIME           00:00:00
-REPORT_START_DATE    06/23/2013
+REPORT_START_DATE    04/22/2016
 REPORT_START_TIME    00:00:00
-END_DATE             06/29/2013
+END_DATE             04/24/2016
 END_TIME             00:00:00
 SWEEP_START          01/01
 SWEEP_END            12/31
@@ -159,18 +159,18 @@ conduit_N1sc     junc_N1sc        basin_N1         800.0      0.014      0.0    
 ;;Name           From Node        To Node          Type         Offset     Qcoeff     Gated    CloseTime
 ;;-------------- ---------------- ---------------- ------------ ---------- ---------- -------- ----------
 orifice_S        junc_Sup         junc_Sdown       SIDE         0.0        0.65       NO       0.0
-orifice_N        junc_Nup         junc_NdownA      SIDE         840.92     0.65       NO       0.0
-orifice_N32      junc_N32up       junc_N32down     SIDE         848.99     0.65       NO       0.0
-orifice_N21      junc_N21up       junc_N21down     SIDE         844.4      0.65       NO       0.0
-orifice_E        junc_Eup         junc_Edown       SIDE         839.72     0.65       NO       0.0
+orifice_N1       junc_Nup         junc_NdownA      SIDE         840.92     0.65       NO       0.0
+orifice_N3       junc_N32up       junc_N32down     SIDE         848.99     0.65       NO       0.0
+orifice_N2       junc_N21up       junc_N21down     SIDE         844.4      0.65       NO       0.0
+orifice_C        junc_Eup         junc_Edown       SIDE         839.72     0.65       NO       0.0
 
 [WEIRS]
 ;;Name           From Node        To Node          Type         CrestHt    Qcoeff     Gated    EndCon   EndCoeff   Surcharge  RoadWidth  RoadSurf   Coeff. Curve
 ;;-------------- ---------------- ---------------- ------------ ---------- ---------- -------- -------- ---------- ---------- ---------- ---------- ----------------
-weir_E           junc_Eup         junc_Edown       TRANSVERSE   834.5      3.33       NO       0.0      0.0        YES
-weir_N           junc_Nup         junc_NdownA      TRANSVERSE   837.11     3.33       NO       0.0      0.0        YES
-weir_N32         junc_N32up       junc_N32down     TRANSVERSE   842.28     3.33       NO       0.0      0.0        YES
-weir_N21         junc_N21up       junc_N21down     TRANSVERSE   838.09     3.33       NO       0.0      0.0        YES
+weir_C           junc_Eup         junc_Edown       TRANSVERSE   834.5      3.33       NO       0.0      0.0        YES
+weir_N1          junc_Nup         junc_NdownA      TRANSVERSE   837.11     3.33       NO       0.0      0.0        YES
+weir_N3          junc_N32up       junc_N32down     TRANSVERSE   842.28     3.33       NO       0.0      0.0        YES
+weir_N2          junc_N21up       junc_N21down     TRANSVERSE   838.09     3.33       NO       0.0      0.0        YES
 
 [XSECTIONS]
 ;;Link           Shape        Geom1            Geom2      Geom3      Geom4      Barrels    Culvert
@@ -197,14 +197,14 @@ conduit_EinflowB CIRCULAR     1.75             0.0        0.0        0.0        
 conduit_Csc      CIRCULAR     1.5              0.0        0.0        0.0        1          0
 conduit_N1sc     CIRCULAR     1.5              0.0        0.0        0.0        1          0
 orifice_S        CIRCULAR     1.0              0          0          0
-orifice_N        RECT_CLOSED  10.0             3.0        0          0
-orifice_N32      RECT_CLOSED  10.0             3.0        0          0
-orifice_N21      RECT_CLOSED  10.0             3.0        0          0
-orifice_E        RECT_CLOSED  10.0             3.0        0          0
-weir_E           RECT_OPEN    4.92             3.0        0.0        0.0
-weir_N           RECT_OPEN    3.81             3.0        0.0        0.0
-weir_N32         RECT_OPEN    6.71             3.0        0.0        0.0
-weir_N21         RECT_OPEN    5.5              3.0        0.0        0.0
+orifice_N1       RECT_CLOSED  10.0             3.0        0          0
+orifice_N3       RECT_CLOSED  10.0             3.0        0          0
+orifice_N2       RECT_CLOSED  10.0             3.0        0          0
+orifice_C        RECT_CLOSED  10.0             3.0        0          0
+weir_C           RECT_OPEN    4.92             3.0        0.0        0.0
+weir_N1          RECT_OPEN    3.81             3.0        0.0        0.0
+weir_N3          RECT_OPEN    6.71             3.0        0.0        0.0
+weir_N2          RECT_OPEN    5.5              3.0        0.0        0.0
 
 [LOSSES]
 ;;Link           Kentry     Kexit      Kavg       Flap Gate  Seepage
@@ -1173,7 +1173,7 @@ conduit_Ndown    79158.004          5842.021
 orifice_N        86742.757          46289.753
 orifice_N32      57871.322          93531.827
 orifice_N21      71587.084          79192.875
-orifice_E        89310.101          5000.000
+orifice_C        89310.101          5000.000
 
 [Polygons]
 ;;Subcatchment   X-Coord            Y-Coord

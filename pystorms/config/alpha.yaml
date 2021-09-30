@@ -4,7 +4,7 @@
 name: alpha
 # state definitions
 states:
-      # depth at runoff entry point into network
+      # Depth at each runoff entry point into sewer network
       - !!python/tuple
         - "J1"
         - depthN
@@ -26,7 +26,7 @@ states:
       - !!python/tuple
         - "JC4c"
         - depthN                
-      # depth at regulator nodes
+      # Depth if the junctions nodes at the sewer inlet into the flow regulators
       - !!python/tuple
         - "R1"
         - depthN
@@ -42,7 +42,7 @@ states:
       - !!python/tuple
         - "R5"
         - depthN      
-      # depth at nodes connecting weirs and waterway
+      # Depth at the CSO outfalls
       - !!python/tuple
         - "JC1b"
         - depthN
@@ -58,10 +58,41 @@ states:
       - !!python/tuple
         - "JC5"
         - depthN
-      # depth at end of waterway
+      # Depth at each segment of the stream
       - !!python/tuple
-        - "JCout"
-        - depthN
+        - "C1a"
+        - depthL
+      - !!python/tuple
+        - "C1b"
+        - depthL
+      - !!python/tuple
+        - "C2"
+        - depthL
+      - !!python/tuple
+        - "C3a"
+        - depthL
+      - !!python/tuple
+        - "C3b"
+        - depthL
+      - !!python/tuple
+        - "C4a"
+        - depthL
+      - !!python/tuple
+        - "C4b"
+        - depthL
+      - !!python/tuple
+        - "C4c"
+        - depthL
+      - !!python/tuple
+        - "C5a"
+        - depthL
+      - !!python/tuple
+        - "C5b"
+        - depthL
+      # Flowrate at final interceptor pipe connected to WWTP
+      - !!python/tuple
+        - "I5"
+        - flow
 
 # Action space
 action_space:
@@ -104,6 +135,4 @@ performance_targets:
           - flooding
         - !!python/tuple
           - "R5"
-          - flooding    
-       
-
+          - flooding
