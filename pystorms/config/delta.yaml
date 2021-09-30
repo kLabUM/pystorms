@@ -79,15 +79,4 @@ performance_targets:
         - !!python/tuple
           - "conduit_Eout"
           - flow
-        - !!python/tuple
-          - "orifice_E"
-          - flow
-        - !!python/tuple
-          - "orifice_N"
-          - flow
-        - !!python/tuple
-          - "orifice_N21"
-          - flow
-        - !!python/tuple
-          - "orifice_N32"
-          - flow
+

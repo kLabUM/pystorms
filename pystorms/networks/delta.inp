@@ -1,7 +1,6 @@
 [TITLE]
 ;;Project Title/Notes
 Delta
-Anonymized
 
 [OPTIONS]
 ;;Option             Value
@@ -124,11 +123,11 @@ outfall_E        825.46     FREE                        NO
 ;;Name           Elev.    MaxDepth   InitDepth  Shape      Curve Name/Params            N/A      Fevap    Psi      Ksat     IMD
 ;;-------------- -------- ---------- ----------- ---------- ---------------------------- -------- --------          -------- --------
 basin_C          833.5    11.5       3.38       TABULAR    BasinCentral                 0.000000 0.000000
-basin_N1         835.0    11.0       5.3        TABULAR    BasinSouth1                  0.000000 0.000000
-basin_N2         837.0    12.0       4.54       TABULAR    BasinSouth2                  0.000000 0.000000
-basin_N3         837.0    16.0       5.42       TABULAR    BasinSouth3                  0.000000 0.000000
-basin_N4         847.0    9.0        6.5        TABULAR    BasinSouth4                  0.000000 0.000000
-basin_S          827.0    20.0       0.7        TABULAR    BasinNorth                   0.000000 0.000000
+basin_N1         835.0    11.0       5.3        TABULAR    BasinNorth1                  0.000000 0.000000
+basin_N2         837.0    12.0       4.54       TABULAR    BasinNorth2                  0.000000 0.000000
+basin_N3         837.0    16.0       5.42       TABULAR    BasinNorth3                  0.000000 0.000000
+basin_N4         847.0    9.0        6.5        TABULAR    BasinNorth4                  0.000000 0.000000
+basin_S          827.0    20.0       0.7        TABULAR    BasinSouth                   0.000000 0.000000
 
 [CONDUITS]
 ;;Name           From Node        To Node          Length     Roughness  InOffset   OutOffset  InitFlow   MaxFlow
@@ -230,27 +229,27 @@ BasinCentral                1.5        152203.0
 BasinCentral                3.38       155968.0
 BasinCentral                5.38       191373.0
 ;
-BasinNorth       Storage    0.0        14184.0
-BasinNorth                  4.8        26000.0
+BasinSouth       Storage    0.0        14184.0
+BasinSouth                  4.8        26000.0
 ;
 BasinSouth1      Storage    0.0        32669.0
 BasinSouth1                 2.7        118927.0
 BasinSouth1                 4.3        178181.0
 BasinSouth1                 8.8        231072.0
 ;
-BasinSouth2      Storage    0.0        62500.0
-BasinSouth2                 2.04       63000.0
-BasinSouth2                 3.0        107025.0
-BasinSouth2                 4.54       186953.0
-BasinSouth2                 7.25       362040.0
+BasinNorth2      Storage    0.0        62500.0
+BasinNorth2                 2.04       63000.0
+BasinNorth2                 3.0        107025.0
+BasinNorth2                 4.54       186953.0
+BasinNorth2                 7.25       362040.0
 ;
-BasinSouth3      Storage    0.0        0.0
-BasinSouth3                 1.03       0.0
-BasinSouth3                 5.42       75340.0
-BasinSouth3                 12.1       78040.0
+BasinNorth3      Storage    0.0        0.0
+BasinNorth3                 1.03       0.0
+BasinNorth3                 5.42       75340.0
+BasinNorth3                 12.1       78040.0
 ;
-BasinSouth4      Storage    0.0        18716.0
-BasinSouth4                 6.5        45719.0
+BasinNorth4      Storage    0.0        18716.0
+BasinNorth4                 6.5        45719.0
 
 [TIMESERIES]
 ;;Name           Date       Time       Value
