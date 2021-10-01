@@ -232,10 +232,10 @@ BasinCentral                5.38       191373.0
 BasinSouth       Storage    0.0        14184.0
 BasinSouth                  4.8        26000.0
 ;
-BasinSouth1      Storage    0.0        32669.0
-BasinSouth1                 2.7        118927.0
-BasinSouth1                 4.3        178181.0
-BasinSouth1                 8.8        231072.0
+BasinNorth1      Storage    0.0        32669.0
+BasinNorth1                 2.7        118927.0
+BasinNorth1                 4.3        178181.0
+BasinNorth1                 8.8        231072.0
 ;
 BasinNorth2      Storage    0.0        62500.0
 BasinNorth2                 2.04       63000.0

@@ -143,6 +143,5 @@ def exponentialpenalty(value, max_penalty=10 ** 6, scaling=1.0):
 
     """
     performance = 0.0
-    a = np.log(max_penalty + 1) - 1
-    performance += scaling * (np.exp(a * value) - 1)
+    performance += scaling * (((max_penalty + 1) ** value)  - 1)
     return performance

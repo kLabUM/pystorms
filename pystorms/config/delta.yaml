@@ -23,14 +23,13 @@ states:
         - "basin_N4"
         - depthN
 
-
 # Action space
 action_space:
-        - "weir_E"
+        - "weir_N3"
+        - "weir_N2"
+        - "weir_N1"          
+        - "weir_C"
         - "orifice_S"
-        - "weir_N"
-        - "weir_N21"
-        - "weir_N32"
 
 # Performance Targets
 performance_targets:
