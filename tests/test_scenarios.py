@@ -20,7 +20,7 @@ def test_alpha():
         done = env.step()
         steps += 1
         # Check for length of state being returned
-        assert len(state) == 18
+        assert len(state) == 28
         # Check if data log is working
         assert len(env.data_log["performance_measure"]) == steps
 
