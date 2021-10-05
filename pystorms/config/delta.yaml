@@ -1,4 +1,4 @@
-# Configuration file for scenario theta
+# Configuration file for scenario delta
 
 # name of scearnio 
 name: delta
@@ -51,31 +51,45 @@ performance_targets:
           - depthN
         # flooding
         - !!python/tuple
-          - "junc_Eout"
+          - "junc_N4sc"
           - flooding
         - !!python/tuple
-          - "junc_EinflowA"
-          - flooding
-        - !!python/tuple
-          - "junc_Csc"
-          - flooding
-        - !!python/tuple
-          - "junc_Ssc"
-          - flooding
-        - !!python/tuple
-          - "junc_N1sc"
-          - flooding
-        - !!python/tuple
-          - "junc_N2sc"
+          - "basin_N4"
           - flooding
         - !!python/tuple
           - "junc_N3sc"
           - flooding
         - !!python/tuple
-          - "junc_N4sc"
+          - "basin_N3"
+          - flooding
+        - !!python/tuple
+          - "junc_N2sc"
+          - flooding
+        - !!python/tuple
+          - "basin_N2"
+          - flooding
+        - !!python/tuple
+          - "junc_N1sc"
+          - flooding
+        - !!python/tuple
+          - "basin_N1"
+          - flooding
+        - !!python/tuple
+          - "junc_Csc"
+          - flooding
+        - !!python/tuple
+          - "basin_C"
+          - flooding          
+        - !!python/tuple
+          - "junc_Ssc"
+          - flooding
+        - !!python/tuple
+          - "basin_S"
+          - flooding
+        - !!python/tuple
+          - "junc_EinflowA"
           - flooding
         # flow
         - !!python/tuple
           - "conduit_Eout"
           - flow
-
