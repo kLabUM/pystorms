@@ -75,7 +75,7 @@ class beta(scenario):
                 if __floodrate > 0.0:
                     __floodvol = (
                         __floodrate * __timestep * 7.48
-                    )  # convert the flooding rate to flooding volume in gallons (1 ft^3 is 7.43 gallons)
+                    )  # convert the flooding rate to flooding volume in gallons (1 ft^3 is 7.48 gallons)
                 else:
                     __floodvol = 0.0
             __performance += __floodvol

@@ -122,6 +122,69 @@ performance_targets:
           - flow
         # flooding
         - !!python/tuple
+          - "J1"
+          - flooding
+        - !!python/tuple
+          - "J2"
+          - flooding
+        - !!python/tuple
+          - "J3"
+          - flooding
+        - !!python/tuple
+          - "J4"
+          - flooding
+        - !!python/tuple
+          - "J5a"
+          - flooding
+        - !!python/tuple
+          - "J5b"
+          - flooding     
+        - !!python/tuple
+          - "JC1a"
+          - flooding
+        - !!python/tuple
+          - "JC1b"
+          - flooding
+        - !!python/tuple
+          - "JC2"
+          - flooding
+        - !!python/tuple
+          - "JC3a"
+          - flooding
+        - !!python/tuple
+          - "JC3b"
+          - flooding
+        - !!python/tuple
+          - "JC4a"
+          - flooding
+        - !!python/tuple
+          - "JC4b"
+          - flooding
+        - !!python/tuple
+          - "JC4c"
+          - flooding          
+        - !!python/tuple
+          - "JC5"
+          - flooding
+        - !!python/tuple
+          - "JI1"
+          - flooding
+        - !!python/tuple
+          - "JI2"
+          - flooding
+        - !!python/tuple
+          - "JI3a"
+          - flooding
+        - !!python/tuple
+          - "JI3b"
+          - flooding
+        - !!python/tuple
+          - "JI4"
+          - flooding
+        - !!python/tuple
+          - "JI5"
+          - flooding
+        - !!python/tuple
           - "R1"
           - flooding
         - !!python/tuple
@@ -135,4 +198,4 @@ performance_targets:
           - flooding
         - !!python/tuple
           - "R5"
-          - flooding
+          - flooding                                   

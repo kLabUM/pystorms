@@ -105,7 +105,8 @@ class zeta(scenario):
             if attribute == "flooding":  # compute penalty for CSO overflow
                 __floodrate = self.env.methods[attribute](ID)  # flooding rate
                 __volume = __floodrate * __timestep  # flooding volume
-                __weight = 1
+                #__weight = 1
+                __weight = self.penalty_weight[ID]
             else:  # compute reward for flow to WWTP, and penalty for change in flow from previous timestep due to control (i.e. throttle flow)
                 __flowrate = self.env.methods[attribute](ID)
                 if ID == "C14":  # conduit connected to "Out_to_WWTP" node
