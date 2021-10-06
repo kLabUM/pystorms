@@ -25,22 +25,14 @@ class zeta(scenario):
     -----
     Objectives are the following:
     1. Minimization of accumulated CSO volume
-    2. Minimization of CSO to the river/creek
+    2. Minimization of CSO to the creek more than the river
     3. Maximizing flow to the WWTP
     4. Minimizing roughness of control.
 
     Performance is measured as the following:
-    1. *2 for the flow to the river/creek
+    1. *2 for CSO volume (doubled for flow into the creek)
     2. *(−1) for the flow to the WWTP
     3. *(0.01) for the roughness of the control
-
-    Weights of tanks:
-    Tank1 - 1000
-    Tank2 - 5000
-    Tank3 - 5000
-    Tank4 - 5000
-    Tank5 - 5000
-    Tank6 - 10000
 
     """
 
@@ -54,14 +46,14 @@ class zeta(scenario):
 
         self.penalty_weight = {
             "T1": 1,
-            "T2": 5,
-            "T3": 5,
-            "T4": 5,
-            "T5": 5,
-            "T6": 10,
-            "CSO7": 10,
-            "CSO8": 5,
-            "CSO9": 10,
+            "T2": 1,
+            "T3": 1,
+            "T4": 1,
+            "T5": 1,
+            "T6": 2, #creek
+            "CSO7": 2, #creek
+            "CSO8": 1,
+            "CSO9": 2, #creek
             "CSO10": 1,
         }
 
@@ -105,8 +97,8 @@ class zeta(scenario):
             if attribute == "flooding":  # compute penalty for CSO overflow
                 __floodrate = self.env.methods[attribute](ID)  # flooding rate
                 __volume = __floodrate * __timestep  # flooding volume
-                #__weight = 1
                 __weight = self.penalty_weight[ID]
+#                __weight = 2
             else:  # compute reward for flow to WWTP, and penalty for change in flow from previous timestep due to control (i.e. throttle flow)
                 __flowrate = self.env.methods[attribute](ID)
                 if ID == "C14":  # conduit connected to "Out_to_WWTP" node
