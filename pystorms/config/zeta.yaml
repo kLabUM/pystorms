@@ -69,18 +69,6 @@ performance_targets:
         - "C14"
         - "flow"
       # control roughness
-      - !!python/tuple # flow out of CSO7
-        - "C5"
-        - "flow"
-      - !!python/tuple # flow out of CSO8
-        - "C15"
-        - "flow"
-      - !!python/tuple # flow out of CSO9
-        - "C8"
-        - "flow"
-      - !!python/tuple # flow out of CSO10
-        - "C21"
-        - "flow"
       - !!python/tuple # flow out of Tank1
         - "V1"
         - "flow"
