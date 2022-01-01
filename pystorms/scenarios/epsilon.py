@@ -70,7 +70,7 @@ class epsilon(scenario):
                     __performance += 10 ** 9
             elif attribute == "loading":
                 pollutantLoading = (
-                    self.env.methods["pollutantL"](ID, 0)
+                    self.env.methods["pollutantL"](ID, 'TSS')
                     * self.env.methods["flow"](ID)
                     * 28.3168
                     / (10 ** 6)
@@ -92,7 +92,7 @@ class epsilon(scenario):
         for ID, attribute in self.config["performance_targets"]:
             if attribute == "loading":
                 pollutantLoading = (
-                    self.env.methods["pollutantL"](ID, 0)
+                    self.env.methods["pollutantL"](ID, 'TSS')
                     * self.env.methods["flow"](ID)
                     * 28.3168
                     / (10 ** 6)

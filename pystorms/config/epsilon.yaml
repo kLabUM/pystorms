@@ -45,7 +45,7 @@ states:
         - !!python/tuple
           - "001"
           - pollutantL
-          - 0
+          - TSS
 
 # Action space 
 action_space:
