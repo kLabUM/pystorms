@@ -166,7 +166,7 @@ def _to_dataframe(data_log):
     data_dataframe = {}
     time_index = data_log['simulation_time']
     for attribute in data_log.keys():
-        if attribute is not 'simulation_time':
+        if attribute != 'simulation_time':
             data_dataframe[attribute] = pd.DataFrame(index=time_index,
                                                      data=data_log[attribute])
     return dataframe
