@@ -146,3 +146,27 @@ def exponentialpenalty(value, max_penalty=10 ** 6, scaling=1.0):
     a = np.log(max_penalty + 1) - 1
     performance += scaling * (np.exp(a * value) - 1)
     return performance
+
+
+def _to_dataframe(data_log):
+    r"""
+    
+    convert environment data log to dataframe
+
+    Parameters
+    ----------
+    data_log
+        dict with simulation time and data
+
+    Returns:
+    -------
+    data_dataframe
+        dict of dataframes
+    """
+    data_dataframe = {}
+    time_index = data_log['simulation_time']
+    for attribute in data_log.keys():
+        if attribute is not 'simulation_time':
+            data_dataframe[attribute] = pd.DataFrame(index=time_index,
+                                                     data=data_log[attribute])
+    return dataframe
