@@ -1,0 +1,9 @@
+Intro to workshop (15 min)
+Intro to modeling - workflow and tools being used for real-time control (15min)
+RTC101-pyswmm Intro (15min) [ ]
+RTC101-pystorms Intro (15min) [ ]
+-- Break -- (10 min)
+Review any questions that might have come up and big picture on where we are and where we are going (5min)
+Equal-filling Controller - gamma (30min) [ ]
+Bayesian Optimization Optimization - gamma (30min) [ ]
+Future Directions - (15min) [ ]
