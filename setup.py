@@ -30,7 +30,7 @@ setup(
     ],
     install_requires=[
         "numpy>=1.18.4",
-        "pyswmm==0.6.0",
+        "pyswmm>=1.0.1",
         "pyyaml>=5.3"
     ],
 )
