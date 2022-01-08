@@ -30,3 +30,8 @@ Review any questions that might have come up and big picture on where we are and
 Equal-filling Controller - gamma (30min) [ ]
 Bayesian Optimization Optimization - gamma (30min) [ ]
 Future Directions - (15min) [ ]
+
+
+Bayesian Optimization
+1. New Approach to Control
+2. 
