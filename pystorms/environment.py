@@ -1,10 +1,8 @@
 """
 Environment abstraction for SWMM.
 """
-import ctypes
 import numpy as np
 import pyswmm.toolkitapi as tkai
-from pyswmm.lib import DLL_SELECTION
 from pyswmm.simulation import Simulation
 
 
@@ -50,13 +48,8 @@ class environment:
             # TODO: Add link to config documentation
             self.config = config
 
-            # load the swmm object based on the binary
-            if binary is None:
-                self.sim = Simulation(self.config["swmm_input"])
-            else:
-                # though this says DLL, it is os agnosistic
-                DLL_SELECTION.dll_loc = self.config["binary"]
-                self.sim = Simulation(self.config["swmm_input"])
+            # load the swmm object
+            self.sim = Simulation(self.config["swmm_input"])
         else:
             # load the swmm objection based on the inp file path
             if type(config) == str:
@@ -200,20 +193,14 @@ class environment:
     def _setInflow(self, ID, value):
         return self.sim._model.setNodeInflow(ID, value)
 
-    def _getNodePollutant(self, ID, pollutant_index):
-        """
-        Get the pollutant concentration in a node
-        :param str ID: Node ID
-        :param int NUMPOLLUTANT: Number of pollutants
-        :return: Pollutant as list
-        """
-        index = self.sim._model.getObjectIDIndex(tkai.ObjectType.NODE.value, ID)
-        result = ctypes.c_double()
-        errorcode = self.sim._model.SWMMlibobj.swmm_getNodePollutant(
-            index, pollutant_index, ctypes.byref(result)
-        )
-        self.sim._model._error_check(errorcode)
-        return result.value
+    def _getNodePollutant(self, ID, pollutant_name=None):
+        pollut_quantity = self.sim._model.getNodePollut(ID, tkai.NodePollut.nodeQual)
+        pollut_id = self.sim._model.getObjectIDList(tkai.ObjectType.POLLUT.value)
+        pollutants = {pollut_id[i]: pollut_quantity[i] for i in range(0, len(pollut_id))}
+        if pollutant_name is None:
+            return pollutants
+        else:
+            return pollutants[pollutant_name]
 
     # ------ Valve modifications -------------------------------------------
     def _getValvePosition(self, ID):
@@ -224,20 +211,14 @@ class environment:
 
     # ------ Link modifications --------------------------------------------
 
-    def _getLinkPollutant(self, ID, pollutant_index):
-        """
-        Get the pollutant concentration in a node
-        :param str ID: Node ID
-        :param int NUMPOLLUTANT: Number of pollutants
-        :return: Pollutant as list
-        """
-        index = self.sim._model.getObjectIDIndex(tkai.ObjectType.NODE.value, ID)
-        result = ctypes.c_double()
-        errorcode = self.sim._model.SWMMlibobj.swmm_getLinkPollutant(
-            index, pollutant_index, ctypes.byref(result)
-        )
-        self.sim._model._error_check(errorcode)
-        return result.value
+    def _getLinkPollutant(self, ID, pollutant_name=None):
+        pollut_quantity = self.sim._model.getNodePollut(ID, tkai.LinkPollut.linkQual)
+        pollut_id = self.sim._model.getObjectIDList(tkai.ObjectType.POLLUT.value)
+        pollutants = {pollut_id[i]: pollut_quantity[i] for i in range(0, len(pollut_id))}
+        if pollutant_name is None:
+            return pollutants
+        else:
+            return pollutants[pollutant_name]
 
     def _getLinkDepth(self, ID):
         return self.sim._model.getLinkResult(ID, tkai.LinkResults.newDepth.value)
