@@ -3,7 +3,6 @@ from pystorms.networks import load_network
 from pystorms.config import load_config
 from pystorms.scenarios import scenario
 from pystorms.utilities import threshold
-from pystorms.binaries import load_binary
 import yaml
 
 
