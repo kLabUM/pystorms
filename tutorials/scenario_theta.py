@@ -61,6 +61,12 @@ plt.style.use("seaborn-v0_8-whitegrid")
 
 # Run simulation with gates open
 env_uncontrolled = pystorms.scenarios.theta()
+
+# Update the datalog to append states
+env_uncontrolled.data_log["depthN"] = {}
+env_uncontrolled.data_log["depthN"]['P1'] = []
+env_uncontrolled.data_log["depthN"]['P2'] = []
+
 done = False
 while not done:
     done = env_uncontrolled.step()
@@ -71,9 +77,19 @@ uncontrolled_flows.index = env_uncontrolled.data_log["simulation_time"]
 uncontrolled_flows = uncontrolled_flows.resample("15min").mean()
 uncontrolled_flows = uncontrolled_flows.rename(columns={"8": "Uncontrolled"})
 
+uncontrolled_depth = pd.DataFrame.from_dict(env_uncontrolled.data_log["depthN"])
+uncontrolled_depth.index = env_uncontrolled.data_log["simulation_time"]
+uncontrolled_depth = uncontrolled_depth.resample("15min").mean()
+
+
 # Controlled simulation
 env_controlled = pystorms.scenarios.theta()
 done = False
+
+# Update the datalog to append states
+env_controlled.data_log["depthN"] = {}
+env_controlled.data_log["depthN"]['P1'] = []
+env_controlled.data_log["depthN"]['P2'] = []
 
 while not done:
     state = env_controlled.state()
@@ -85,6 +101,10 @@ controlled_flows = pd.DataFrame.from_dict(env_controlled.data_log["flow"])
 controlled_flows.index = env_controlled.data_log["simulation_time"]
 controlled_flows = controlled_flows.resample("15min").mean()
 controlled_flows = controlled_flows.rename(columns={"8": "Controlled"})
+
+controlled_depth = pd.DataFrame.from_dict(env_controlled.data_log["depthN"])
+controlled_depth.index = env_controlled.data_log["simulation_time"]
+controlled_depth = controlled_depth.resample("15min").mean()
 
 
 textstr = "Controlled Performance = {:.2f} \nUncontrolled Peformance = {:.2f}".format(
@@ -116,4 +136,15 @@ plt.axhline(y=0.50, color="red")
 plt.title("Scenario Theta: Equal-filling Controller", loc="left")
 plt.ylabel("Flows")
 plt.xlabel("Time")
+
+fig, ax = plt.subplots(1, 3, sharey=True)
+
+controlled_depth[['P1']].plot(ax=ax[0])
+uncontrolled_depth[['P1']].plot(ax=ax[0])
+
+controlled_depth[['P2']].plot(ax=ax[1])
+uncontrolled_depth[['P2']].plot(ax=ax[1])
+
+controlled_flows.plot(ax=ax[2])
+uncontrolled_flows.plot(ax=ax[2])
 plt.show()
