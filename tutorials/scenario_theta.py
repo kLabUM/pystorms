@@ -56,6 +56,12 @@ def controller(
     return actions
 
 
+def rule_based_controller(state):
+    actions = np.zeros(2)
+    actions = state/2.0 
+    return actions
+
+
 # Configure matplotlib style to make pretty plots
 plt.style.use("seaborn-v0_8-whitegrid")
 
@@ -106,45 +112,42 @@ controlled_depth = pd.DataFrame.from_dict(env_controlled.data_log["depthN"])
 controlled_depth.index = env_controlled.data_log["simulation_time"]
 controlled_depth = controlled_depth.resample("15min").mean()
 
+# Rule based controller
+env_rule_controlled = pystorms.scenarios.theta()
+done = False
 
-textstr = "Controlled Performance = {:.2f} \nUncontrolled Peformance = {:.2f}".format(
-    env_controlled.performance(), env_uncontrolled.performance()
-)
+# Update the datalog to append states
+env_rule_controlled.data_log["depthN"] = {}
+env_rule_controlled.data_log["depthN"]['P1'] = []
+env_rule_controlled.data_log["depthN"]['P2'] = []
 
-fig = plt.figure(num=1, figsize=(20, 5))
-ax = plt.gca()
-controlled_flows.plot(ax=ax)
-uncontrolled_flows.plot(ax=ax)
-ax.text(
-    0.20,
-    0.90,
-    textstr,
-    transform=ax.transAxes,
-    fontsize=10,
-    verticalalignment="center",
-    bbox=dict(boxstyle="round", facecolor="grey", alpha=0.2),
-)
-ax.text(
-    0.80,
-    0.73,
-    "Exceedance Threshold",
-    transform=ax.transAxes,
-    fontsize=10,
-    verticalalignment="center",
-)
-plt.axhline(y=0.50, color="red")
-plt.title("Scenario Theta: Equal-filling Controller", loc="left")
-plt.ylabel("Flows")
-plt.xlabel("Time")
+while not done:
+    state = env_rule_controlled.state()
+    actions = rule_based_controller(state)
+    done = env_rule_controlled.step(actions)
+
+env_rule_controlled_flows = pd.DataFrame.from_dict(env_rule_controlled.data_log["flow"])
+env_rule_controlled_flows.index = env_rule_controlled.data_log["simulation_time"]
+env_rule_controlled_flows = env_rule_controlled_flows.resample("15min").mean()
+env_rule_controlled_flows = env_rule_controlled_flows.rename(columns={"8": "Rule-baseed Controller"})
+
+env_rule_controlled_depth = pd.DataFrame.from_dict(env_rule_controlled.data_log["depthN"])
+env_rule_controlled_depth.index = env_rule_controlled.data_log["simulation_time"]
+env_rule_controlled_depth = env_rule_controlled_depth.resample("15min").mean()
+
 
 fig, ax = plt.subplots(1, 3, sharey=True)
-
 controlled_depth[['P1']].plot(ax=ax[0])
 uncontrolled_depth[['P1']].plot(ax=ax[0])
+env_rule_controlled_depth[['P1']].plot(ax=ax[0])
 
 controlled_depth[['P2']].plot(ax=ax[1])
 uncontrolled_depth[['P2']].plot(ax=ax[1])
+env_rule_controlled_depth[['P2']].plot(ax=ax[1])
 
 controlled_flows.plot(ax=ax[2])
 uncontrolled_flows.plot(ax=ax[2])
-plt.show()
+env_rule_controlled_flows.plot(ax=ax[2])
+
+fig.set_size_inches(8.0, 3.0)
+plt.savefig("scenario_theta.svg", dpi=1000)
