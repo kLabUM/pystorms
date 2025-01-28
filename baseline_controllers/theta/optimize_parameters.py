@@ -145,7 +145,7 @@ if evaluating == "constant-flow":
     print(bo.fun)
     print(bo.x_iters)
     # save the optimal constant heads 
-    np.savetxt("optimal_constant_flows.txt", bo.x)
+    np.savetxt(str(version +"/optimal_constant_flows.txt"), bo.x)
 
 
 elif evaluating == "efd":
@@ -162,7 +162,7 @@ elif evaluating == "efd":
     print(bo.fun)
     print(bo.x_iters)
     # save the optimal efd params
-    np.savetxt("optimal_efd_params.txt", bo.x)
+    np.savetxt(str(version +"/optimal_efd_params.txt"), bo.x)
     
 elif evaluating == 'both':
     evaluating="constant-flow"

@@ -4,7 +4,7 @@ Environment abstraction for SWMM.
 import numpy as np
 import pyswmm.toolkitapi as tkai
 from pyswmm.simulation import Simulation
-
+import pandas as pd
 
 class environment:
     r"""Environment for controlling the swmm simulation
@@ -41,6 +41,7 @@ class environment:
         
 
         print("version = ", version)
+        print("level = ", level)
         self.version = version
         # control expects users to define the state and action space
         # this is required for querying state and setting control actions
@@ -63,6 +64,63 @@ class environment:
         # start the swmm simulation
         # this reads the inp file and initializes elements in the model
         self.sim.start()
+        
+        self.actuator_schedule = None
+        self.sensor_schedule = None
+        
+        # for levels 2 and 3, schedule random faults in sensors and actuators
+        if level == "2":
+            # create an actuator schedule with columns the action space.
+            # rows will be event times
+            # entries will be events. for now, just "stuck" and "fix"
+            actuator_schedule = pd.DataFrame(columns = self.config['action_space'])
+            for actuator in actuator_schedule.columns:
+                if np.random.rand() > 0.4:
+                    # a fault will occur
+                    fault_duration = np.random.uniform(0.1, 0.3) # 10 to 30% of duration
+                    fault_time = np.random.uniform(0.0, 1.0-fault_duration)
+                    fault_datetime = self.sim.start_time + (self.sim.end_time - self.sim.start_time) * fault_time
+                    actuator_schedule.loc[fault_datetime, actuator] = "stuck"
+                    fix_datetime = fault_datetime + (self.sim.end_time - self.sim.start_time) * fault_duration
+                    actuator_schedule.loc[fix_datetime, actuator] = "fix"
+            self.actuator_schedule = actuator_schedule
+            # if actuator_schedule is empty, make it None
+            if actuator_schedule.empty:
+                self.actuator_schedule = None
+            print(self.actuator_schedule)
+        if level == "3":
+            sensor_ids = [self.config['states'][i][0] for i in range(len(self.config['states']))]
+            sensor_schedule = pd.DataFrame(columns = sensor_ids)
+            for sensor in sensor_schedule.columns:
+                if np.random.rand() > 0.2:
+                    # a fault will occur
+                    fault_duration = np.random.uniform(0.05, 0.2)
+                    fault_time = np.random.uniform(0.0, 1.0-fault_duration)
+                    fault_datetime = self.sim.start_time + (self.sim.end_time - self.sim.start_time) * fault_time
+                    sensor_schedule.loc[fault_datetime, sensor] = "stuck"
+                    fix_datetime = fault_datetime + (self.sim.end_time - self.sim.start_time) * fault_duration
+                    sensor_schedule.loc[fix_datetime, sensor] = "fix"
+            self.sensor_schedule = sensor_schedule
+            if sensor_schedule.empty:
+                self.sensor_schedule = None 
+            print(self.sensor_schedule)
+
+
+            actuator_schedule = pd.DataFrame(columns = self.config['action_space'])
+            for actuator in actuator_schedule.columns:
+                if np.random.rand() > 0.2:
+                    # a fault will occur
+                    fault_duration = np.random.uniform(0.2, 0.5) # 10 to 30% of duration
+                    fault_time = np.random.uniform(0.0, 1.0-fault_duration)
+                    fault_datetime = self.sim.start_time + (self.sim.end_time - self.sim.start_time) * fault_time
+                    actuator_schedule.loc[fault_datetime, actuator] = "stuck"
+                    fix_datetime = fault_datetime + (self.sim.end_time - self.sim.start_time) * fault_duration
+                    actuator_schedule.loc[fix_datetime, actuator] = "fix"
+            self.actuator_schedule = actuator_schedule
+            if actuator_schedule.empty:
+                self.actuator_schedule = None
+            print(self.actuator_schedule)
+
 
         # map class methods to individual class function calls
         self.methods = {
@@ -78,7 +136,7 @@ class environment:
             "simulation_time": self._getCurrentSimulationDateTime,
         }
 
-    def _state(self):
+    def _state(self,level="1"):
         r"""
         Query the stormwater network states based on the config file.
         """
@@ -88,19 +146,65 @@ class environment:
                 ID = _temp[0]
                 attribute = _temp[1]
 
-                if attribute == "pollutantN" or attribute == "pollutantL":
-                    pollutant_index = _temp[2]
-                    state.append(self.methods[attribute](ID, pollutant_index))
+                if level == "3" and self.sensor_schedule is not None:
+                    # if the current time has a "stuck" before it and a "fix" after it for the column "ID"
+                    # assign the most recent value in the data_log and continue
+                    # check if self.current_time has "stuck" before and "fix" after in sensor_schedule[ID]
+                    # find the index value of the most recent "stuck" before self.current_time
+                    stuck_times = self.sensor_schedule[ID].index[self.sensor_schedule[ID] == "stuck"]
+                    fix_times = self.sensor_schedule[ID].index[self.sensor_schedule[ID] == "fix"]
+                    if len(stuck_times) > 0:
+                        most_recent_stuck_time = stuck_times[stuck_times < self.sim.current_time].max()
+                        most_recent_fix_time = fix_times[fix_times > most_recent_stuck_time].min()
+                        if most_recent_fix_time > self.sim.current_time:
+                            # the sensor is stuck
+                            #print("sensor ", ID, " zeroed out")
+                            state.append(0.0)
+                        else: 
+                            # the sensor is not stuck
+                            if attribute == "pollutantN" or attribute == "pollutantL":
+                                pollutant_index = _temp[2]
+                                state.append(self.methods[attribute](ID, pollutant_index))
+                            else:
+                                state.append(self.methods[attribute](ID))   
+                    else: 
+                        # the sensor is not stuck
+                        if attribute == "pollutantN" or attribute == "pollutantL":
+                            pollutant_index = _temp[2]
+                            state.append(self.methods[attribute](ID, pollutant_index))
+                        else:
+                            state.append(self.methods[attribute](ID)) 
                 else:
-                    state.append(self.methods[attribute](ID))
+                    if attribute == "pollutantN" or attribute == "pollutantL":
+                        pollutant_index = _temp[2]
+                        state.append(self.methods[attribute](ID, pollutant_index))
+                    else:
+                        state.append(self.methods[attribute](ID))
 
             state = np.asarray(state)
+            
+            # noise and sensor faults (implemented as "levels")
+            
+            if level == "1":
+                noise_multiplier = 0.0
+            elif level == "2":    
+                noise_multiplier = 1.0
+            elif level == "3":
+                noise_multiplier = 3.0
+                
+            if self.sim.system_units == "SI": # metric
+                noise_mag = 0.025 # 2.5 centimeters = 0.025 meters
+            elif self.sim.system_units == "US": # imperial
+                noise_mag = 0.025 * 3.28084 # 2.5 centimeters ~ 0.082 feet
+                
+            state = state + np.random.normal(0, noise_multiplier*noise_mag, state.shape)
+
             return state
         else:
             print("State config not defined! \n ctrl is defined as False")
             return np.array([])
 
-    def step(self, actions=None):
+    def step(self, actions=None, level="1"):
         r"""
         Implements the control action and forwards
         the simulation by a step.

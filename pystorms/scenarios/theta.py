@@ -56,7 +56,7 @@ class theta(scenario):
             #print(self.config["swmm_input"])
             
         # Create the environment based on the physical parameters
-        self.env = environment(self.config, ctrl=True,version=version)
+        self.env = environment(self.config, ctrl=True,version=version,level=level)
 
 
         # Create an object for storing the data points
@@ -71,9 +71,9 @@ class theta(scenario):
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
 
-    def step(self, actions=None, log=True,version="1.0"):
+    def step(self, actions=None, log=True,version="1",level="1"):
         # Implement the actions and take a step forward
-        done = self.env.step(actions)
+        done = self.env.step(actions,level=level)
 
         # Log the flows in the networks
         if log:
