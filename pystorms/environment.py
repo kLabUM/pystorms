@@ -87,7 +87,7 @@ class environment:
             # if actuator_schedule is empty, make it None
             if actuator_schedule.empty:
                 self.actuator_schedule = None
-            print(self.actuator_schedule)
+            #print(self.actuator_schedule)
         if level == "3":
             sensor_ids = [self.config['states'][i][0] for i in range(len(self.config['states']))]
             sensor_schedule = pd.DataFrame(columns = sensor_ids)
@@ -103,7 +103,7 @@ class environment:
             self.sensor_schedule = sensor_schedule
             if sensor_schedule.empty:
                 self.sensor_schedule = None 
-            print(self.sensor_schedule)
+            #print(self.sensor_schedule)
 
 
             actuator_schedule = pd.DataFrame(columns = self.config['action_space'])
@@ -119,7 +119,7 @@ class environment:
             self.actuator_schedule = actuator_schedule
             if actuator_schedule.empty:
                 self.actuator_schedule = None
-            print(self.actuator_schedule)
+            #print(self.actuator_schedule)
 
 
         # map class methods to individual class function calls
@@ -227,9 +227,33 @@ class environment:
             # if actions are an array or a list
             if type(actions) == list or type(actions) == np.ndarray:
                 for asset, valve_position in zip(self.config["action_space"], actions):
+                    if level == "2" or level == "3" and self.actuator_schedule is not None:
+                        # if the current time has a "stuck" before it and a "fix" after it for the column "asset"
+                        # assign the most recent value in the data_log and continue
+                        # check if self.current_time has "stuck" before and "fix" after in actuator_schedule[asset]
+                        # find the index value of the most recent "stuck" before self.current_time
+                        stuck_times = self.actuator_schedule[asset].index[self.actuator_schedule[asset] == "stuck"]
+                        fix_times = self.actuator_schedule[asset].index[self.actuator_schedule[asset] == "fix"]
+                        if len(stuck_times) > 0:
+                            most_recent_stuck_time = stuck_times[stuck_times < self.sim.current_time].max()
+                            most_recent_fix_time = fix_times[fix_times > most_recent_stuck_time].min()
+                            if most_recent_fix_time > self.sim.current_time:
+                                # the actuator is stuck
+                                #print("actuator ", asset, " not changed")
+                                continue
                     self._setValvePosition(asset, valve_position)
             elif type(actions) == dict:
                 for valve_position, asset in enumerate(actions):
+                    if level == "2" or level == "3" and self.actuator_schedule is not None:
+                        stuck_times = self.actuator_schedule[asset].index[self.actuator_schedule[asset] == "stuck"]
+                        fix_times = self.actuator_schedule[asset].index[self.actuator_schedule[asset] == "fix"]
+                        if len(stuck_times) > 0:
+                            most_recent_stuck_time = stuck_times[stuck_times < self.sim.current_time].max()
+                            most_recent_fix_time = fix_times[fix_times > most_recent_stuck_time].min()
+                            if most_recent_fix_time > self.sim.current_time:
+                                # the actuator is stuck
+                                #print("actuator ", asset, " not changed")
+                                continue
                     self._setValvePosition(asset, valve_position)
             else:
                 raise ValueError(

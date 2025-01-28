@@ -18,15 +18,15 @@ import os
 np.set_printoptions(precision=3,suppress=True)
 
 # options are: 'equal-filling' and 'constant-flow'
-control_scenario = 'constant-flow' 
+control_scenario = 'equal-filling' 
 verbose = True
-version = "1" # options are "1" and "2"
+version = "2" # options are "1" and "2"
 level = "3" # options are "1" , "2", and "3"
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
 # set the random seed
-rand_seed = 41
+rand_seed = 42
 np.random.seed(rand_seed)
 
 optimal_constant_flows = np.loadtxt(str("./" + version + "/optimal_constant_flows.txt"))
@@ -43,6 +43,15 @@ env = pystorms.scenarios.theta(level=level)
 env.env.sim.start()
 done = False
 
+max_depths_array = np.array([])
+max_depths = dict()
+for state in env.config['states']:
+    if 'depth' in state[1]:
+        node_id = state[0]
+        max_depths[node_id] = pyswmm.Nodes(env.env.sim)[node_id].full_depth
+        max_depths_array = np.append(max_depths_array, pyswmm.Nodes(env.env.sim)[node_id].full_depth)
+
+
 u = np.ones((len(env.config['action_space']),1)) # begin all open
 u_open_pct = np.ones((len(env.config['action_space']),1)) # begin all open
 
@@ -53,6 +62,8 @@ flows = pd.DataFrame(columns = env.config['action_space'])
 last_eval = env.env.sim.start_time - datetime.timedelta(days=1) # initto a time before the simulation starts
 last_read = env.env.sim.start_time - datetime.timedelta(days=1) # initto a time before the simulation starts
 
+print(env.env.actuator_schedule)
+print(env.env.sensor_schedule)
 
 while not done:
 
@@ -113,7 +124,7 @@ while not done:
         flows = pd.concat((flows,pd.DataFrame(data=current_flows, columns=env.config['action_space'], index = [env.env.sim.current_time])),axis=0)
     
     
-    done = env.step(u_open_pct.flatten())
+    done = env.step(u_open_pct.flatten(),level=level)
 
 
 perf = sum(env.data_log["performance_measure"])
