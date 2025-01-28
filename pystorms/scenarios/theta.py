@@ -4,7 +4,8 @@ from pystorms.config import load_config
 from pystorms.scenarios import scenario
 from pystorms.utilities import threshold
 import yaml
-
+#import swmm_api
+import swmmio
 
 class theta(scenario):
     r"""Theta Scenario
@@ -26,15 +27,37 @@ class theta(scenario):
 
     """
 
-    def __init__(self):
+    def __init__(self,version="1",level="1"):
         # Network configuration
         self.config = yaml.load(open(load_config("theta"), "r"), yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["name"])
-
+        
+        #print("version = ", version)
+        #print("level = ", level)
+        self.version = version
+        
+  
         self.threshold = 0.5
 
+        
+        if version == "2":
+            # make the threshold more stringent
+            self.threshold = self.threshold * (3.0/4.0)
+            #  make the max depth of one of the nodes smaller. error because sim not running. maybe use swmm-api?
+            #print(self.config['states'][0][0])
+            model = swmmio.Model(self.config["swmm_input"])
+
+            #print(model.inp.storage)
+            #print(model.inp.storage.loc[self.config['states'][0][0] , 'MaxD'])
+            model.inp.storage.loc[self.config['states'][0][0] , 'MaxD'] = model.inp.storage.loc[self.config['states'][0][0] , 'MaxD'] / 2.0
+            #print(model.inp.storage)
+            model.inp.save(str(self.config["swmm_input"][:-4] + "_v2.inp")) 
+            self.config["swmm_input"] = str(self.config["swmm_input"][:-4] + "_v2.inp")
+            #print(self.config["swmm_input"])
+            
         # Create the environment based on the physical parameters
-        self.env = environment(self.config, ctrl=True)
+        self.env = environment(self.config, ctrl=True,version=version)
+
 
         # Create an object for storing the data points
         self.data_log = {
@@ -48,7 +71,7 @@ class theta(scenario):
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
 
-    def step(self, actions=None, log=True):
+    def step(self, actions=None, log=True,version="1.0"):
         # Implement the actions and take a step forward
         done = self.env.step(actions)
 
@@ -75,6 +98,12 @@ class theta(scenario):
 
         # Terminate the simulation
         if done:
+            '''
+            if version == "2.0": # undo the changes you made to the model
+                model = swmmio.Model(self.config["swmm_input"])
+                model.inp.storage.loc[self.config['states'][0][0] , 'MaxD'] = model.inp.storage.loc[self.config['states'][0][0] , 'MaxD'] * 2.0
+                model.inp.save(self.config["swmm_input"]) # overwrite the original file
+            '''    
             self.env.terminate()
 
         return done

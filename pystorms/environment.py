@@ -37,8 +37,11 @@ class environment:
         closes the swmm simulaton and start a new one with the predefined config file.
     """
 
-    def __init__(self, config, ctrl=True, binary=None):
+    def __init__(self, config, ctrl=True, binary=None,version="1",level="1"):
+        
 
+        print("version = ", version)
+        self.version = version
         # control expects users to define the state and action space
         # this is required for querying state and setting control actions
         self.ctrl = ctrl
