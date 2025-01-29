@@ -33,6 +33,10 @@ np.random.seed(rand_seed)
 optimal_constant_flows = np.loadtxt(str("./" + version + "/optimal_constant_flows.txt"))
 optimal_efd_params = np.loadtxt(str("./" + version + "/optimal_efd_params.txt"))
 
+if not os.path.exists(str("./v" + version + "/lev" + level + "/results")):
+    os.makedirs(str("./v" + version + "/lev" + level + "/results"))
+
+
 print("evaluating ", control_scenario, " for theta scenario")
 
 Cd = 1.0 # same for both valves
@@ -165,8 +169,8 @@ for idx in range(len(env.config['states'])):
 # annotate the cost on the depths plot
 axes[-1,1].annotate("cost: {:.2e}".format(perf), xy=(0.5, 0.5), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
 plt.tight_layout()
-plt.savefig(str("./" + version +"/evaluate_" + str(control_scenario) + "_level_" + level + ".png"),dpi=450)
-plt.savefig(str("./" + version +"/evaluate_" + str(control_scenario) + "_level_" + level + ".svg"),dpi=450)
+plt.savefig(str("./v" + version +"/evaluate_" + str(control_scenario) + "_level_" + level + ".png"),dpi=450)
+plt.savefig(str("./v" + version +"/evaluate_" + str(control_scenario) + "_level_" + level + ".svg"),dpi=450)
 #plt.show(block=True)
 plt.close('all')
 
@@ -176,9 +180,9 @@ flows = flows.resample('5T').mean()
 depths = depths.resample('5T').mean()
 
 # save the flows and depths
-flows.to_csv(str("./" + version +"/flows_" + str(control_scenario) + "_level_" + level +  ".csv"))
-depths.to_csv(str("./" + version +"/depths_" + str(control_scenario) + "_level_" + level +  ".csv"))
+flows.to_csv(str("./v" + version +"/flows_" + str(control_scenario) + "_level_" + level +  ".csv"))
+depths.to_csv(str("./v" + version +"/depths_" + str(control_scenario) + "_level_" + level +  ".csv"))
 # and the data log
-with open(f'./{version}/{control_scenario}_level_{level}_data_log.pkl', 'wb') as f:
+with open(f'./v{version}/{control_scenario}_level_{level}_data_log.pkl', 'wb') as f:
             pickle.dump(env.data_log, f)
             

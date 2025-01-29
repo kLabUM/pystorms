@@ -27,8 +27,8 @@ version = "2" # "1" or "2" - 2 will be the updated, more difficult version
 level = "1"
 # level should always be 1 when optimizing parameters. controllers will be evaluated but not optimized on higher levels
 # if the directory version doesn't exist, create it
-if not os.path.exists(version):
-    os.makedirs(version)
+if not os.path.exists(str("v"+version)):
+    os.makedirs(str("v"+version))
 
 
 # evaluating a given set of parameters for their cost
@@ -153,9 +153,9 @@ if evaluating == "constant-flow":
     print(bo.fun)
     print(bo.x_iters)
     # save the optimal constant flows
-    np.savetxt(str(version +"/optimal_constant_flows.txt"), bo.x)
+    np.savetxt(str("v" + version +"/optimal_constant_flows.txt"), bo.x)
     # save the float bo.fun to a text file 
-    np.savetxt(str(version +"/optimal_constant_flows_cost.txt"), np.array([bo.fun]))
+    np.savetxt(str("v" + version +"/optimal_constant_flows_cost.txt"), np.array([bo.fun]))
 
     # save the whole bo object
     #with open("bo_constant_flows.pkl", "wb") as f:
@@ -163,7 +163,7 @@ if evaluating == "constant-flow":
 
 
 elif evaluating == "efd":
-    optimal_constant_flows = np.loadtxt(str(version +"/optimal_constant_flows.txt"))
+    optimal_constant_flows = np.loadtxt(str("v" + version +"/optimal_constant_flows.txt"))
     #domain = [{"name": "TSS_feedback", "type": "continuous", "domain": (-1, -1e-4)},
     #        {"name": "efd_gain", "type": "continuous", "domain": (0.0, 1.0)}]
     domain = [Real(-1e-1,-1e-4, name="TSS_feedback"), Real(0.0, 1.0, name="efd_gain")]
@@ -176,9 +176,9 @@ elif evaluating == "efd":
     print(bo.fun)
     print(bo.x_iters)
     # save the optimal efd params
-    np.savetxt(str(version +"/optimal_efd_params.txt"), bo.x)
+    np.savetxt(str("v" + version +"/optimal_efd_params.txt"), bo.x)
     # save bo.fun
-    np.savetxt(str(version +"/optimal_efd_cost.txt"), np.array([bo.fun]))
+    np.savetxt(str("v" + version +"/optimal_efd_cost.txt"), np.array([bo.fun]))
     # save the whole bo object
     #with open("bo_efd.pkl", "wb") as f:
     #    pickle.dump(bo, f)
@@ -199,9 +199,9 @@ elif evaluating == 'both':
     print(bo.fun)
     print(bo.x_iters)
     # save the optimal constant heads 
-    np.savetxt(str(version +"/optimal_constant_flows.txt"), bo.x)
+    np.savetxt(str("v" + version +"/optimal_constant_flows.txt"), bo.x)
     # save the float bo.fun to a text file 
-    np.savetxt(str(version +"/optimal_constant_flows_cost.txt"), np.array([bo.fun]))
+    np.savetxt(str("v" + version +"/optimal_constant_flows_cost.txt"), np.array([bo.fun]))
 
     # save the whole bo object
     #with open("bo_constant_flows.pkl", "wb") as f:
@@ -209,7 +209,7 @@ elif evaluating == 'both':
 
 
     evaluating = "efd"
-    optimal_constant_flows = np.loadtxt(str(version +"/optimal_constant_flows.txt"))
+    optimal_constant_flows = np.loadtxt(str("v" + version +"/optimal_constant_flows.txt"))
     domain = [Real(-1,-1e-4, name="TSS_feedback"), Real(0.0, 1.0, name="efd_gain")]
     x0 = [-1e-4, 0.05] # manual optimal is 3e-3, and 0.25
     
@@ -220,9 +220,9 @@ elif evaluating == 'both':
     print(bo.fun)
     print(bo.x_iters)
     # save the optimal efd params
-    np.savetxt(str(version +"/optimal_efd_params.txt"), bo.x)
+    np.savetxt(str("v" + version +"/optimal_efd_params.txt"), bo.x)
     # save bo.fun
-    np.savetxt(str(version +"/optimal_efd_cost.txt"), np.array([bo.fun]))
+    np.savetxt(str("v" + version +"/optimal_efd_cost.txt"), np.array([bo.fun]))
     # save the whole bo object
     #with open("bo_efd.pkl", "wb") as f:
     #    pickle.dump(bo, f)

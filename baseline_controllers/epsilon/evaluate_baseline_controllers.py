@@ -18,8 +18,8 @@ import os
 np.set_printoptions(precision=3,suppress=True)
 
 # EPSILON
-# options are: 'equal-filling' and 'constant-flow'
-control_scenario = 'constant-flow' 
+# options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
+control_scenario = 'equal-filling' 
 verbose = True
 version = "1" # options are "1" and "2"
 level = "1" # options are "1" , "2", and "3"
@@ -31,20 +31,29 @@ print(os.getcwd())
 rand_seed = 42
 np.random.seed(rand_seed)
 
-optimal_constant_flows = np.loadtxt(str("./" + version + "/optimal_constant_flows.txt"))
-optimal_efd_params = np.loadtxt(str("./" + version + "/optimal_efd_params.txt"))
 
 print("evaluating ", control_scenario, " for epsilon scenario")
 
-tuning_values = np.arange(-0.05,0.15,0.01)
+tuning_values = np.arange(-0.03,0.10,0.01)
 tuning_values = np.round(tuning_values,2)
 
 # for dev or plotting - single value
 #tuning_values = [0.0]
 
+if control_scenario == "constant-flow" or control_scenario == "equal-filling":
+    folder_path = str("./v" + version + "/lev" + level + "/results")
+elif control_scenario == "uncontrolled":
+    folder_path = str("./v" + version + "/results")
+
+if not os.path.exists(folder_path):
+    os.makedirs(folder_path)
 
 for parameter in tuning_values:
+    optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
+    optimal_efd_params = np.loadtxt(str("./v" + version + "/optimal_efd_params.txt"))
+
     print("tuning value: ", parameter)
+    optimal_constant_flows = optimal_constant_flows*(1+parameter)
 
     # project file is in english units
     cfs2cms = 35.315
@@ -121,7 +130,8 @@ for parameter in tuning_values:
                         u_open_pct[i,0] = 1.0
                     elif u_open_pct[i,0] < 0.09:
                         u_open_pct[i,0] = 0.09
-
+            elif control_scenario == 'uncontrolled':
+                u_open_pct = np.ones((len(env.config['action_space']),1))
             if verbose and env.env.sim.current_time.minute == 0 and env.env.sim.current_time.hour % 2 == 0: 
                 u_print = u_open_pct.flatten()
                 y_measured = env.state().reshape(-1,1)
@@ -176,9 +186,15 @@ for parameter in tuning_values:
     print("cost ignoring flooding")
     print("{:.4e}".format(perf - flood_cost))
     
+    # calculate final filling degrees based on the max_depths array
+    final_filling_degrees = np.array([depth/max_depth for depth,max_depth in zip(final_depths,max_depths_array)])
+    
     # save the cost and ending filling degree to a csv
-    perf_summary = pd.DataFrame(data = {"cost": perf, "final_depths": final_depths})
-    perf_summary.to_csv(str("./" + version + "/results/costs_" + control_scenario + "_a=" + str(parameter) + ".csv"))
+    perf_summary = pd.DataFrame(data = {"cost": perf, "final_depths": final_depths,"final_filling": final_filling_degrees})
+    if control_scenario == "uncontrolled":
+        perf_summary.to_csv(str(folder_path + "/costs_" + control_scenario + ".csv"))
+    else:
+        perf_summary.to_csv(str(folder_path + "/costs_" + control_scenario + "_a=" + str(parameter) + ".csv"))
 
 
     if plot:
@@ -235,8 +251,12 @@ for parameter in tuning_values:
 
 
         plt.tight_layout()
-        plt.savefig(str("./" + version + "/results/evaluate_" + str(control_scenario) + "_param=" + str(parameter) + ".png"),dpi=450)
-        plt.savefig(str("./" + version + "/results/evaluate_" + str(control_scenario) + "_param=" + str(parameter) + ".svg"),dpi=450)
+        if control_scenario == "uncontrolled":
+            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + ".png"),dpi=450)
+            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + ".svg"),dpi=450)
+        else:
+            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + "_param=" + str(parameter) + ".png"),dpi=450)
+            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + "_param=" + str(parameter) + ".svg"),dpi=450)
         #plt.show()
         plt.close('all')
 
@@ -310,8 +330,12 @@ for parameter in tuning_values:
 
     
         ax.axis('off')
-        plt.savefig(str("./" + version + "/results/evaluate_" + str(control_scenario) + "_param=" + str(parameter) + "_subway.png"),dpi=450)
-        plt.savefig(str("./" + version + "/results/evaluate_" + str(control_scenario) + "_param=" + str(parameter) + "_subway.svg"),dpi=450)
+        if control_scenario == "uncontrolled":
+            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + "_subway.png"),dpi=450)
+            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + "_subway.svg"),dpi=450)
+        else:
+            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + "_param=" + str(parameter) + "_subway.png"),dpi=450)
+            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + "_param=" + str(parameter) + "_subway.svg"),dpi=450)
         plt.tight_layout()
         #plt.show()
         plt.close('all')
@@ -321,10 +345,18 @@ for parameter in tuning_values:
         states = states.resample('5min').mean()
         actions = actions.resample('5min').mean()
 
-        # save the flows and depths
-        weir_heads32.to_csv(str("./" + version + "/results/weir_heads32_" + str(control_scenario) + "_param=" + str(parameter) + ".csv"))
-        states.to_csv(str("./" + version + "/results/states_" + str(control_scenario) + "_param=" + str(parameter) + ".csv"))
-        actions.to_csv(str("./" + version + "/results/actions_" + str(control_scenario) + "_param=" + str(parameter) + ".csv"))
-        # and the data log
-        with open(f'./{version}/results/{str(control_scenario + "_param=" + str(parameter))}_data_log.pkl', 'wb') as f:
-            pickle.dump(env.data_log, f)
+        if control_scenario == "uncontrolled":
+            weir_heads32.to_csv(str(folder_path + "/weir_heads32_" + str(control_scenario) + ".csv"))
+            states.to_csv(str(folder_path + "/states_" + str(control_scenario) + ".csv"))
+            actions.to_csv(str(folder_path + "/actions_" + str(control_scenario) + ".csv"))
+            # and the data log
+            with open(f'./v{version}/results/{control_scenario}_data_log.pkl', 'wb') as f:
+                pickle.dump(env.data_log, f)
+        else:
+            # save the flows and depths
+            weir_heads32.to_csv(str(folder_path + "/weir_heads32_" + str(control_scenario) + "_param=" + str(parameter) + ".csv"))
+            states.to_csv(str(folder_path + "/states_" + str(control_scenario) + "_param=" + str(parameter) + ".csv"))
+            actions.to_csv(str(folder_path + "/actions_" + str(control_scenario) + "_param=" + str(parameter) + ".csv"))
+            # and the data log
+            with open(f'./v{version}/lev{level}/results/{str(control_scenario + "_param=" + str(parameter))}_data_log.pkl', 'wb') as f:
+                pickle.dump(env.data_log, f)
