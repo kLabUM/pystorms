@@ -32,8 +32,7 @@ class theta(scenario):
         self.config = yaml.load(open(load_config("theta"), "r"), yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["name"])
         
-        #print("version = ", version)
-        #print("level = ", level)
+
         self.version = version
         
   
@@ -97,13 +96,7 @@ class theta(scenario):
         self.data_log["performance_measure"].append(__performance)
 
         # Terminate the simulation
-        if done:
-            '''
-            if version == "2.0": # undo the changes you made to the model
-                model = swmmio.Model(self.config["swmm_input"])
-                model.inp.storage.loc[self.config['states'][0][0] , 'MaxD'] = model.inp.storage.loc[self.config['states'][0][0] , 'MaxD'] * 2.0
-                model.inp.save(self.config["swmm_input"]) # overwrite the original file
-            '''    
+        if done:   
             self.env.terminate()
 
         return done

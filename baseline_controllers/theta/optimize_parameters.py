@@ -21,6 +21,7 @@ print(os.getcwd())
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
 
+# THETA
 evaluating = "both" # "constant-flow" or "efd" or "both"
 version = "2" # "1" or "2" - 2 will be the updated, more difficult version
 # level should always be 1 when optimizing parameters. controllers will be evaluated but not calibrated on higher levels
@@ -169,8 +170,8 @@ elif evaluating == 'both':
     domain = []
     x0 = []
     for i in range(1, 3):
-        domain.append(Real(0.05,0.5,name=str(i)))
-        x0.append(0.4)
+        domain.append(Real(0.01,0.5,name=str(i)))
+        x0.append(0.1)
     
     bo = gp_minimize(f_constant_flows, domain,x0=x0, 
                      n_calls=250, n_initial_points=25, 
@@ -194,7 +195,7 @@ elif evaluating == 'both':
     #domain = [{"name": "TSS_feedback", "type": "continuous", "domain": (-1, -1e-4)},
     #        {"name": "efd_gain", "type": "continuous", "domain": (0.0, 1.0)}]
     domain = [Real(0.0, 1.0, name="efd_gain")]
-    x0 = [0.2]
+    x0 = [0.01]
     
     bo = gp_minimize(f_efd, domain, x0=x0, n_calls=100, n_initial_points=25, 
                      initial_point_generator = 'lhs',verbose=True)

@@ -17,6 +17,7 @@ import os
 
 np.set_printoptions(precision=3,suppress=True)
 
+# THETA
 # options are: 'equal-filling' and 'constant-flow'
 control_scenario = 'equal-filling' 
 verbose = True
@@ -161,6 +162,8 @@ for idx in range(len(env.config['states'])):
         axes[idx,1].set_xticklabels([])
     axes[idx,1].annotate(str(env.config['states'][idx]), xy=(0.5, 0.8), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
 
+# annotate the cost on the depths plot
+axes[-1,1].annotate("cost: {:.2e}".format(perf), xy=(0.5, 0.5), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
 plt.tight_layout()
 plt.savefig(str("./" + version +"/evaluate_" + str(control_scenario) + "_level_" + level + ".png"),dpi=450)
 plt.savefig(str("./" + version +"/evaluate_" + str(control_scenario) + "_level_" + level + ".svg"),dpi=450)
