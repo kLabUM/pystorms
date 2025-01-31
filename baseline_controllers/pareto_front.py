@@ -1,3 +1,4 @@
+from msilib import Control
 import pystorms # this will be the first line of the program when dev is done
 import pandas as pd
 import numpy as np
@@ -9,7 +10,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
 
 network = "epsilon"
-version = "1" # of the model
+version = "2" # of the model
 level = "1" # noise and faults
 
 # create separate plots for each control scenario
@@ -20,7 +21,7 @@ for control_scenario in ["constant-flow","equal-filling"]:
     # find the csv files which match our network, version, and level
     folder_path = str("./" + network + "/v" + version + "/lev" + level + "/results")
     for file in os.listdir(folder_path):
-        if file.endswith(".csv") and control_scenario in file and "=" in file:
+        if file.endswith(".csv") and control_scenario in file and "=" in file and "costs" in file:
             # the parameter value will be a float (including a decimal) between "=" and ".csv"
             parameter = float(file.split("=")[1].split(".csv")[0])
             parameter_values.append( parameter)       
@@ -46,6 +47,7 @@ for control_scenario in ["constant-flow","equal-filling"]:
 
     plt.xlabel("Cost")
     plt.ylabel("Average Ending\nFilling Degree", rotation=0, labelpad=40)
+    plt.title(str(network + " | " + control_scenario + "\nversion " + version + " | level " + level))
     max_cost = max([data[parameter_value]["cost"].iloc[0] for parameter_value in parameter_values])
     max_cost = max(max_cost , uncontrolled_data["cost"].iloc[0])
     max_filling = max([data[parameter_value]["average_ending_filling_degree"].iloc[0] for parameter_value in parameter_values])
@@ -76,7 +78,7 @@ for control_scenario in ["constant-flow","equal-filling"]:
     # find the csv files which match our network, version, and level
     folder_path = str("./" + network + "/v" + version + "/lev" + level + "/results")
     for file in os.listdir(folder_path):
-        if file.endswith(".csv") and control_scenario in file and "=" in file:
+        if file.endswith(".csv") and control_scenario in file and "=" in file and "costs" in file:
             # the parameter value will be a float (including a decimal) between "=" and ".csv"
             parameter = float(file.split("=")[1].split(".csv")[0])
             parameter_values.append( parameter)       
@@ -102,7 +104,7 @@ plt.xlabel("Cost")
 #plt.ylabel("Average Ending\nFilling Degree")
 # rotate the ylabel to be vertical
 plt.ylabel("Average Ending\nFilling Degree", rotation=0, labelpad=40)
-
+plt.title(str(network + "\nversion " + version + " | level " + level))
 #plt.colorbar(label=label)
 # rotate the colorbar label to be vertical
 # set the xlim to be between 0 and whatever the maximum cost is

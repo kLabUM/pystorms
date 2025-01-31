@@ -1,10 +1,11 @@
+'''
 # install pystorms from the current directory (this should be commented out in final version once pystorms source code isn't changing all the time)
 import subprocess
 import sys
 subprocess.check_call([sys.executable, '-m', 'pip', 'uninstall', '-y', 'pystorms'])
 subprocess.check_call([sys.executable, '-m', 'pip', 'cache', 'purge'])
 subprocess.check_call([sys.executable, '-m', 'pip', 'install', '.'])
-
+'''
 import pystorms # this will be the first line of the program when dev is done
 
 import pyswmm
@@ -21,7 +22,7 @@ np.set_printoptions(precision=3,suppress=True)
 # options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
 control_scenario = 'equal-filling' 
 verbose = True
-version = "1" # options are "1" and "2"
+version = "2" # options are "1" and "2"
 level = "1" # options are "1" , "2", and "3"
 plot = False # plot True significantly increases the memory usage. 
 # set the working directory to the directory of this script
@@ -34,7 +35,7 @@ np.random.seed(rand_seed)
 
 print("evaluating ", control_scenario, " for epsilon scenario")
 
-tuning_values = np.arange(-0.03,0.10,0.01)
+tuning_values = np.arange(-0.05,0.25,0.01)
 tuning_values = np.round(tuning_values,2)
 
 # for dev or plotting - single value
@@ -263,7 +264,7 @@ for parameter in tuning_values:
         # put all the data together
         #response = pd.concat([weir_heads32, states], axis=1)
         response = pd.concat([actions, states],axis=1)
-
+        import sys
         sys.path.append("C:/modpods")
         import modpods
         # plot the flows on top of the subway map

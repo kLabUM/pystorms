@@ -61,7 +61,7 @@ class epsilon(scenario):
 
 
         # Create the env based on the config file
-        self.env = environment(self.config, ctrl=True, binary=self.config["binary"],level=level)
+        self.env = environment(self.config, ctrl=True, binary=self.config["binary"],version=version,level=level)
 
         # Create an object for storing data
         self.data_log = {

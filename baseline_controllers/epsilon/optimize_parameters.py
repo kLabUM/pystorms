@@ -188,8 +188,8 @@ elif evaluating == 'both':
     domain = []
     x0 = []
     for i in range(1, 12):
-        domain.append(Real(0.3,5.0,name=str(i)))
-        x0.append(2.0)
+        domain.append(Real(0.5,6.0,name=str(i)))
+        x0.append(4.0)
     
     bo = gp_minimize(f_constant_flows, domain,x0=x0, 
                      n_calls=1000, n_initial_points=100, 
@@ -210,8 +210,8 @@ elif evaluating == 'both':
 
     evaluating = "efd"
     optimal_constant_flows = np.loadtxt(str("v" + version +"/optimal_constant_flows.txt"))
-    domain = [Real(-1,-1e-4, name="TSS_feedback"), Real(0.0, 1.0, name="efd_gain")]
-    x0 = [-1e-4, 0.05] # manual optimal is 3e-3, and 0.25
+    domain = [Real(-1,-1e-5, name="TSS_feedback"), Real(0.0, 1.0, name="efd_gain")]
+    x0 = [-1e-5, 1e-3] # manual optimal is 3e-3, and 0.25
     
     bo = gp_minimize(f_efd, domain, x0=x0, n_calls=500, n_initial_points=50, 
                      initial_point_generator = 'lhs',verbose=True)
