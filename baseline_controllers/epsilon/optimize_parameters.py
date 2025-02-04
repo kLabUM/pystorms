@@ -129,14 +129,14 @@ def f_constant_flows(constant_flows):
     constant_head_params = np.array(constant_flows).flatten()    
 
     data = run_swmm(constant_head_params, None,verbose=False)
-    return_value = data["cost"] + sum(data["final_depths"]) + 10*np.std(data['final_depths'])
+    return_value = data["cost"] + 100*sum(data["final_depths"]) + 100*np.std(data['final_depths'])
     return float(return_value)
 
 def f_efd(efd_parameters):
     efd_params = np.array(efd_parameters).flatten()
 
     data = run_swmm(optimal_constant_flows, efd_params,verbose=False)
-    return float(data['cost'] + sum(data['final_depths'])) + 10*np.std(data['final_depths'])
+    return float(data['cost'] + 100*sum(data['final_depths'])) + 100*np.std(data['final_depths'])
 
 if evaluating == "constant-flow":
     domain = []
@@ -189,7 +189,7 @@ elif evaluating == 'both':
     x0 = []
     for i in range(1, 12):
         domain.append(Real(0.5,6.0,name=str(i)))
-        x0.append(4.0)
+        x0.append(4.5)
     
     bo = gp_minimize(f_constant_flows, domain,x0=x0, 
                      n_calls=1000, n_initial_points=100, 
@@ -211,7 +211,7 @@ elif evaluating == 'both':
     evaluating = "efd"
     optimal_constant_flows = np.loadtxt(str("v" + version +"/optimal_constant_flows.txt"))
     domain = [Real(-1,-1e-5, name="TSS_feedback"), Real(0.0, 1.0, name="efd_gain")]
-    x0 = [-1e-5, 1e-3] # manual optimal is 3e-3, and 0.25
+    x0 = [-1e-5, 1e-2] # manual optimal was 3e-3, and 0.25
     
     bo = gp_minimize(f_efd, domain, x0=x0, n_calls=500, n_initial_points=50, 
                      initial_point_generator = 'lhs',verbose=True)

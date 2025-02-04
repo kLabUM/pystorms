@@ -4,7 +4,7 @@ from pystorms.config import load_config
 from pystorms.scenarios import scenario
 from pystorms.utilities import threshold, exponentialpenalty
 import yaml
-
+import swmmio
 
 class alpha(scenario):
     r"""Alpha Scenario
@@ -33,13 +33,46 @@ class alpha(scenario):
 
     """
 
-    def __init__(self):
+    def __init__(self,version="1", level="1"):
         # Network configuration
         self.config = yaml.load(open(load_config("alpha"), "r"), yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["name"])
+        print(self.config["swmm_input"])
+
+
+        if version == "2":
+            # make the action space the weirs in additon to the orifices
+            model = swmmio.Model(self.config["swmm_input"])
+            #print(self.config['action_space'])
+            #print(model.inp.weirs)
+            for item in model.inp.weirs.index.tolist():
+                self.config['action_space'].append(item)
+            #print(self.config['action_space'])
+            '''
+            for col in model.inp.xsections:
+                print(col)
+            for col in model.inp.weirs:
+                print(col)
+            # set the max weir height such that they can completely block flow
+            for weir in model.inp.weirs.index:
+                # find the max height of the upstream regulator. that's the same number with a prefix of R instead of W
+                regulator = "R" + weir[1:]
+                print(weir)
+                print(regulator)
+                print(model.inp.junctions.loc[regulator, 'MaxDepth'])
+                print(model.inp.weirs.loc[weir, 'CrestHeight'])
+                model.inp.xsections.loc[weir, 'Geom1'] = model.inp.junctions.loc[regulator, 'MaxDepth'] - model.inp.weirs.loc[weir, 'CrestHeight']
+                
+                '''
+            # no changes to the underlying model (at least for now)
+            #model.inp.save(str(self.config["swmm_input"][:-4] + "_v2.inp"))
+            #self.config["swmm_input"] = str(self.config["swmm_input"][:-4] + "_v2.inp")
+            
+
+
 
         # Create the environment based on the physical parameters
-        self.env = environment(self.config, ctrl=True)
+        self.env = environment(self.config, ctrl=True,version=version,level=level)
 
         # Create an object for storing the data points
         self.data_log = {
@@ -55,7 +88,7 @@ class alpha(scenario):
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
 
-    def step(self, actions=None, log=True):
+    def step(self, actions=None, log=True,level="1",version="1"):
         # Implement the actions and take a step forward
         done = self.env.step(actions)
 

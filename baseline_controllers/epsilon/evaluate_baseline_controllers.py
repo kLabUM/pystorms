@@ -64,11 +64,9 @@ for parameter in tuning_values:
     env.env.sim.start()
     done = False
     
-    u = np.ones((len(env.config['action_space']),1)) # begin all open
     u_open_pct = np.ones((len(env.config['action_space']),1)) # begin all open
 
     h32 = -1.0*np.ones((len(env.config['action_space']),1)) # weir head ^ (3/2)
-    u_open_pct = np.ones((len(env.config['action_space']),1))*1 # begin open
 
     last_eval = env.env.sim.start_time - datetime.timedelta(days=1) # initto a time before the simulation starts
     last_read = env.env.sim.start_time - datetime.timedelta(days=1) # initto a time before the simulation starts
@@ -199,7 +197,7 @@ for parameter in tuning_values:
 
 
     if plot:
-        import networkx as nx
+        
         
         # if there are any na values in states or weir_heads32, linearly interpolate over them
         states.interpolate(method='time',axis='index',inplace=True)
@@ -267,6 +265,7 @@ for parameter in tuning_values:
         import sys
         sys.path.append("C:/modpods")
         import modpods
+        import networkx as nx
         # plot the flows on top of the subway map
         subway = modpods.subway_map_from_pystorms(env)
 

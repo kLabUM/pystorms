@@ -37,7 +37,7 @@ class epsilon(scenario):
 
         if version == "2":
             # make the threshold more stringent
-            self._performormance_threshold = self._performormance_threshold * (3.0/4.0)
+            self._performormance_threshold = self._performormance_threshold * (9.0/10.0)
 
             model = swmmio.Model(self.config["swmm_input"])
             #print(model)
