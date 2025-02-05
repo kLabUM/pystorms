@@ -19,7 +19,7 @@ import swmmio
 
 np.set_printoptions(precision=3,suppress=True)
 
-# ALPHA
+# GAMMA
 # options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
 evaluating = 'equal-filling' 
 verbose = True
@@ -33,7 +33,7 @@ print(os.getcwd())
 rand_seed = 42
 np.random.seed(rand_seed)
 
-print("evaluating ", evaluating, " for alpha scenario")
+print("evaluating ", evaluating, " for gamma scenario")
 
 tuning_values = np.arange(-0.05,0.25,0.01)
 tuning_values = np.round(tuning_values,2)
@@ -50,65 +50,71 @@ if not os.path.exists(folder_path):
     os.makedirs(folder_path)
     
 
-
 for parameter in tuning_values:
-    optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
-    optimal_efd_params = np.loadtxt(str("./v" + version + "/optimal_efd_params.txt"))
+    #optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
+    optimal_constant_flows = np.ones(9)*6.0
+    #optimal_constant_flows[[4,8]] = 75.0 # 5 and 9 will flood
+    #optimal_efd_params = np.loadtxt(str("./v" + version + "/optimal_efd_params.txt"))
+    optimal_efd_params = 0.5
 
     print("tuning value: ", parameter)
     optimal_constant_flows = optimal_constant_flows*(1+parameter)
     
-    # alpha is in imperial units of feet and cubic feet per second
+    # gamma is in imperial units of feet and cubic feet per second
     cfs2cms = 35.315
     ft2meters = 3.281
-    env = pystorms.scenarios.alpha(version=version,level=level)
-
+    #env = pystorms.scenarios.gamma(version=version,level=level)
+    env = pystorms.scenarios.gamma()
+    for state in env.config['states']:
+        # if state contains 5 or 9, remove it
+        if '5' in state[0] or '9' in state[0]:
+            env.config['states'].remove(state)
+    for action in env.config['action_space']:
+        # if action contains 5 or 9, remove it
+        if '5' in action or '9' in action:
+            env.config['action_space'].remove(action)
+    for target in env.config['performance_targets']:
+        # if target contains 5 or 9, remove it
+        if '5' in target[0] or '9' in target[0]:
+            env.config['performance_targets'].remove(target)
+    #print(env.config['states'])
+    #print(env.config['action_space'])
+    #print(env.config['performance_targets'])
     env.env.sim.start()
     done = False
     last_eval = env.env.sim.start_time - datetime.timedelta(hours=1) 
     last_read = env.env.sim.start_time - datetime.timedelta(hours=1)
     start_time = env.env.sim.start_time
-    #u_open_pct = constant_flows
-    # make u_open_pct a deep copy of constant_flows (constant_flows should not change)
-    u_open_pct = copy.deepcopy(optimal_constant_flows)
+    
+    u_open_pct = 0.0*np.ones(len(env.config['action_space'])) # start closed
 
     states = pd.DataFrame(columns = env.config['states'])
     actions = pd.DataFrame(columns = env.config['action_space'])
-    # indices of actions that are orifices (contain "Or")
-    orifice_indices = [i for i in range(len(env.config['action_space'])) if "Or" in env.config['action_space'][i]]
+    flows = pd.DataFrame(columns = env.config['action_space'])
 
     #print(env.env.actuator_schedule)
     #print(env.env.sensor_schedule)
 
-    max_depths_array = np.array([]) # for all states, not just the regulators
+    max_depths_array = np.array([]) # for all states
     for state in env.config['states']:
         if 'depthN' in state[1]:
             node_id = state[0]
             max_depths_array = np.append(max_depths_array, pyswmm.Nodes(env.env.sim)[node_id].full_depth)
 
-    
-
-    # grab some metadata for the control algorithm
-    max_depths = dict()
-    for idx in range(1,6):
-        regulator_id = "R" + str(idx)
-        max_depths[regulator_id] = pyswmm.Nodes(env.env.sim)[regulator_id].full_depth
-    #print(max_depths)
-    
 
     model = swmmio.Model(env.config["swmm_input"])
     #print(model.inp.orifices)
     orifice_areas = dict()
     for ori in model.inp.orifices.index.tolist():
-        # Geom1 is the diameter of the orifice
-        orifice_areas[ori] = np.pi*(model.inp.xsections.loc[ori, 'Geom1']/2)**2
+        # Geom1 and geom2 are the height and width of the orifice
+        orifice_areas[ori] = model.inp.xsections.loc[ori, 'Geom1']*model.inp.xsections.loc[ori, 'Geom2']
         
     # per the EPA-SWMM user manual volume ii hydraulics, orifices (section 6.2, page 107) - https://nepis.epa.gov/Exe/ZyPDF.cgi/P100S9AS.PDF?Dockey=P100S9AS.PDF 
-    # all orifices in alpha are "bottom"
+    # all orifices in alpha are "bottom" 
     Cd = 0.65 # same for all 
     g = 32.2 # ft / s^2 (imperial units)
     # the expression for discharge is found using Torricelli's equation: Q = Cd * (Ao*open_pct) sqrt(2*g*H_e)
-
+    
     while not done:
         
         # take control actions?
@@ -117,43 +123,32 @@ for parameter in tuning_values:
             state = env.state(level=level)
             
             # iterate over the action space entries containing "Or" (orifices)
-            for idx in orifice_indices:
+            for idx in range(len(env.config['action_space'])):
                 orifice_id = env.config['action_space'][idx]
                 # the area of the orifice is the area of the circle
                 Ao = orifice_areas[orifice_id]
                 # Q = Cd * Ao * sqrt(2*g*H_e)
                 Q_desired = optimal_constant_flows[idx] 
-                # regulator depth
-                # find the index of "R" + idx in the states
-                regulator_id = "R" + orifice_id[2:]
-                # find the index of the entry in the states which contains the regulator_id
-                regulator_idx = [i for i in range(len(env.config['states'])) if regulator_id in env.config['states'][i]][0]
-                    
+
                 # assume linear scaling with opening percentage
-                u_open_pct[idx] = Q_desired / (Cd * Ao * np.sqrt(2*g*state[regulator_idx]))
+                if state[idx] > 0.0:
+                    u_open_pct[idx] = Q_desired / (Cd * Ao * np.sqrt(2*g*state[idx]))
+                else:
+                    u_open_pct[idx] = 1.0
+                
                 if u_open_pct[idx] > 1.0:
                     u_open_pct[idx] = 1.0
                 elif u_open_pct[idx] < 0.0:
                     u_open_pct[idx] = 0.0
             
-            filling_degrees = []
-            for idx in orifice_indices: 
-                orifice_id = env.config['action_space'][idx]
-                regulator_id = "R" + orifice_id[2:]
-                max_depth = max_depths[regulator_id]
-                    
-                # find the index of the entry in the states which contains the regulator_id
-                regulator_idx = [i for i in range(len(env.config['states'])) if regulator_id in env.config['states'][i]][0]
-                filling_degrees.append(state[regulator_idx] / max_depth)
-                
-            filling_degrees = np.array(filling_degrees)
+            filling_degrees = state / max_depths_array
             filling_degree_avg = np.mean(filling_degrees)
             
             if evaluating == "constant-flow":
 
                 done = env.step(u_open_pct.flatten())
             elif evaluating == "equal-filling":
-                for idx in orifice_indices:
+                for idx in range(len(env.config['action_space'])):
                     this_fd = filling_degrees[idx]
                     u_open_pct[idx] += optimal_efd_params * (this_fd - filling_degree_avg)
 
@@ -167,7 +162,7 @@ for parameter in tuning_values:
             else:
                 print("error. control scenario not recongized.")
                 done = True
-        if (not done) and verbose and env.env.sim.current_time.minute == 0 and env.env.sim.current_time.hour % 1 == 0: 
+        if (not done) and verbose and env.env.sim.current_time.minute == 0 and env.env.sim.current_time.hour % 4 == 0: 
                 u_print = u_open_pct.flatten()
                 y_measured = env.state().reshape(-1,1)
                 # print the names of the states and their current values side-by-side
@@ -190,13 +185,22 @@ for parameter in tuning_values:
             action = u_open_pct.reshape(1,len(env.config['action_space']))
             current_actions = pd.DataFrame(data = action, columns = env.config['action_space'], index=[env.env.sim.current_time])
             actions = pd.concat((actions, current_actions))
+            
+            current_flows_dict = dict()
+            for orifice in env.config['action_space']:
+                current_flows_dict[orifice] = pyswmm.Links(env.env.sim)[orifice].flow
+            current_flows = pd.DataFrame(data = current_flows_dict,columns=env.config['action_space'], index=[env.env.sim.current_time])
+            
+            flows = pd.concat((flows,current_flows))
+
+                
 
         if (not done) and env.env.sim.current_time > env.env.sim.end_time - datetime.timedelta(hours=1):
-            node_indices = [i for i in range(len(env.config['states'])) if 'depthN' in env.config['states'][i][1]]
-            final_depths = env.state()[node_indices]
+            final_depths = env.state()
 
-        done = env.step(u_open_pct.flatten(),level=level)
-    
+        #done = env.step(u_open_pct.flatten(),level=level)
+        done = env.step(u_open_pct.flatten())
+        
     perf = sum(env.data_log["performance_measure"])
     print("cost:")
     print("{:.4e}".format(perf))
@@ -205,12 +209,21 @@ for parameter in tuning_values:
         # flooded nodes
         if sum(value) > 0:
             print(key, sum(value))
-    print("CSO")
+    print("flow threshold exceedance")
     for key,value in env.data_log['flow'].items():
-        # CSO
+        value = [x-4.0 for x in value]
+        value = [x if x > 0 else 0 for x in value]
+        # high flows
         if sum(value) > 0:
             print(key, sum(value))
-    
+    print("nodes with ending depth > 0.1 ft")
+    nodes_not_empty = 0
+    for key,value in env.data_log['depthN'].items():
+        if value[-1] > 0.10:
+            print(key)
+            nodes_not_empty += 1
+    print("cost from nodes not empty: ", "{:.4e}".format(nodes_not_empty*(7*10**5)))
+            
     # round final_depths to 2 decimal places
     final_depths = np.round(final_depths,2)
     # calcuate the final filling degrees of all measured depths
@@ -222,8 +235,6 @@ for parameter in tuning_values:
     else:
         perf_summary.to_csv(str(folder_path + "/costs_" + evaluating + "_a=" + str(parameter) + ".csv"))
 
-        
-    
     if plot:
         
         
@@ -231,6 +242,7 @@ for parameter in tuning_values:
         states.interpolate(method='time',axis='index',inplace=True)
         #weir_heads32.interpolate(method='time',axis='index',inplace=True)
         actions.interpolate(method='time',axis='index',inplace=True)
+        flows.interpolate(method='time',axis='index',inplace=True)
 
         plots_high = max(len(env.config['action_space']) , len(env.config['states']))
         fig, axes = plt.subplots(plots_high, 2, figsize=(10,2*plots_high))
@@ -241,8 +253,8 @@ for parameter in tuning_values:
         for idx in range(len(env.config['action_space'])):
             #axes[idx,0].plot(weir_heads32.iloc[:,idx])
             #axes[idx,0].set_ylabel("(weir head [ft])^(3/2)")
-            axes[idx,0].plot(actions.iloc[:,idx])
-            axes[idx,0].set_ylabel("fraction open")
+            axes[idx,0].plot(flows.iloc[:,idx])
+            axes[idx,0].set_ylabel("flow")
             if idx == len(env.config['action_space']) - 1:
                 axes[idx,0].set_xlabel("time")
                 # plot only the first, middle, and last x-ticks

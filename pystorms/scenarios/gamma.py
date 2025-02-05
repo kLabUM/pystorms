@@ -4,7 +4,7 @@ from pystorms.networks import load_network
 from pystorms.config import load_config
 from pystorms.scenarios import scenario
 import yaml
-
+import swmmio
 
 class gamma(scenario):
     r"""Gamma Scenario
@@ -24,14 +24,16 @@ class gamma(scenario):
     Objective : Route flows though the network such that they are below a threshold.
     """
 
-    def __init__(self):
+    def __init__(self , version = "1", level = "1"):
         # Network configuration
         self.config = yaml.load(open(load_config("gamma"), "r"), yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["name"])
 
         # Common threhold for the network, can be done independently
         self._performormance_threshold = 4.0
-
+        
+        # todo: remove 5 and 9 from the scenario
+        
         # Create the environment based on the physical parameters
         self.env = environment(self.config, ctrl=True)
 
@@ -48,7 +50,7 @@ class gamma(scenario):
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
 
-    def step(self, actions=None, log=True):
+    def step(self, actions=None, log=True, level="1", version="1"):
         # Implement the actions and take a step forward
         done = self.env.step(actions)
 

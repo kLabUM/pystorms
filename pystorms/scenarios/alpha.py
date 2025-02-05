@@ -37,7 +37,7 @@ class alpha(scenario):
         # Network configuration
         self.config = yaml.load(open(load_config("alpha"), "r"), yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["name"])
-        print(self.config["swmm_input"])
+        #print(self.config["swmm_input"])
 
 
         if version == "2":
