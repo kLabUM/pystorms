@@ -13,10 +13,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pyswmm
 import datetime
-from skopt import gp_minimize
+from skopt import gp_minimize, gbrt_minimize
 from skopt.space import Real, Integer
 import swmmio
 import copy
+import scipy
 # print current working directory
 import os
 print(os.getcwd())
@@ -101,7 +102,8 @@ def run_swmm(constant_flows, efd_parameters=None,verbose=False):
                 regulator_idx = [i for i in range(len(env.config['states'])) if regulator_id in env.config['states'][i]][0]
                     
                 # assume linear scaling with opening percentage
-                u_open_pct[idx] = Q_desired / (Cd * Ao * np.sqrt(2*g*state[regulator_idx]) )
+                if state[regulator_idx] > 0:
+                    u_open_pct[idx] = Q_desired / (Cd * Ao * np.sqrt(2*g*state[regulator_idx]) )
                 if u_open_pct[idx] > 1.0:
                     u_open_pct[idx] = 1.0
                 elif u_open_pct[idx] < 0.0:
@@ -177,22 +179,26 @@ def f_constant_flows(constant_flows):
     flooding = data['data_log']['flooding']
     CSO_penalty = 0
     for weir in CSO_flows.keys():
-        CSO_penalty += sum(CSO_flows[weir])
+        CSO_penalty += sum(CSO_flows[weir])**2
     flooding_penalty = 0
     for junction in flooding.keys():
-        flooding_penalty += sum(flooding[junction])*100
+        #flooding_penalty += sum(flooding[junction])*100
+        if sum(flooding[junction]) > 0:
+            return 1e12
 
     # provide an incentive (negative cost) for getting the peak filling degrees close to 1.0
-    # scale the reward quadratically by distance from 1.0
+    # scale the reward quadratically by distance from 0.8
     peak_filling_degrees = data['peak_filling_degrees']
     peak_filling_reward = 0
     for regulator in peak_filling_degrees.keys():
-        if peak_filling_degrees[regulator] > 0.95: # don't want to reward getting that close
-            peak_filling_reward += 0
-        else:
-            peak_filling_reward += 10*(1/(1.0 - peak_filling_degrees[regulator]) )
+        # give the maximum reward when about to flood
+        peak_filling_reward += 1/((peak_filling_degrees[regulator] - 1.0)**6)
 
-    return_value = CSO_penalty + flooding_penalty - peak_filling_reward + sum(data["final_depths"]) + np.std(data['final_depths'])
+
+    return_value = CSO_penalty + flooding_penalty  + sum(data["final_depths"]) + np.std(data['final_depths'])
+ 
+    #return_value = CSO_penalty + flooding_penalty - peak_filling_reward + sum(data["final_depths"]) + np.std(data['final_depths'])
+    #print(return_value)
     return float(return_value)
 
 def f_efd(efd_parameters):
@@ -203,7 +209,8 @@ def f_efd(efd_parameters):
     flooding = data['data_log']['flooding']
     CSO_penalty = 0
     for weir in CSO_flows.keys():
-        CSO_penalty += sum(CSO_flows[weir])
+        CSO_penalty += sum(CSO_flows[weir])**2
+    '''
     flooding_penalty = 0
     for junction in flooding.keys():
         flooding_penalty += sum(flooding[junction])*100
@@ -221,6 +228,26 @@ def f_efd(efd_parameters):
     return_value = CSO_penalty + flooding_penalty - peak_filling_reward + sum(data["final_depths"]) + np.std(data['final_depths'])
     
     return return_value
+    '''
+    flooding_penalty = 0
+    for junction in flooding.keys():
+        #flooding_penalty += sum(flooding[junction])*100
+        if sum(flooding[junction]) > 0:
+            return 1e12
+
+    # provide an incentive (negative cost) for getting the peak filling degrees close to 1.0
+    # scale the reward quadratically by distance from 0.8
+    peak_filling_degrees = data['peak_filling_degrees']
+    peak_filling_reward = 0
+    for regulator in peak_filling_degrees.keys():
+        # give the maximum reward when about to flood
+        peak_filling_reward += 1/((peak_filling_degrees[regulator] - 1.0)**6)
+
+
+    return_value = CSO_penalty + flooding_penalty + sum(data["final_depths"]) + np.std(data['final_depths'])
+    #return_value = CSO_penalty + flooding_penalty - peak_filling_reward + sum(data["final_depths"]) + np.std(data['final_depths'])
+    #print(return_value)
+    return float(return_value)
 
 
 if evaluating == "constant-flow":
@@ -237,7 +264,7 @@ if evaluating == "constant-flow":
     
     bo = gp_minimize(f_constant_flows, domain,x0=x0, 
                      n_calls=10, n_initial_points=5, 
-                     initial_point_generator = 'lhs',verbose=True)
+                     initial_point_generator = 'lhs',verbose=True, acq_func="LCB")
     #bo = gp_minimize(f_constant_flows, domain,x0=x0, verbose=True)
     print(bo.x)
     print(bo.fun)
@@ -251,11 +278,11 @@ elif evaluating == "equal-filling":
     optimal_constant_flows = np.loadtxt(str("v" + version +"/optimal_constant_flows.txt"))
     #domain = [{"name": "TSS_feedback", "type": "continuous", "domain": (-1, -1e-4)},
     #        {"name": "efd_gain", "type": "continuous", "domain": (0.0, 1.0)}]
-    domain = [Real(0.0, 10.0, name="efd_gain")]
-    x0 = [5.0] 
+    domain = [Real(1e-5, 10.0, name="efd_gain")]
+    x0 = [2.0] 
     
-    bo = gp_minimize(f_efd, domain, x0=x0, n_calls=10, n_initial_points=5, 
-                     initial_point_generator = 'lhs',verbose=True)
+    bo = gp_minimize(f_efd, domain, x0=x0, n_calls=100, n_initial_points=10, 
+                     initial_point_generator = 'lhs',verbose=True, acq_func="LCB",kappa=1.96)
     
     print(bo.x)
     print(bo.fun)
@@ -274,20 +301,29 @@ elif evaluating == "both":
     x0 = []
     for i in range(10):
         if i < 5: # orifices, constant flow rates
-            domain.append(Real(0.5,5.0))
+            domain.append(Real(0.5,10.0))
             x0.append(3.0)
         else: # regulators, constant opening percentage
             domain.append(Real(0.0,1.0))
             x0.append(0.5)
-
+    #x0[0] = 3.0
+    x0[5] = 0.2
+    x0[7] = 0.45
     
+    #opt_result = scipy.optimize.minimize(f_constant_flows, x0, jac = '3-point',
+    #                                     method='trust-constr', 
+    #                                     options={"xtol":1e-5,"verbose":3,disp":True,"initial_tr_radius":1e-2})
+    
+    #opt_result = scipy.optimize.minimize(f_constant_flows,x0, method='Nelder-Mead', 
+    #                                     options={"fatol":1.0,"disp":True,"adaptive":True})
+    #print(opt_result)
     bo = gp_minimize(f_constant_flows, domain,x0=x0, 
-                     n_calls=1000, n_initial_points=100, 
-                     initial_point_generator = 'lhs',verbose=True)
+                     n_calls=200, n_initial_points=25, 
+                     initial_point_generator = 'lhs',verbose=True, acq_func="LCB",kappa=1e2)
     #bo = gp_minimize(f_constant_flows, domain,x0=x0, verbose=True)
     print(bo.x)
     print(bo.fun)
-    print(bo.x_iters)
+    #print(bo.x_iters)
     # save the optimal constant flows
     np.savetxt(str("v" + version +"/optimal_constant_flows.txt"), bo.x)
     # save the float bo.fun to a text file 
@@ -296,15 +332,15 @@ elif evaluating == "both":
     evaluating = "equal-filling"
     optimal_constant_flows = np.loadtxt(str("v" + version +"/optimal_constant_flows.txt"))
 
-    domain = [Real(0.0, 10.0, name="efd_gain")]
+    domain = [Real(1e-5, 10.0, name="efd_gain")]
     x0 = [2.0] 
     
-    bo = gp_minimize(f_efd, domain, x0=x0, n_calls=500, n_initial_points=50, 
-                     initial_point_generator = 'lhs',verbose=True)
+    bo = gp_minimize(f_efd, domain, x0=x0, n_calls=100, n_initial_points=10, 
+                     initial_point_generator = 'lhs',verbose=True, acq_func="LCB",kappa=1e2)
     
     print(bo.x)
     print(bo.fun)
-    print(bo.x_iters)
+    #print(bo.x_iters)
     # save the optimal efd params
     np.savetxt(str("v" + version +"/optimal_efd_params.txt"), bo.x)
     # save bo.fun

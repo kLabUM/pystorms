@@ -20,11 +20,11 @@ np.set_printoptions(precision=3,suppress=True)
 
 # EPSILON
 # options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
-control_scenario = 'equal-filling' 
+control_scenario = 'uncontrolled' 
 verbose = True
 version = "2" # options are "1" and "2"
 level = "1" # options are "1" , "2", and "3"
-plot = False # plot True significantly increases the memory usage. 
+plot = True # plot True significantly increases the memory usage. 
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
@@ -39,7 +39,7 @@ tuning_values = np.arange(-0.05,0.25,0.01)
 tuning_values = np.round(tuning_values,2)
 
 # for dev or plotting - single value
-#tuning_values = [0.0]
+tuning_values = [0.0]
 
 if control_scenario == "constant-flow" or control_scenario == "equal-filling":
     folder_path = str("./v" + version + "/lev" + level + "/results")

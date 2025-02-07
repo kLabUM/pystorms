@@ -38,6 +38,7 @@ class alpha(scenario):
         self.config = yaml.load(open(load_config("alpha"), "r"), yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["name"])
         #print(self.config["swmm_input"])
+        # suppress print statements from this script
 
 
         if version == "2":

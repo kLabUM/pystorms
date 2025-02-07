@@ -40,8 +40,8 @@ class environment:
     def __init__(self, config, ctrl=True, binary=None,version="1",level="1"):
         
 
-        print("version = ", version)
-        print("level = ", level)
+        #print("version = ", version)
+        #print("level = ", level)
         self.version = version
         # control expects users to define the state and action space
         # this is required for querying state and setting control actions

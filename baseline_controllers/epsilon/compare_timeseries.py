@@ -11,12 +11,12 @@ from matplotlib.gridspec import GridSpec
 import os
 
 # EPSILON SCENARIO
-version = "1"
+version = "2"
 level = "1"
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
-env = pystorms.scenarios.epsilon()
+env = pystorms.scenarios.epsilon(version=version,level=level)
 env.env.sim.start()
 
 H = {"ISD001": 14.7, "ISD002": 9.0, "ISD003": 14.0, "ISD004": 15.5, "ISD005": 15.5, "ISD006": 15.5, "ISD007": 15.5, "ISD008": 12.25, "ISD009": 15.5, "ISD010": 10.5, "ISD011": 11.5}
@@ -43,12 +43,12 @@ print("equal filling: ", "{:.2E}".format(sum(equal_filling_data_log['performance
 print("constant flow: ", "{:.2E}".format(sum(constant_flow_data_log['performance_measure'])))
 
 # load the actions and states
-uncontrolled_actions = pd.read_csv("./v1/results/actions_uncontrolled.csv",index_col=0,parse_dates=True)
-uncontrolled_states = pd.read_csv("./v1/results/states_uncontrolled.csv",index_col=0,parse_dates=True)
-equal_filling_actions = pd.read_csv(str("./v1/lev1/results/actions_equal-filling_param=" + equal_filling_param + ".csv"),index_col=0,parse_dates=True)
-equal_filling_states = pd.read_csv(str("./v1/lev1/results/states_equal-filling_param=" + equal_filling_param + ".csv"),index_col=0,parse_dates=True)
-constant_flow_actions = pd.read_csv(str("./v1/lev1/results/actions_constant-flow_param=" + constant_flow_param + ".csv"),index_col=0,parse_dates=True)
-constant_flow_states = pd.read_csv(str("./v1/lev1/results/states_constant-flow_param=" + constant_flow_param + ".csv"),index_col=0,parse_dates=True)
+uncontrolled_actions = pd.read_csv("./v" + version + "/results/actions_uncontrolled.csv",index_col=0,parse_dates=True)
+uncontrolled_states = pd.read_csv("./v" + version + "/results/states_uncontrolled.csv",index_col=0,parse_dates=True)
+equal_filling_actions = pd.read_csv(str("./v" + version + "/lev" + level + "/results/actions_equal-filling_param=" + equal_filling_param + ".csv"),index_col=0,parse_dates=True)
+equal_filling_states = pd.read_csv(str("./v" + version + "/lev" + level + "/results/states_equal-filling_param=" + equal_filling_param + ".csv"),index_col=0,parse_dates=True)
+constant_flow_actions = pd.read_csv(str("./v" + version + "/lev" + level + "/results/actions_constant-flow_param=" + constant_flow_param + ".csv"),index_col=0,parse_dates=True)
+constant_flow_states = pd.read_csv(str("./v" + version + "/lev" + level + "/results/states_constant-flow_param=" + constant_flow_param + ".csv"),index_col=0,parse_dates=True)
 
 
 plots_high = max(len(env.config['action_space']) , len(env.config['states']))
@@ -125,8 +125,8 @@ ax.axis('off')
 
 plt.tight_layout()
 # only going to use one plot for level (at most) so don't worry about tracking parameters
-plt.savefig(str("./v1/lev1/actions_states.png")) 
-plt.savefig(str("./v1/lev1/actions_states.svg"))
+plt.savefig(str("./v" + version + "/lev" + level + "/actions_states.png")) 
+plt.savefig(str("./v" + version + "/lev" + level + "/actions_states.svg"))
 #plt.show()
 plt.close('all')
 
@@ -267,7 +267,7 @@ ax.legend(handles=[uncontrolled_patch,cf_patch,ef_patch],
 ax.annotate(perfstr, xy=(0.9, 0.9), xycoords='axes fraction', ha='center', va='center',fontsize='large')
 
 ax.axis('off')
-plt.savefig(str("./v1/lev1/actions_states_L.png")) 
-plt.savefig(str("./v1/lev1/actions_states_L.svg"))
+plt.savefig(str("./v" + version + "/lev" + level + "/actions_states_L.png")) 
+plt.savefig(str("./v" + version + "/lev" + level + "/actions_states_L.svg"))
 #plt.show()
 plt.close('all')

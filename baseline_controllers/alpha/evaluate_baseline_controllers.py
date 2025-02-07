@@ -21,7 +21,7 @@ np.set_printoptions(precision=3,suppress=True)
 
 # ALPHA
 # options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
-evaluating = 'equal-filling' 
+evaluating = 'constant-flow' 
 verbose = True
 version = "2" # options are "1" and "2"
 level = "1" # options are "1" , "2", and "3"
@@ -86,15 +86,21 @@ for parameter in tuning_values:
             node_id = state[0]
             max_depths_array = np.append(max_depths_array, pyswmm.Nodes(env.env.sim)[node_id].full_depth)
 
-    
+    max_depths = dict()
+    for state in env.config['states']:
+        if 'depthN' in state[1]:
+            node_id = state[0]
+            max_depths[node_id] = pyswmm.Nodes(env.env.sim)[node_id].full_depth
 
+    
+    '''
     # grab some metadata for the control algorithm
     max_depths = dict()
     for idx in range(1,6):
         regulator_id = "R" + str(idx)
         max_depths[regulator_id] = pyswmm.Nodes(env.env.sim)[regulator_id].full_depth
     #print(max_depths)
-    
+    '''
 
     model = swmmio.Model(env.config["swmm_input"])
     #print(model.inp.orifices)
@@ -151,7 +157,7 @@ for parameter in tuning_values:
             
             if evaluating == "constant-flow":
 
-                done = env.step(u_open_pct.flatten())
+                done = env.step(u_open_pct.flatten(),level=level)
             elif evaluating == "equal-filling":
                 for idx in orifice_indices:
                     this_fd = filling_degrees[idx]
@@ -162,8 +168,10 @@ for parameter in tuning_values:
                         u_open_pct[i] = 1.0
                     elif u_open_pct[i] < 0.0:
                         u_open_pct[i] = 0.0
-                done = env.step(u_open_pct.flatten())
-
+                done = env.step(u_open_pct.flatten(),level=level)
+            elif evaluating == "uncontrolled":
+                u_open_pct[0:4] = 1.0
+                done = env.step(u_open_pct.flatten(),level=level)
             else:
                 print("error. control scenario not recongized.")
                 done = True
@@ -226,7 +234,6 @@ for parameter in tuning_values:
     
     if plot:
         
-        
         # if there are any na values in states or weir_heads32, linearly interpolate over them
         states.interpolate(method='time',axis='index',inplace=True)
         #weir_heads32.interpolate(method='time',axis='index',inplace=True)
@@ -256,10 +263,15 @@ for parameter in tuning_values:
         # plot the states
         for idx in range(len(env.config['states'])):
             axes[idx,1].plot(states.iloc[:,idx])
+            try:
+                axes[idx,1].axhline(y=max_depths[env.config['states'][idx][0]], color='r', linestyle='--')
+            except:
+                pass
 
             if idx == len(env.config['states']) - 1:
                 axes[idx,1].set_xlabel("time")
                 axes[idx,1].annotate(str(env.config['states'][idx]), xy=(0.5, 0.4), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
+
                 # plot only the first, middle, and last x-ticks
                 xticks = axes[idx,1].get_xticks()
                 xticks = [xticks[0],xticks[int(len(xticks)/2)],xticks[-1]]
@@ -279,3 +291,20 @@ for parameter in tuning_values:
             plt.savefig(str(folder_path + "/evaluate_" + str(evaluating) + "_param=" + str(parameter) + ".svg"),dpi=450)
         #plt.show()
         plt.close('all')
+        
+        states = states.resample('5min').mean()
+        actions = actions.resample('5min').mean()
+
+        if evaluating == "uncontrolled":
+            states.to_csv(str(folder_path + "/states_" + str(evaluating) + ".csv"))
+            actions.to_csv(str(folder_path + "/actions_" + str(evaluating) + ".csv"))
+            # and the data log
+            with open(f'./v{version}/results/{evaluating}_data_log.pkl', 'wb') as f:
+                pickle.dump(env.data_log, f)
+        else:
+            # save the flows and depths
+            states.to_csv(str(folder_path + "/states_" + str(evaluating) + "_param=" + str(parameter) + ".csv"))
+            actions.to_csv(str(folder_path + "/actions_" + str(evaluating) + "_param=" + str(parameter) + ".csv"))
+            # and the data log
+            with open(f'./v{version}/lev{level}/results/{str(evaluating + "_param=" + str(parameter))}_data_log.pkl', 'wb') as f:
+                pickle.dump(env.data_log, f)
