@@ -25,6 +25,24 @@ print(os.getcwd())
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
 
+# imports for trieste active learning of feasibility region (https://secondmind-labs.github.io/trieste/4.3.0/notebooks/feasible_sets.html)
+
+import tensorflow as tf
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+tf.get_logger().setLevel("ERROR")
+import trieste
+import gpflow
+from trieste.space import Box
+from trieste.acquisition.rule import EfficientGlobalOptimization
+from trieste.acquisition.function import ExpectedFeasibility
+from trieste.data import Dataset
+from trieste.models.gpflow import GaussianProcessRegression
+
+
+
+
+
+
 # ALPHA
 evaluating = "both" # "constant-flow" or "efd" or "both"
 version = "2" # "1" or "2" - 2 will be the updated, more difficult version
@@ -299,13 +317,25 @@ elif evaluating == "both":
     evaluating = "constant-flow"
     domain = []
     x0 = []
+    
+    # for trieste
+    lower_bounds = []
+    upper_bounds = []
     for i in range(10):
         if i < 5: # orifices, constant flow rates
             domain.append(Real(0.5,10.0))
             x0.append(3.0)
+            lower_bounds.append(0.5)
+            upper_bounds.append(10.0)
         else: # regulators, constant opening percentage
             domain.append(Real(0.0,1.0))
             x0.append(0.5)
+            lower_bounds.append(0.0)
+            upper_bounds.append(1.0)
+            
+            
+    search_space = Box(lower_bounds,upper_bounds)       
+
     #x0[0] = 3.0
     x0[5] = 0.2
     x0[7] = 0.45
