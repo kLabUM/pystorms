@@ -312,7 +312,7 @@ elif evaluating == 'both':
         upper_bounds.append(0.5)
     search_space = Box(lower_bounds, upper_bounds)
     
-    num_initial_points = 10
+    num_initial_points = 20
     initial_data = observer(search_space.sample(num_initial_points))
     
     from trieste.models.gpflow import build_gpr, GaussianProcessRegression
@@ -333,7 +333,7 @@ elif evaluating == 'both':
     )
     rule = EfficientGlobalOptimization(eci)  # type: ignore
 
-    num_steps = 50
+    num_steps = 100
     bo = trieste.bayesian_optimizer.BayesianOptimizer(observer, search_space)
 
     opt_result = bo.optimize(
@@ -380,8 +380,10 @@ elif evaluating == 'both':
     constraint_predicted = models[CONSTRAINT].predict_y(X)
     constraint_mean_predicted = constraint_predicted[0]
     c = ax[1].contourf(X1, X2, constraint_mean_predicted.reshape(100,100), alpha=0.2, label="model")
-    # add a black contour line at 0.0 to show the boundary of the feasible region
-    ax[1].contour(X1, X2, constraint_mean_predicted.reshape(100,100), levels=[0.0], colors='black')
+    # add a black contour line to show the boundary of the feasible region
+    ax[1].contour(X1, X2, constraint_mean_predicted.reshape(100,100), levels=[Sim_cf.threshold], colors='black')
+    # put it on the objective function plot too
+    ax[0].contour(X1, X2, constraint_mean_predicted.reshape(100,100), levels=[Sim_cf.threshold], colors='black')
     plt.colorbar(c, ax=ax[1])
     ax[1].set_title("Constraint observations and gp model")
     ax[1].set_xlabel("Constant Flow 1")
