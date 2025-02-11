@@ -1,10 +1,11 @@
+'''
 # install pystorms from the current directory (this should be commented out in final version once pystorms source code isn't changing all the time)
 import subprocess
 import sys
 subprocess.check_call([sys.executable, '-m', 'pip', 'uninstall', '-y', 'pystorms'])
 subprocess.check_call([sys.executable, '-m', 'pip', 'cache', 'purge'])
 subprocess.check_call([sys.executable, '-m', 'pip', 'install', '.'])
-
+'''
 import pystorms # this will be the first line of the program when dev is done
 
 import pyswmm
@@ -19,10 +20,10 @@ np.set_printoptions(precision=3,suppress=True)
 
 # THETA
 # options are: 'equal-filling' and 'constant-flow'
-control_scenario = 'equal-filling' 
+control_scenario = 'constant-flow' 
 verbose = True
 version = "2" # options are "1" and "2"
-level = "3" # options are "1" , "2", and "3"
+level = "1" # options are "1" , "2", and "3"
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
@@ -30,12 +31,15 @@ print(os.getcwd())
 rand_seed = 42
 np.random.seed(rand_seed)
 
-optimal_constant_flows = np.loadtxt(str("./" + version + "/optimal_constant_flows.txt"))
-optimal_efd_params = np.loadtxt(str("./" + version + "/optimal_efd_params.txt"))
-
+if control_scenario == "constant-flow":
+    optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
+elif control_scenario == "equal-filling":
+    optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_efd_params.txt"))[:-1]
+    optimal_efd_params = np.loadtxt(str("./v" + version + "/optimal_efd_params.txt"))[-1]
+'''
 if not os.path.exists(str("./v" + version + "/lev" + level + "/results")):
     os.makedirs(str("./v" + version + "/lev" + level + "/results"))
-
+'''
 
 print("evaluating ", control_scenario, " for theta scenario")
 
@@ -44,7 +48,7 @@ Ao = 1 # area is one square meter
 g = 9.81 # m / s^2
 
 
-env = pystorms.scenarios.theta(level=level)
+env = pystorms.scenarios.theta(version=version,level=level)
 env.env.sim.start()
 done = False
 
@@ -176,8 +180,8 @@ plt.close('all')
 
 
 # resample the flows and depths to 5 minute intervals
-flows = flows.resample('5T').mean()
-depths = depths.resample('5T').mean()
+flows = flows.resample('5min').mean()
+depths = depths.resample('5min').mean()
 
 # save the flows and depths
 flows.to_csv(str("./v" + version +"/flows_" + str(control_scenario) + "_level_" + level +  ".csv"))

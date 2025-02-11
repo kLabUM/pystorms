@@ -41,7 +41,7 @@ class theta(scenario):
         
         if version == "2":
             # make the threshold more stringent
-            self.threshold = self.threshold * (3.0/4.0)
+            self.threshold = self.threshold * (1.0/2.0)
             #  make the max depth of one of the nodes smaller. error because sim not running. maybe use swmm-api?
             #print(self.config['states'][0][0])
             model = swmmio.Model(self.config["swmm_input"])
