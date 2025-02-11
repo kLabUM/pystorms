@@ -218,8 +218,8 @@ for node in pos:
     elif "4" in node[0] or "4" in node[1]:
         pos[node][0] = 0.5
     elif "5" in node[0] or "5" in node[1]:
-        if "C" not in node[0] and "C" not in node[1] and "I" not in node[0] and "I" not in node[1]:
-            pos[node][0] = 1.0
+        #if "C" not in node[0] and "C" not in node[1] and "I" not in node[0] and "I" not in node[1]:
+        pos[node][0] = 1.0
 
 
 #nx.draw_networkx_nodes(subway['graph'], pos, node_size=500)

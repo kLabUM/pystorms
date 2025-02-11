@@ -50,3 +50,6 @@ cover/
 profile_default/
 ipython_config.py
 /.vs
+*.pkl
+*.pkl
+baseline_controllers/alpha/v2/results/uncontrolled_data_log.pkl

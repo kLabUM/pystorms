@@ -1,10 +1,11 @@
+'''
 # install pystorms from the current directory (this should be commented out in final version once pystorms source code isn't changing all the time)
 import subprocess
 import sys
 subprocess.check_call([sys.executable, '-m', 'pip', 'uninstall', '-y', 'pystorms'])
 subprocess.check_call([sys.executable, '-m', 'pip', 'cache', 'purge'])
 subprocess.check_call([sys.executable, '-m', 'pip', 'install', '.'])
-
+'''
 import pystorms # this will be the first line of the program when dev is done
 
 import numpy as np

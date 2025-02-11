@@ -20,7 +20,7 @@ np.set_printoptions(precision=3,suppress=True)
 
 # THETA
 # options are: 'equal-filling' and 'constant-flow'
-control_scenario = 'constant-flow' 
+control_scenario = 'uncontrolled' 
 verbose = True
 version = "2" # options are "1" and "2"
 level = "1" # options are "1" , "2", and "3"

@@ -30,7 +30,7 @@ from trieste.data import Dataset
 from trieste.models.gpflow import build_gpr, GaussianProcessRegression
 from trieste.acquisition.rule import EfficientGlobalOptimization
 # THETA
-evaluating = "both" # "constant-flow" or "efd" or "both"
+evaluating = "efd" # "constant-flow" or "efd" or "both"
 version = "2" # "1" or "2" - 2 will be the updated, more difficult version
 # level should always be 1 when optimizing parameters. controllers will be evaluated but not calibrated on higher levels
 # if the directory version doesn't exist, create it
@@ -344,7 +344,7 @@ elif evaluating == "efd":
     upper_bounds.append(1.0)
     search_space = Box(lower_bounds, upper_bounds)
     
-    num_initial_points = 50
+    num_initial_points = 75
     initial_data = observer_efd(search_space.sample(num_initial_points))
 
     initial_models = trieste.utils.map_values(create_bo_model, initial_data)
@@ -355,7 +355,7 @@ elif evaluating == "efd":
     )
     rule = EfficientGlobalOptimization(eci)  # type: ignore
 
-    num_steps = 200
+    num_steps = 750
     bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_efd, search_space)
 
     opt_result = bo.optimize(
@@ -444,10 +444,10 @@ elif evaluating == 'both':
     lower_bounds = []
     upper_bounds = []
     for i in range(1, 3):
-        domain.append(Real(0.01,0.5,name=str(i)))
+
         
         lower_bounds.append(0.01)
-        upper_bounds.append(0.5)
+        upper_bounds.append(1.0)
     search_space = Box(lower_bounds, upper_bounds)
     
     num_initial_points = 50
@@ -508,8 +508,8 @@ elif evaluating == 'both':
 
     # plot the GP model outputs across a grid of points
     # make a grid of two-dimensional points across the search space
-    x1 = np.linspace(0.01, 0.5, 100)
-    x2 = np.linspace(0.01, 0.5, 100)
+    x1 = np.linspace(0.01, 1.0, 100)
+    x2 = np.linspace(0.01, 1.0, 100)
     X1, X2 = np.meshgrid(x1, x2)
     X = np.stack([X1, X2], axis=-1)
     objective_predicted = models['OBJECTIVE'].predict_y(X)
@@ -551,7 +551,7 @@ elif evaluating == 'both':
     upper_bounds = []
     for i in range(1, 3):
         lower_bounds.append(0.01)
-        upper_bounds.append(0.5)
+        upper_bounds.append(1.0)
         
     lower_bounds.append(0.0)
     upper_bounds.append(1.0)

@@ -21,7 +21,7 @@ np.set_printoptions(precision=3,suppress=True)
 
 # ALPHA
 # options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
-evaluating = 'constant-flow' 
+evaluating = 'uncontrolled' 
 verbose = True
 version = "2" # options are "1" and "2"
 level = "1" # options are "1" , "2", and "3"
@@ -52,8 +52,12 @@ if not os.path.exists(folder_path):
 
 
 for parameter in tuning_values:
-    optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
-    optimal_efd_params = np.loadtxt(str("./v" + version + "/optimal_efd_params.txt"))
+    if evaluating == "constant-flow" or evaluating == "uncontrolled":
+        optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
+    elif evaluating == "equal-filling":
+        optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[:-1]
+        optimal_efd_params = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[-1]
+    
 
     print("tuning value: ", parameter)
     optimal_constant_flows = optimal_constant_flows*(1+parameter)
@@ -156,8 +160,8 @@ for parameter in tuning_values:
             filling_degree_avg = np.mean(filling_degrees)
             
             if evaluating == "constant-flow":
-
-                done = env.step(u_open_pct.flatten(),level=level)
+                pass
+                #done = env.step(u_open_pct.flatten(),level=level)
             elif evaluating == "equal-filling":
                 for idx in orifice_indices:
                     this_fd = filling_degrees[idx]
@@ -168,10 +172,10 @@ for parameter in tuning_values:
                         u_open_pct[i] = 1.0
                     elif u_open_pct[i] < 0.0:
                         u_open_pct[i] = 0.0
-                done = env.step(u_open_pct.flatten(),level=level)
+                #done = env.step(u_open_pct.flatten(),level=level)
             elif evaluating == "uncontrolled":
                 u_open_pct[0:4] = 1.0
-                done = env.step(u_open_pct.flatten(),level=level)
+                #done = env.step(u_open_pct.flatten(),level=level)
             else:
                 print("error. control scenario not recongized.")
                 done = True
@@ -202,7 +206,7 @@ for parameter in tuning_values:
         if (not done) and env.env.sim.current_time > env.env.sim.end_time - datetime.timedelta(hours=1):
             node_indices = [i for i in range(len(env.config['states'])) if 'depthN' in env.config['states'][i][1]]
             final_depths = env.state()[node_indices]
-
+    
         done = env.step(u_open_pct.flatten(),level=level)
     
     perf = sum(env.data_log["performance_measure"])
