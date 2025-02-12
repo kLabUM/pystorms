@@ -20,9 +20,9 @@ np.set_printoptions(precision=3,suppress=True)
 
 # EPSILON
 # options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
-control_scenario = 'uncontrolled' 
+evaluating = 'equal-filling' 
 verbose = True
-version = "2" # options are "1" and "2"
+version = "1" # options are "1" and "2"
 level = "1" # options are "1" , "2", and "3"
 plot = True # plot True significantly increases the memory usage. 
 # set the working directory to the directory of this script
@@ -33,7 +33,7 @@ rand_seed = 42
 np.random.seed(rand_seed)
 
 
-print("evaluating ", control_scenario, " for epsilon scenario")
+print("evaluating ", evaluating, " for epsilon scenario")
 
 tuning_values = np.arange(-0.05,0.25,0.01)
 tuning_values = np.round(tuning_values,2)
@@ -41,9 +41,9 @@ tuning_values = np.round(tuning_values,2)
 # for dev or plotting - single value
 tuning_values = [0.0]
 
-if control_scenario == "constant-flow" or control_scenario == "equal-filling":
+if evaluating == "constant-flow" or evaluating == "equal-filling":
     folder_path = str("./v" + version + "/lev" + level + "/results")
-elif control_scenario == "uncontrolled":
+elif evaluating == "uncontrolled":
     folder_path = str("./v" + version + "/results")
 
 if not os.path.exists(folder_path):
@@ -51,7 +51,7 @@ if not os.path.exists(folder_path):
 
 for parameter in tuning_values:
     optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
-    optimal_efd_params = np.loadtxt(str("./v" + version + "/optimal_efd_params.txt"))
+    efd_parameters = np.loadtxt(str("./v" + version + "/optimal_efd_params.txt"))
 
     print("tuning value: ", parameter)
     optimal_constant_flows = optimal_constant_flows*(1+parameter)
@@ -88,48 +88,64 @@ for parameter in tuning_values:
     H_array = [14.7,9.0,14.0, 15.5 , 15.5 ,15.5, 15.5 ,12.25,15.5,10.5 ,11.5]
     max_depths_array = np.array([])
     max_depths = dict()
+    peak_filling_degrees = dict()
     for state in env.config['states']:
         if 'depth' in state[1]:
             node_id = state[0]
             max_depths[node_id] = pyswmm.Nodes(env.env.sim)[node_id].full_depth
+            peak_filling_degrees[node_id] = 0.0
             max_depths_array = np.append(max_depths_array, pyswmm.Nodes(env.env.sim)[node_id].full_depth)
             
     while not done:
         
         # take control actions?
         if env.env.sim.current_time.minute % 5 == 0 and (env.env.sim.current_time > last_eval + datetime.timedelta(minutes=2)):
-            state = env.state(level=level)
-            #print("clean," , env.state(level="1"))
-            #print("level 2," , env.state(level="2"))
-            #print("level 3," , env.state(level="3"))
-            if control_scenario == 'equal-filling' or control_scenario == 'constant-flow':
-            
-                for idx in range(len(u_open_pct)): # set opening percentage to achieve the desired flow rate
-                    desired_head = optimal_constant_flows[idx]
-                    max_weir_height = H[env.config['action_space'][idx]]
-                    
-                    h_upstream = state[idx]
-                    if desired_head > h_upstream: # all the way open
-                        u_open_pct[idx,0] = 1.0
-                    else:
-                        h_weir = h_upstream - desired_head
-                        closed_percentage = h_weir / max_weir_height
-                        u_open_pct[idx,0] = 1.0 - closed_percentage
-                if control_scenario == "equal-filling":
-                    u_avg = np.mean(u_open_pct)
-                    u_diff = u_avg - u_open_pct
-                    for i in [0,3,8]: # most downstream controllers
-                        TSS_conc = env.state()[-1]
-                        delta_TSS = TSS_conc - 150 # 150 is long term average
-                        u_diff[i,0] = optimal_efd_params[0]*delta_TSS # downstream respond to TSS, not others filling degrees
-                    u_open_pct = u_open_pct + optimal_efd_params[1]*u_diff
-                
+            last_eval = env.env.sim.current_time
+            state = env.state()[:11] # only the first eleven, controlled basins
+            for idx in range(len(u_open_pct)): # set h_weir to achieve the desired head over the weir
+       
+                max_weir_height = H[env.config['action_space'][idx]]
+
+                #h_up = min(y_measured[idx,0],max_weir_height) # upstream storage basin depth
+                h_up = state[idx] # the depth in the junction just above the weir
+                if optimal_constant_flows[idx] >= h_up: # all the way open
+                    u_open_pct[idx] = 1.0
+                else: # somewhere in between
+                    h_weir = h_up - optimal_constant_flows[idx] # desired weir position
+                    closed_percentage = h_weir / max_weir_height
+                    u_open_pct[idx] = 1 - closed_percentage
+                u_open_pct[idx] = max(0.0,u_open_pct[idx]) # don't allow negative opening percentages
+                u_open_pct[idx] = min(1.0,u_open_pct[idx]) # don't allow opening percentages greater than 1
+
+            for idx, state in enumerate(env.config['states']):
+                if 'depth' in state[1]:
+                    node_id = state[0]
+                    peak_filling_degrees[node_id] = max(peak_filling_degrees[node_id],env.state()[idx]/max_depths[node_id])
+            if evaluating == "constant-flow":
                 for i in range(len(u_open_pct)):
-                    if u_open_pct[i,0] > 1.0:
-                        u_open_pct[i,0] = 1.0
-                    elif u_open_pct[i,0] < 0.09:
+                    if u_open_pct[i,0]< 0.09:
                         u_open_pct[i,0] = 0.09
-            elif control_scenario == 'uncontrolled':
+                done = env.step(u_open_pct.flatten())
+            elif evaluating == "efd":
+                # this is a slightly different formulation for equal filling degree
+                # the fixed depth of the inline storages is based on the height of the weir
+                # so by making the weirs more similar opening percentages, the fixed depths are converging
+                u_avg = np.mean(u_open_pct)
+                u_diff = u_avg - u_open_pct
+                
+                for i in [0,3,8]: # the most downstream dams
+                    TSS_conc = env.state()[-1]
+                    delta_TSS = TSS_conc - 150 # 150 is roughly the long term average
+                    u_diff[i,0] = efd_parameters[0]*delta_TSS # increase flow out of the outflow controllers when TSS is low. reduce when high.
+                    # so efd_parameters[0] should be negative
+
+                u_open_pct = u_open_pct + efd_parameters[1]*u_diff 
+                #for i in range(len(u_open_pct)):
+                #    if u_open_pct[i,0]< 0.09:
+                #        print("efd using storage above the weir")
+                done = env.step(u_open_pct.flatten())
+                
+            elif evaluating == 'uncontrolled':
                 u_open_pct = np.ones((len(env.config['action_space']),1))
             if verbose and env.env.sim.current_time.minute == 0 and env.env.sim.current_time.hour % 2 == 0: 
                 u_print = u_open_pct.flatten()
@@ -190,10 +206,10 @@ for parameter in tuning_values:
     
     # save the cost and ending filling degree to a csv
     perf_summary = pd.DataFrame(data = {"cost": perf, "final_depths": final_depths,"final_filling": final_filling_degrees})
-    if control_scenario == "uncontrolled":
-        perf_summary.to_csv(str(folder_path + "/costs_" + control_scenario + ".csv"))
+    if evaluating == "uncontrolled":
+        perf_summary.to_csv(str(folder_path + "/costs_" + evaluating + ".csv"))
     else:
-        perf_summary.to_csv(str(folder_path + "/costs_" + control_scenario + "_a=" + str(parameter) + ".csv"))
+        perf_summary.to_csv(str(folder_path + "/costs_" + evaluating + "_a=" + str(parameter) + ".csv"))
 
 
     if plot:
@@ -250,12 +266,12 @@ for parameter in tuning_values:
 
 
         plt.tight_layout()
-        if control_scenario == "uncontrolled":
-            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + ".png"),dpi=450)
-            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + ".svg"),dpi=450)
+        if evaluating == "uncontrolled":
+            plt.savefig(str(folder_path + "/evaluate_" + str(evaluating) + ".png"),dpi=450)
+            plt.savefig(str(folder_path + "/evaluate_" + str(evaluating) + ".svg"),dpi=450)
         else:
-            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + "_param=" + str(parameter) + ".png"),dpi=450)
-            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + "_param=" + str(parameter) + ".svg"),dpi=450)
+            plt.savefig(str(folder_path + "/evaluate_" + str(evaluating) + "_param=" + str(parameter) + ".png"),dpi=450)
+            plt.savefig(str(folder_path + "/evaluate_" + str(evaluating) + "_param=" + str(parameter) + ".svg"),dpi=450)
         #plt.show()
         plt.close('all')
 
@@ -330,12 +346,12 @@ for parameter in tuning_values:
 
     
         ax.axis('off')
-        if control_scenario == "uncontrolled":
-            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + "_subway.png"),dpi=450)
-            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + "_subway.svg"),dpi=450)
+        if evaluating == "uncontrolled":
+            plt.savefig(str(folder_path + "/evaluate_" + str(evaluating) + "_subway.png"),dpi=450)
+            plt.savefig(str(folder_path + "/evaluate_" + str(evaluating) + "_subway.svg"),dpi=450)
         else:
-            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + "_param=" + str(parameter) + "_subway.png"),dpi=450)
-            plt.savefig(str(folder_path + "/evaluate_" + str(control_scenario) + "_param=" + str(parameter) + "_subway.svg"),dpi=450)
+            plt.savefig(str(folder_path + "/evaluate_" + str(evaluating) + "_param=" + str(parameter) + "_subway.png"),dpi=450)
+            plt.savefig(str(folder_path + "/evaluate_" + str(evaluating) + "_param=" + str(parameter) + "_subway.svg"),dpi=450)
         plt.tight_layout()
         #plt.show()
         plt.close('all')
@@ -345,18 +361,18 @@ for parameter in tuning_values:
         states = states.resample('5min').mean()
         actions = actions.resample('5min').mean()
 
-        if control_scenario == "uncontrolled":
-            weir_heads32.to_csv(str(folder_path + "/weir_heads32_" + str(control_scenario) + ".csv"))
-            states.to_csv(str(folder_path + "/states_" + str(control_scenario) + ".csv"))
-            actions.to_csv(str(folder_path + "/actions_" + str(control_scenario) + ".csv"))
+        if evaluating == "uncontrolled":
+            weir_heads32.to_csv(str(folder_path + "/weir_heads32_" + str(evaluating) + ".csv"))
+            states.to_csv(str(folder_path + "/states_" + str(evaluating) + ".csv"))
+            actions.to_csv(str(folder_path + "/actions_" + str(evaluating) + ".csv"))
             # and the data log
-            with open(f'./v{version}/results/{control_scenario}_data_log.pkl', 'wb') as f:
+            with open(f'./v{version}/results/{evaluating}_data_log.pkl', 'wb') as f:
                 pickle.dump(env.data_log, f)
         else:
             # save the flows and depths
-            weir_heads32.to_csv(str(folder_path + "/weir_heads32_" + str(control_scenario) + "_param=" + str(parameter) + ".csv"))
-            states.to_csv(str(folder_path + "/states_" + str(control_scenario) + "_param=" + str(parameter) + ".csv"))
-            actions.to_csv(str(folder_path + "/actions_" + str(control_scenario) + "_param=" + str(parameter) + ".csv"))
+            weir_heads32.to_csv(str(folder_path + "/weir_heads32_" + str(evaluating) + "_param=" + str(parameter) + ".csv"))
+            states.to_csv(str(folder_path + "/states_" + str(evaluating) + "_param=" + str(parameter) + ".csv"))
+            actions.to_csv(str(folder_path + "/actions_" + str(evaluating) + "_param=" + str(parameter) + ".csv"))
             # and the data log
-            with open(f'./v{version}/lev{level}/results/{str(control_scenario + "_param=" + str(parameter))}_data_log.pkl', 'wb') as f:
+            with open(f'./v{version}/lev{level}/results/{str(evaluating + "_param=" + str(parameter))}_data_log.pkl', 'wb') as f:
                 pickle.dump(env.data_log, f)

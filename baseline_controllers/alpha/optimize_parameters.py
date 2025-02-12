@@ -124,7 +124,7 @@ def run_swmm(constant_flows, efd_gain=None,verbose=False):
                     u_open_pct[idx] = 0.0
                     
             filling_degrees = []
-            for idx in orifice_indices: # this is not correct right now
+            for idx in orifice_indices: 
                 orifice_id = env.config['action_space'][idx]
                 regulator_id = "R" + orifice_id[2:]
                 max_depth = max_depths[regulator_id]
@@ -183,6 +183,7 @@ def run_swmm(constant_flows, efd_gain=None,verbose=False):
 
     
 #run_swmm(0.5*np.ones((10,1)), efd_parameters=[0.25], verbose=True)
+'''
 
 def f_constant_flows(constant_flows):
     # flatten the actions
@@ -262,7 +263,7 @@ def f_efd(efd_parameters):
     #return_value = CSO_penalty + flooding_penalty - peak_filling_reward + sum(data["final_depths"]) + np.std(data['final_depths'])
     #print(return_value)
     return float(return_value)
-
+'''
 
 
 class Sim_cf:

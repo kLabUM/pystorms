@@ -338,7 +338,7 @@ elif evaluating == "efd":
     upper_bounds = []
     for i in range(1, 3):
         lower_bounds.append(0.01)
-        upper_bounds.append(0.5)
+        upper_bounds.append(1.0)
         
     lower_bounds.append(0.0)
     upper_bounds.append(1.0)
@@ -387,8 +387,8 @@ elif evaluating == "efd":
     np.savetxt(str("v" +version +"/optimal_efd_params.txt"), best_feasible_point.numpy())
     np.savetxt(str("v" +version +"/optimal_efd_params_cost.txt"), best_feasible_observation.numpy())
     # save the whole object
-    with open("bo_efd_params.pkl", "wb") as f:
-        pickle.dump(opt_result, f)
+    #with open("bo_efd_params.pkl", "wb") as f:
+    #    pickle.dump(opt_result, f)
 
     ''' 
     # plot the model and observations of the objective function
