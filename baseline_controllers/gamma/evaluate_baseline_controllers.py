@@ -21,7 +21,7 @@ np.set_printoptions(precision=3,suppress=True)
 
 # GAMMA
 # options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
-evaluating = 'uncontrolled' 
+evaluating = 'constant-flow' 
 verbose = True
 version = "2" # options are "1" and "2"
 level = "1" # options are "1" , "2", and "3"
@@ -51,11 +51,16 @@ if not os.path.exists(folder_path):
     
 
 for parameter in tuning_values:
+    if evaluating == "constant-flow":
+        optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
+    elif evaluating == "equal-filling":
+        optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[:-1]
+        optimal_efd_params = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[-1]
     #optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
-    optimal_constant_flows = np.ones(9)*6.0
+    #optimal_constant_flows = np.ones(9)*6.0
     #optimal_constant_flows[[4,8]] = 75.0 # 5 and 9 will flood
     #optimal_efd_params = np.loadtxt(str("./v" + version + "/optimal_efd_params.txt"))
-    optimal_efd_params = 0.5
+    #optimal_efd_params = 0.5
 
     print("tuning value: ", parameter)
     optimal_constant_flows = optimal_constant_flows*(1+parameter)

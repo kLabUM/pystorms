@@ -23,9 +23,16 @@ print(os.getcwd())
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
-
+# imports for joint optimization of expected improvement and probability of feasibility (https://secondmind-labs.github.io/trieste/4.3.0/notebooks/inequality_constraints.html)
+import tensorflow as tf
+from trieste.space import Box
+import trieste
+from trieste.data import Dataset
+from trieste.models.gpflow import build_gpr, GaussianProcessRegression
+from trieste.acquisition.rule import EfficientGlobalOptimization
+import dill as pickle
 # GAMMA
-evaluating = "both" # "constant-flow" or "efd" or "both"
+evaluating = "efd" # "constant-flow" or "efd" or "both"
 version = "2" # "1" or "2" - 2 will be the updated, more difficult version
 level = "1"
 # level should always be 1 when optimizing parameters. controllers will be evaluated but not optimized on higher levels
@@ -71,11 +78,15 @@ def run_swmm(constant_flows, efd_parameters=None,verbose=False):
     #print(env.env.actuator_schedule)
     #print(env.env.sensor_schedule)
 
-    max_depths_array = np.array([]) # for all states
+    max_depths_array = np.array([])
+    max_depths = dict()
+    peak_filling_degrees = np.array([])
     for state in env.config['states']:
-        if 'depthN' in state[1]:
+        if 'depth' in state[1]:
             node_id = state[0]
+            max_depths[node_id] = pyswmm.Nodes(env.env.sim)[node_id].full_depth
             max_depths_array = np.append(max_depths_array, pyswmm.Nodes(env.env.sim)[node_id].full_depth)
+            peak_filling_degrees = np.append(peak_filling_degrees, 0.0)
 
 
     model = swmmio.Model(env.config["swmm_input"])
@@ -120,14 +131,15 @@ def run_swmm(constant_flows, efd_parameters=None,verbose=False):
             
             filling_degrees = state / max_depths_array
             filling_degree_avg = np.mean(filling_degrees)
+            peak_filling_degrees = np.maximum(peak_filling_degrees, filling_degrees)
             
             if evaluating == "constant-flow":
 
                 done = env.step(u_open_pct.flatten())
-            elif evaluating == "equal-filling":
+            elif evaluating == "efd":
                 for idx in range(len(env.config['action_space'])):
                     this_fd = filling_degrees[idx]
-                    u_open_pct[idx] += efd_parameters[0] * (this_fd - filling_degree_avg)
+                    u_open_pct[idx] += efd_parameters * (this_fd - filling_degree_avg)
 
                 for i in range(len(u_open_pct)):
                     if u_open_pct[i] > 1.0:
@@ -157,10 +169,103 @@ def run_swmm(constant_flows, efd_parameters=None,verbose=False):
         #done = env.step(u_open_pct.flatten(),level=level)
         done = env.step(u_open_pct.flatten())
         
-    return {"data_log": env.data_log}
+    return {"data_log": env.data_log,"peak_filling_degrees":peak_filling_degrees}
+
+class Sim_cf:
+    threshold = 0.99 # on the constraint function to define the feasible (safe) region
+    computed_return_values = dict()
+    
+    @staticmethod
+    def objective(input_data):
+        return_values = []
+        for sample in input_data:
+            if tuple(sample.numpy()) in Sim_cf.computed_return_values.keys():
+                return_values.append(Sim_cf.computed_return_values[tuple(sample.numpy())]['objective'])
+            else:
+                constant_flow_params = np.array(sample).flatten()    
+                data = run_swmm(constant_flow_params, None,verbose=False)
+                flow_cost = 0.0
+                for key,value in data['data_log']['flow'].items():
+                    if '5' not in key and '9' not in key:
+                        flow_exceed = [x - 4.0 for x in value]
+                        flow_exceed = [x if x > 0 else 0 for x in flow_exceed]
+                        flow_cost += sum(flow_exceed)
+                objective_cost = flow_cost
+                flood_cost = 0.0
+                for key, value in data['data_log']['flooding'].items():
+                    if '5' not in key and '9' not in key:
+                        flood_cost += sum(value)
+                # if flood cost is more than zero, ensure it's more than one
+                if flood_cost > 0 and flood_cost < 1:
+                    flood_cost = 1.0
+                elif flood_cost <= 0.0:
+                    flood_cost = max(data['peak_filling_degrees'])
+                drainage_cost = 0.0
+                for key, value in data['data_log']['depthN'].items():
+                    if '5' not in key and '9' not in key:
+                        final_depth = value[-1]
+                        if final_depth > 0.10:
+                            drainage_cost += 10*final_depth # drainage cost will always be at least 1.0 if greater than zero
+                constraint_cost = flood_cost + drainage_cost
+
+                Sim_cf.computed_return_values[tuple(sample.numpy())] = dict()
+                Sim_cf.computed_return_values[tuple(sample.numpy())]['objective'] = objective_cost
+                Sim_cf.computed_return_values[tuple(sample.numpy())]['constraint'] = constraint_cost
+                return_values.append(objective_cost)
+        return_values = np.array(return_values).reshape(-1,1)
+        return return_values
+    
+    @staticmethod
+    def constraint(input_data):
+        return_values = []
+        for sample in input_data:
+            if tuple(sample.numpy()) in Sim_cf.computed_return_values.keys():
+                return_values.append(Sim_cf.computed_return_values[tuple(sample.numpy())]['constraint'])
+            else:
+                constant_flow_params = np.array(sample).flatten()    
+                data = run_swmm(constant_flow_params, None,verbose=False)
+                flow_cost = 0.0
+                for key,value in data['data_log']['flow'].items():
+                    if '5' not in key and '9' not in key:
+                        flow_exceed = [x - 4.0 for x in value]
+                        flow_exceed = [x if x > 0 else 0 for x in flow_exceed]
+                        flow_cost += sum(flow_exceed)
+                objective_cost = flow_cost
+                flood_cost = 0.0
+                for key, value in data['data_log']['flooding'].items():
+                    if '5' not in key and '9' not in key:
+                        flood_cost += sum(value)
+                # if flood cost is more than zero, ensure it's more than one
+                if flood_cost > 0 and flood_cost < 1:
+                    flood_cost = 1.0
+                elif flood_cost <= 0.0:
+                    flood_cost = max(data['peak_filling_degrees'])
+                drainage_cost = 0.0
+                for key, value in data['data_log']['depthN'].items():
+                    if '5' not in key and '9' not in key:
+                        final_depth = value[-1]
+                        if final_depth > 0.10:
+                            drainage_cost += 10*final_depth # drainage cost will always be at least 1.0 if greater than zero
+                constraint_cost = flood_cost + drainage_cost
+                
+                Sim_cf.computed_return_values[tuple(sample.numpy())] = dict()
+                Sim_cf.computed_return_values[tuple(sample.numpy())]['objective'] = objective_cost
+                Sim_cf.computed_return_values[tuple(sample.numpy())]['constraint'] = flood_cost
+                return_values.append(flood_cost)
+        return_values = np.array(return_values).reshape(-1,1)
+        return return_values
+    
+OBJECTIVE = "OBJECTIVE"
+CONSTRAINT = "CONSTRAINT"
+    
+def observer_cf(query_points):
+    return {
+            OBJECTIVE: Dataset(query_points, Sim_cf.objective(query_points)),
+            CONSTRAINT: Dataset(query_points, Sim_cf.constraint(query_points)),
+        }
 
 #run_swmm(np.ones(9), None, verbose=True)
-
+'''
 def f_constant_flows(constant_flows):
     data = run_swmm(constant_flows, None, verbose=False)
     # rather than penalize on the threshold 0.1, penalize the final storage depth for a smoother gradient
@@ -196,8 +301,159 @@ def f_efd(efd_parameters):
             drainage_penalty += 1000*final_depth
         
     return flow_penalty + drainage_penalty
+'''
+
+class Sim_efd:
+    threshold = 0.99 # on the constraint function to define the feasible (safe) region
+    computed_return_values = dict()
+    
+    @staticmethod
+    def objective(input_data):
+        return_values = []
+        for sample in input_data:
+            if tuple(sample.numpy()) in Sim_efd.computed_return_values.keys():
+                return_values.append(Sim_efd.computed_return_values[tuple(sample.numpy())]['objective'])
+            else:
+                constant_flow_params = np.array(sample).flatten()[:-1]
+                efd_params = np.array(sample).flatten()[-1]
+                data = run_swmm(constant_flow_params, efd_params,verbose=False)
+                flow_cost = 0.0
+                for key,value in data['data_log']['flow'].items():
+                    if '5' not in key and '9' not in key:
+                        flow_exceed = [x - 4.0 for x in value]
+                        flow_exceed = [x if x > 0 else 0 for x in flow_exceed]
+                        flow_cost += sum(flow_exceed)
+                objective_cost = flow_cost
+                flood_cost = 0.0
+                for key, value in data['data_log']['flooding'].items():
+                    if '5' not in key and '9' not in key:
+                        flood_cost += sum(value)
+                # if flood cost is more than zero, ensure it's more than one
+                if flood_cost > 0 and flood_cost < 1:
+                    flood_cost = 1.0
+                elif flood_cost <= 0.0:
+                    flood_cost = max(data['peak_filling_degrees'])
+                drainage_cost = 0.0
+                for key, value in data['data_log']['depthN'].items():
+                    if '5' not in key and '9' not in key:
+                        final_depth = value[-1]
+                        if final_depth > 0.10:
+                            drainage_cost += 10*final_depth # drainage cost will always be at least 1.0 if greater than zero
+                constraint_cost = flood_cost + drainage_cost
+
+                Sim_efd.computed_return_values[tuple(sample.numpy())] = dict()
+                Sim_efd.computed_return_values[tuple(sample.numpy())]['objective'] = objective_cost
+                Sim_efd.computed_return_values[tuple(sample.numpy())]['constraint'] = constraint_cost
+                return_values.append(objective_cost)
+        return_values = np.array(return_values).reshape(-1,1)
+        return return_values
+    
+    @staticmethod
+    def constraint(input_data):
+        return_values = []
+        for sample in input_data:
+            if tuple(sample.numpy()) in Sim_efd.computed_return_values.keys():
+                return_values.append(Sim_efd.computed_return_values[tuple(sample.numpy())]['constraint'])
+            else:
+                constant_flow_params = np.array(sample).flatten()[:-1]
+                efd_params = np.array(sample).flatten()[-1]
+                data = run_swmm(constant_flow_params, efd_params,verbose=False)
+                flow_cost = 0.0
+                for key,value in data['data_log']['flow'].items():
+                    if '5' not in key and '9' not in key:
+                        flow_exceed = [x - 4.0 for x in value]
+                        flow_exceed = [x if x > 0 else 0 for x in flow_exceed]
+                        flow_cost += sum(flow_exceed)
+                objective_cost = flow_cost
+                flood_cost = 0.0
+                for key, value in data['data_log']['flooding'].items():
+                    if '5' not in key and '9' not in key:
+                        flood_cost += sum(value)
+                # if flood cost is more than zero, ensure it's more than one
+                if flood_cost > 0 and flood_cost < 1:
+                    flood_cost = 1.0
+                elif flood_cost <= 0.0:
+                    flood_cost = max(data['peak_filling_degrees'])
+                drainage_cost = 0.0
+                for key, value in data['data_log']['depthN'].items():
+                    if '5' not in key and '9' not in key:
+                        final_depth = value[-1]
+                        if final_depth > 0.10:
+                            drainage_cost += 10*final_depth # drainage cost will always be at least 1.0 if greater than zero
+                constraint_cost = flood_cost + drainage_cost
+                
+                Sim_efd.computed_return_values[tuple(sample.numpy())] = dict()
+                Sim_efd.computed_return_values[tuple(sample.numpy())]['objective'] = objective_cost
+                Sim_efd.computed_return_values[tuple(sample.numpy())]['constraint'] = flood_cost
+                return_values.append(flood_cost)
+        return_values = np.array(return_values).reshape(-1,1)
+        return return_values
+    
+
+def observer_efd(query_points):
+    return {
+            OBJECTIVE: Dataset(query_points, Sim_efd.objective(query_points)),
+            CONSTRAINT: Dataset(query_points, Sim_efd.constraint(query_points)),
+        }
+
+def create_bo_model(data):
+        gpr = build_gpr(data, search_space)
+        return GaussianProcessRegression(gpr)
 
 if evaluating == "constant-flow":
+    lower_bounds = []
+    upper_bounds = []
+    for i in range(9):
+        lower_bounds.append(3.5)
+        upper_bounds.append(10.0)
+    search_space = Box(lower_bounds, upper_bounds)
+    
+    num_initial_points = 2
+    initial_data = observer_cf(search_space.sample(num_initial_points))
+    
+    initial_models = trieste.utils.map_values(create_bo_model, initial_data)
+
+    pof = trieste.acquisition.ProbabilityOfFeasibility(threshold=Sim_cf.threshold)
+    eci = trieste.acquisition.ExpectedConstrainedImprovement(
+        OBJECTIVE, pof.using(CONSTRAINT)
+    )
+    rule = EfficientGlobalOptimization(eci)  # type: ignore
+
+    num_steps = 2
+    bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_cf, search_space)
+
+    opt_result = bo.optimize(
+        num_steps, initial_data, initial_models, rule)
+    data = opt_result.try_get_final_datasets()
+    models = opt_result.try_get_final_models()
+    
+    # find the indices of the feasible query points
+    feasible_indices = np.where(data[CONSTRAINT].observations <= Sim_cf.threshold)[0]
+    # if feasible indices is empty, then there are no feasible points
+    if len(feasible_indices) == 0:
+        print("No feasible points found.")
+    else:
+        # find the index of the best feasible query point (tf doesn't play nice with np argmin)
+        best_feasible_index = -1
+        for idx in feasible_indices:
+            if best_feasible_index == -1:
+                best_feasible_index = idx
+            elif data[OBJECTIVE].observations[idx] < data[OBJECTIVE].observations[best_feasible_index]:
+                best_feasible_index = idx
+        #best_feasible_index = feasible_indices[np.argmin(data[OBJECTIVE].observations[feasible_indices])]
+        # get the best feasible query point
+        best_feasible_point = data[OBJECTIVE].query_points[best_feasible_index]
+        # get the best feasible observation
+        best_feasible_observation = data[OBJECTIVE].observations[best_feasible_index]
+
+
+        # save the optimal constant heads and the entire optimization object
+        np.savetxt(str("v" +version +"/optimal_constant_flows.txt"), best_feasible_point.numpy())
+        np.savetxt(str("v" +version +"/optimal_constant_flows_cost.txt"), best_feasible_observation.numpy())
+        # save the whole object
+        with open("bo_constant_flows.pkl", "wb") as f:
+            pickle.dump(opt_result, f)
+    '''
     domain = []
     x0 = []
     for i in range(9):
@@ -217,61 +473,166 @@ if evaluating == "constant-flow":
     np.savetxt(str("v" + version +"/optimal_constant_flows.txt"), bo.x)
     # save the float bo.fun to a text file 
     np.savetxt(str("v" + version +"/optimal_constant_flows_cost.txt"), np.array([bo.fun]))
-    
+    '''
 
-elif evaluating == "equal-filling":
-    optimal_constant_flows = np.loadtxt(str("v" + version +"/optimal_constant_flows.txt"))
-    #domain = [{"name": "TSS_feedback", "type": "continuous", "domain": (-1, -1e-4)},
-    #        {"name": "efd_gain", "type": "continuous", "domain": (0.0, 1.0)}]
-    domain = [Real(0.0, 10.0, name="efd_gain")]
-    x0 = [0.5] 
+elif evaluating == "efd":
+    lower_bounds = []
+    upper_bounds = []
+    for i in range(9):
+        lower_bounds.append(1.0)
+        upper_bounds.append(10.0)
+    lower_bounds.append(0.0)
+    upper_bounds.append(3.0)
+    search_space = Box(lower_bounds, upper_bounds)
     
-    bo = gp_minimize(f_efd, domain, x0=x0, n_calls=10, n_initial_points=5, 
-                        initial_point_generator = 'lhs',verbose=True)
+    num_initial_points = 25
+    initial_data = observer_efd(search_space.sample(num_initial_points))
     
-    print(bo.x)
-    print(bo.fun)
-    print(bo.x_iters)
-    # save the optimal efd params
-    np.savetxt(str("v" + version +"/optimal_efd_params.txt"), bo.x)
-    # save bo.fun
-    np.savetxt(str("v" + version +"/optimal_efd_cost.txt"), np.array([bo.fun]))
+    initial_models = trieste.utils.map_values(create_bo_model, initial_data)
+
+    pof = trieste.acquisition.ProbabilityOfFeasibility(threshold=Sim_efd.threshold)
+    eci = trieste.acquisition.ExpectedConstrainedImprovement(
+        OBJECTIVE, pof.using(CONSTRAINT)
+    )
+    rule = EfficientGlobalOptimization(eci)  # type: ignore
+
+    num_steps = 50
+    bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_efd, search_space)
+
+    opt_result = bo.optimize(
+        num_steps, initial_data, initial_models, rule)
+    data = opt_result.try_get_final_datasets()
+    models = opt_result.try_get_final_models()
+    
+    # find the indices of the feasible query points
+    feasible_indices = np.where(data[CONSTRAINT].observations <= Sim_efd.threshold)[0]
+    # if feasible indices is empty, then there are no feasible points
+    if len(feasible_indices) == 0:
+        print("No feasible points found.")
+    else:
+        # find the index of the best feasible query point (tf doesn't play nice with np argmin)
+        best_feasible_index = -1
+        for idx in feasible_indices:
+            if best_feasible_index == -1:
+                best_feasible_index = idx
+            elif data[OBJECTIVE].observations[idx] < data[OBJECTIVE].observations[best_feasible_index]:
+                best_feasible_index = idx
+        #best_feasible_index = feasible_indices[np.argmin(data[OBJECTIVE].observations[feasible_indices])]
+        # get the best feasible query point
+        best_feasible_point = data[OBJECTIVE].query_points[best_feasible_index]
+        # get the best feasible observation
+        best_feasible_observation = data[OBJECTIVE].observations[best_feasible_index]
+
+
+        # save the optimal constant heads and the entire optimization object
+        np.savetxt(str("v" +version +"/optimal_efd.txt"), best_feasible_point.numpy())
+        np.savetxt(str("v" +version +"/optimal_efd_cost.txt"), best_feasible_observation.numpy())
+        # save the whole object
+        #with open("bo_efd.pkl", "wb") as f:
+        #    pickle.dump(opt_result, f)
     
 elif evaluating == "both":
     evaluating = "constant-flow"
-    domain = []
-    x0 = []
+    lower_bounds = []
+    upper_bounds = []
     for i in range(9):
-        domain.append(Real(3.0,10.0))
-        x0.append(4.5)
-        
+        lower_bounds.append(3.5)
+        upper_bounds.append(10.0)
+    search_space = Box(lower_bounds, upper_bounds)
+    
+    num_initial_points = 25
+    initial_data = observer_cf(search_space.sample(num_initial_points))
+    
+    initial_models = trieste.utils.map_values(create_bo_model, initial_data)
 
-    bo = gp_minimize(f_constant_flows, domain,x0=x0, 
-                     n_calls=500, n_initial_points=50, 
-                     initial_point_generator = 'lhs',verbose=True)
-    #bo = gp_minimize(f_constant_flows, domain,x0=x0, verbose=True)
-    print(bo.x)
-    print(bo.fun)
-    print(bo.x_iters)
-    # save the optimal constant flows
-    np.savetxt(str("v" + version +"/optimal_constant_flows.txt"), bo.x)
-    # save the float bo.fun to a text file 
-    np.savetxt(str("v" + version +"/optimal_constant_flows_cost.txt"), np.array([bo.fun]))
+    pof = trieste.acquisition.ProbabilityOfFeasibility(threshold=Sim_cf.threshold)
+    eci = trieste.acquisition.ExpectedConstrainedImprovement(
+        OBJECTIVE, pof.using(CONSTRAINT)
+    )
+    rule = EfficientGlobalOptimization(eci)  # type: ignore
+
+    num_steps = 150
+    bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_cf, search_space)
+
+    opt_result = bo.optimize(
+        num_steps, initial_data, initial_models, rule)
+    data = opt_result.try_get_final_datasets()
+    models = opt_result.try_get_final_models()
     
-    evaluating="equal-filling"
-    optimal_constant_flows = np.loadtxt(str("v" + version +"/optimal_constant_flows.txt"))
-    #domain = [{"name": "TSS_feedback", "type": "continuous", "domain": (-1, -1e-4)},
-    #        {"name": "efd_gain", "type": "continuous", "domain": (0.0, 1.0)}]
-    domain = [Real(1e-5, 10.0, name="efd_gain")]
-    x0 = [0.1] 
+    # find the indices of the feasible query points
+    feasible_indices = np.where(data[CONSTRAINT].observations <= Sim_cf.threshold)[0]
+    # if feasible indices is empty, then there are no feasible points
+    if len(feasible_indices) == 0:
+        print("No feasible points found.")
+    else:
+        # find the index of the best feasible query point (tf doesn't play nice with np argmin)
+        best_feasible_index = -1
+        for idx in feasible_indices:
+            if best_feasible_index == -1:
+                best_feasible_index = idx
+            elif data[OBJECTIVE].observations[idx] < data[OBJECTIVE].observations[best_feasible_index]:
+                best_feasible_index = idx
+        #best_feasible_index = feasible_indices[np.argmin(data[OBJECTIVE].observations[feasible_indices])]
+        # get the best feasible query point
+        best_feasible_point = data[OBJECTIVE].query_points[best_feasible_index]
+        # get the best feasible observation
+        best_feasible_observation = data[OBJECTIVE].observations[best_feasible_index]
+
+
+        # save the optimal constant heads and the entire optimization object
+        np.savetxt(str("v" +version +"/optimal_constant_flows.txt"), best_feasible_point.numpy())
+        np.savetxt(str("v" +version +"/optimal_constant_flows_cost.txt"), best_feasible_observation.numpy())
     
-    bo = gp_minimize(f_efd, domain, x0=x0, n_calls=250, n_initial_points=25, 
-                        initial_point_generator = 'lhs',verbose=True)
+    print("\n\nconstant flow optimization finished. beginning efd optimization\n\n")    
+    evaluating = "efd"
+    lower_bounds = []
+    upper_bounds = []
+    for i in range(9):
+        lower_bounds.append(1.0)
+        upper_bounds.append(10.0)
+    lower_bounds.append(0.0)
+    upper_bounds.append(3.0)
+    search_space = Box(lower_bounds, upper_bounds)
     
-    print(bo.x)
-    print(bo.fun)
-    print(bo.x_iters)
-    # save the optimal efd params
-    np.savetxt(str("v" + version +"/optimal_efd_params.txt"), bo.x)
-    # save bo.fun
-    np.savetxt(str("v" + version +"/optimal_efd_cost.txt"), np.array([bo.fun]))
+    num_initial_points = 30
+    initial_data = observer_efd(search_space.sample(num_initial_points))
+    
+    initial_models = trieste.utils.map_values(create_bo_model, initial_data)
+
+    pof = trieste.acquisition.ProbabilityOfFeasibility(threshold=Sim_efd.threshold)
+    eci = trieste.acquisition.ExpectedConstrainedImprovement(
+        OBJECTIVE, pof.using(CONSTRAINT)
+    )
+    rule = EfficientGlobalOptimization(eci)  # type: ignore
+
+    num_steps = 200
+    bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_efd, search_space)
+
+    opt_result = bo.optimize(
+        num_steps, initial_data, initial_models, rule)
+    data = opt_result.try_get_final_datasets()
+    models = opt_result.try_get_final_models()
+    
+    # find the indices of the feasible query points
+    feasible_indices = np.where(data[CONSTRAINT].observations <= Sim_efd.threshold)[0]
+    # if feasible indices is empty, then there are no feasible points
+    if len(feasible_indices) == 0:
+        print("No feasible points found.")
+    else:
+        # find the index of the best feasible query point (tf doesn't play nice with np argmin)
+        best_feasible_index = -1
+        for idx in feasible_indices:
+            if best_feasible_index == -1:
+                best_feasible_index = idx
+            elif data[OBJECTIVE].observations[idx] < data[OBJECTIVE].observations[best_feasible_index]:
+                best_feasible_index = idx
+        #best_feasible_index = feasible_indices[np.argmin(data[OBJECTIVE].observations[feasible_indices])]
+        # get the best feasible query point
+        best_feasible_point = data[OBJECTIVE].query_points[best_feasible_index]
+        # get the best feasible observation
+        best_feasible_observation = data[OBJECTIVE].observations[best_feasible_index]
+
+
+        # save the optimal constant heads and the entire optimization object
+        np.savetxt(str("v" +version +"/optimal_efd.txt"), best_feasible_point.numpy())
+        np.savetxt(str("v" +version +"/optimal_efd_cost.txt"), best_feasible_observation.numpy())
