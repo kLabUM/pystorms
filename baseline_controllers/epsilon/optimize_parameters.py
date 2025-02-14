@@ -177,7 +177,7 @@ class Sim_cf:
                 loading_cost = 0.0
                 for key,value in data['data_log']['loading'].items():
                     loading_cost += sum(value)
-                objective_cost = loading_cost + sum(data['final_depths']) + np.std(data['final_depths'])
+                objective_cost = loading_cost + sum(data['final_depths'])*1e3 + np.std(data['final_depths'])*1e3
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -206,7 +206,7 @@ class Sim_cf:
                 loading_cost = 0.0
                 for key,value in data['data_log']['flow'].items():
                     loading_cost += sum(value)
-                objective_cost = loading_cost + sum(data['final_depths']) + np.std(data['final_depths'])
+                objective_cost = loading_cost + sum(data['final_depths'])*1e3 + np.std(data['final_depths'])*1e3
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -249,7 +249,7 @@ class Sim_efd:
                 loading_cost = 0.0
                 for key,value in data['data_log']['loading'].items():
                     loading_cost += sum(value)
-                objective_cost = loading_cost + sum(data['final_depths']) + np.std(data['final_depths'])
+                objective_cost = loading_cost + sum(data['final_depths'])*1e3 + np.std(data['final_depths'])*1e3
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -279,7 +279,7 @@ class Sim_efd:
                 loading_cost = 0.0
                 for key,value in data['data_log']['flow'].items():
                     loading_cost += sum(value)
-                objective_cost = loading_cost + sum(data['final_depths']) + np.std(data['final_depths'])
+                objective_cost = loading_cost + sum(data['final_depths'])*1e3 + np.std(data['final_depths'])*1e3
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -477,8 +477,8 @@ elif evaluating == 'both':
         np.savetxt(str("v" +version +"/optimal_constant_flows.txt"), best_feasible_point.numpy())
         np.savetxt(str("v" +version +"/optimal_constant_flows_cost.txt"), best_feasible_observation.numpy())
         # save the whole object
-        with open("bo_constant_flows.pkl", "wb") as f:
-            pickle.dump(opt_result, f)
+        #with open("bo_constant_flows.pkl", "wb") as f:
+        #    pickle.dump(opt_result, f)
 
 
     evaluating = "efd"
@@ -537,5 +537,5 @@ elif evaluating == 'both':
         np.savetxt(str("v" +version +"/optimal_efd.txt"), best_feasible_point.numpy())
         np.savetxt(str("v" +version +"/optimal_efd_cost.txt"), best_feasible_observation.numpy())
         # save the whole object
-        with open("bo_efd.pkl", "wb") as f:
-            pickle.dump(opt_result, f)
+        #with open("bo_efd.pkl", "wb") as f:
+        #    pickle.dump(opt_result, f)

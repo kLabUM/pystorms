@@ -91,7 +91,7 @@ class alpha(scenario):
 
     def step(self, actions=None, log=True,level="1",version="1"):
         # Implement the actions and take a step forward
-        done = self.env.step(actions)
+        done = self.env.step(actions,level=level)
 
         # Temp variables
         __performance = 0.0

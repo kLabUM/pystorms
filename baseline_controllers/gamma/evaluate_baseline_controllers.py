@@ -1,11 +1,11 @@
-'''
+
 # install pystorms from the current directory (this should be commented out in final version once pystorms source code isn't changing all the time)
 import subprocess
 import sys
 subprocess.check_call([sys.executable, '-m', 'pip', 'uninstall', '-y', 'pystorms'])
 subprocess.check_call([sys.executable, '-m', 'pip', 'cache', 'purge'])
 subprocess.check_call([sys.executable, '-m', 'pip', 'install', '.'])
-'''
+
 import pystorms # this will be the first line of the program when dev is done
 import copy
 import pyswmm
@@ -56,6 +56,8 @@ for parameter in tuning_values:
     elif evaluating == "equal-filling":
         optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[:-1]
         optimal_efd_params = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[-1]
+    elif evaluating == "uncontrolled":
+        optimal_constant_flows = np.ones(9)
     #optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
     #optimal_constant_flows = np.ones(9)*6.0
     #optimal_constant_flows[[4,8]] = 75.0 # 5 and 9 will flood
@@ -68,8 +70,9 @@ for parameter in tuning_values:
     # gamma is in imperial units of feet and cubic feet per second
     cfs2cms = 35.315
     ft2meters = 3.281
-    #env = pystorms.scenarios.gamma(version=version,level=level)
-    env = pystorms.scenarios.gamma()
+    env = pystorms.scenarios.gamma(version=version,level=level)
+    #env = pystorms.scenarios.gamma()
+    '''
     for state in env.config['states']:
         # if state contains 5 or 9, remove it
         if '5' in state[0] or '9' in state[0]:
@@ -82,6 +85,7 @@ for parameter in tuning_values:
         # if target contains 5 or 9, remove it
         if '5' in target[0] or '9' in target[0]:
             env.config['performance_targets'].remove(target)
+    '''
     #print(env.config['states'])
     #print(env.config['action_space'])
     #print(env.config['performance_targets'])
@@ -91,7 +95,7 @@ for parameter in tuning_values:
     last_read = env.env.sim.start_time - datetime.timedelta(hours=1)
     start_time = env.env.sim.start_time
     
-    u_open_pct = 0.0*np.ones(len(env.config['action_space'])) # start closed
+    u_open_pct = 1.0*np.ones(len(env.config['action_space'])) # start open
 
     states = pd.DataFrame(columns = env.config['states'])
     actions = pd.DataFrame(columns = env.config['action_space'])
@@ -110,7 +114,7 @@ for parameter in tuning_values:
     model = swmmio.Model(env.config["swmm_input"])
     #print(model.inp.orifices)
     orifice_areas = dict()
-    for ori in model.inp.orifices.index.tolist():
+    for ori in env.config['action_space']:
         # Geom1 and geom2 are the height and width of the orifice
         orifice_areas[ori] = model.inp.xsections.loc[ori, 'Geom1']*model.inp.xsections.loc[ori, 'Geom2']
         
@@ -151,7 +155,7 @@ for parameter in tuning_values:
             
             if evaluating == "constant-flow":
 
-                done = env.step(u_open_pct.flatten())
+                done = env.step(u_open_pct.flatten(),level=level)
             elif evaluating == "equal-filling":
                 for idx in range(len(env.config['action_space'])):
                     this_fd = filling_degrees[idx]
@@ -162,14 +166,17 @@ for parameter in tuning_values:
                         u_open_pct[i] = 1.0
                     elif u_open_pct[i] < 0.0:
                         u_open_pct[i] = 0.0
-                done = env.step(u_open_pct.flatten())
+                done = env.step(u_open_pct.flatten(),level=level)
 
+            elif evaluating == "uncontrolled":
+                u_open_pct = np.ones(len(env.config['action_space']))
+                done = env.step(u_open_pct.flatten(),level=level)
             else:
-                print("error. control scenario not recongized.")
+                print("invalid control scenario")
                 done = True
         if (not done) and verbose and env.env.sim.current_time.minute == 0 and env.env.sim.current_time.hour % 4 == 0: 
                 u_print = u_open_pct.flatten()
-                y_measured = env.state().reshape(-1,1)
+                y_measured = env.state(level=level).reshape(-1,1)
                 # print the names of the states and their current values side-by-side
                 print("state, value")
                 for idx in range(len(env.config['states'])):
@@ -201,10 +208,9 @@ for parameter in tuning_values:
                 
 
         if (not done) and env.env.sim.current_time > env.env.sim.end_time - datetime.timedelta(hours=1):
-            final_depths = env.state()
+            final_depths = env.state(level=level)
 
-        #done = env.step(u_open_pct.flatten(),level=level)
-        done = env.step(u_open_pct.flatten())
+        done = env.step(u_open_pct.flatten(),level=level)
         
     perf = sum(env.data_log["performance_measure"])
     print("cost:")
@@ -241,6 +247,20 @@ for parameter in tuning_values:
         perf_summary.to_csv(str(folder_path + "/costs_" + evaluating + "_a=" + str(parameter) + ".csv"))
 
     if plot:
+        
+        if evaluating == "uncontrolled":
+            states.to_csv(str(folder_path + "/states_" + str(evaluating) + ".csv"))
+            actions.to_csv(str(folder_path + "/actions_" + str(evaluating) + ".csv"))
+            # and the data log
+            with open(f'./v{version}/results/{evaluating}_data_log.pkl', 'wb') as f:
+                pickle.dump(env.data_log, f)
+        else:
+            # save the flows and depths
+            states.to_csv(str(folder_path + "/states_" + str(evaluating) + "_param=" + str(parameter) + ".csv"))
+            actions.to_csv(str(folder_path + "/actions_" + str(evaluating) + "_param=" + str(parameter) + ".csv"))
+            # and the data log
+            with open(f'./v{version}/lev{level}/results/{str(evaluating + "_param=" + str(parameter))}_data_log.pkl', 'wb') as f:
+                pickle.dump(env.data_log, f)
         
         
         # if there are any na values in states or weir_heads32, linearly interpolate over them

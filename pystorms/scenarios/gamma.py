@@ -33,9 +33,22 @@ class gamma(scenario):
         self._performormance_threshold = 4.0
         
         # todo: remove 5 and 9 from the scenario
+        if version == "2":
+            for state in self.config['states']:
+                # if state contains 5 or 9, remove it
+                if '5' in state[0] or '9' in state[0]:
+                    self.config['states'].remove(state)
+            for action in self.config['action_space']:
+                # if action contains 5 or 9, remove it
+                if '5' in action or '9' in action:
+                    self.config['action_space'].remove(action)
+            for target in self.config['performance_targets']:
+                # if target contains 5 or 9, remove it
+                if '5' in target[0] or '9' in target[0]:
+                    self.config['performance_targets'].remove(target)
         
         # Create the environment based on the physical parameters
-        self.env = environment(self.config, ctrl=True)
+        self.env = environment(self.config, ctrl=True,version=version,level=level)
 
         # Create an object for storing the data points
         self.data_log = {
@@ -52,7 +65,7 @@ class gamma(scenario):
 
     def step(self, actions=None, log=True, level="1", version="1"):
         # Implement the actions and take a step forward
-        done = self.env.step(actions)
+        done = self.env.step(actions,level=level)
 
         # Log the flows in the networks
         if log:

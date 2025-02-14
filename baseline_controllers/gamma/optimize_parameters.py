@@ -32,7 +32,7 @@ from trieste.models.gpflow import build_gpr, GaussianProcessRegression
 from trieste.acquisition.rule import EfficientGlobalOptimization
 import dill as pickle
 # GAMMA
-evaluating = "efd" # "constant-flow" or "efd" or "both"
+evaluating = "both" # "constant-flow" or "efd" or "both"
 version = "2" # "1" or "2" - 2 will be the updated, more difficult version
 level = "1"
 # level should always be 1 when optimizing parameters. controllers will be evaluated but not optimized on higher levels
@@ -405,7 +405,7 @@ if evaluating == "constant-flow":
     upper_bounds = []
     for i in range(9):
         lower_bounds.append(3.5)
-        upper_bounds.append(10.0)
+        upper_bounds.append(6.0)
     search_space = Box(lower_bounds, upper_bounds)
     
     num_initial_points = 2
@@ -479,8 +479,8 @@ elif evaluating == "efd":
     lower_bounds = []
     upper_bounds = []
     for i in range(9):
-        lower_bounds.append(1.0)
-        upper_bounds.append(10.0)
+        lower_bounds.append(0.0)
+        upper_bounds.append(6.0)
     lower_bounds.append(0.0)
     upper_bounds.append(3.0)
     search_space = Box(lower_bounds, upper_bounds)
@@ -537,10 +537,10 @@ elif evaluating == "both":
     upper_bounds = []
     for i in range(9):
         lower_bounds.append(3.5)
-        upper_bounds.append(10.0)
+        upper_bounds.append(6.0)
     search_space = Box(lower_bounds, upper_bounds)
     
-    num_initial_points = 25
+    num_initial_points = 100
     initial_data = observer_cf(search_space.sample(num_initial_points))
     
     initial_models = trieste.utils.map_values(create_bo_model, initial_data)
@@ -551,7 +551,7 @@ elif evaluating == "both":
     )
     rule = EfficientGlobalOptimization(eci)  # type: ignore
 
-    num_steps = 150
+    num_steps = 300
     bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_cf, search_space)
 
     opt_result = bo.optimize(
@@ -588,13 +588,13 @@ elif evaluating == "both":
     lower_bounds = []
     upper_bounds = []
     for i in range(9):
-        lower_bounds.append(1.0)
-        upper_bounds.append(10.0)
+        lower_bounds.append(0.0)
+        upper_bounds.append(6.0)
     lower_bounds.append(0.0)
     upper_bounds.append(3.0)
     search_space = Box(lower_bounds, upper_bounds)
     
-    num_initial_points = 30
+    num_initial_points = 100
     initial_data = observer_efd(search_space.sample(num_initial_points))
     
     initial_models = trieste.utils.map_values(create_bo_model, initial_data)
@@ -605,7 +605,7 @@ elif evaluating == "both":
     )
     rule = EfficientGlobalOptimization(eci)  # type: ignore
 
-    num_steps = 200
+    num_steps = 350
     bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_efd, search_space)
 
     opt_result = bo.optimize(
