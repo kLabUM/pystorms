@@ -4,7 +4,7 @@ from pystorms.config import load_config
 from pystorms.scenarios import scenario
 from pystorms.utilities import threshold, exponentialpenalty
 import yaml
-
+import swmmio
 
 class delta(scenario):
     r"""Delta Scenario
@@ -35,7 +35,7 @@ class delta(scenario):
 
     """
 
-    def __init__(self):
+    def __init__(self,version="1",level="1"):
         # Network configuration
         self.config = yaml.load(open(load_config("delta"), "r"), yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["name"])
@@ -52,6 +52,40 @@ class delta(scenario):
 
         # Additional penalty definition
         self.max_penalty = 10 ** 6
+        
+        if version == "2":
+            # threshold more stringent
+            self.threshold = 1.0
+            model = swmmio.Model(self.config["swmm_input"])
+            # extend end date
+            model.inp.options.loc['END_DATE', 'Value'] = '4/27/2016'
+            # remove downstream structural flow limitation
+            model.inp.xsections.loc["conduit_Eup","Geom1"] = 5.0 
+            model.inp.xsections.loc["conduit_Edown","Geom1"] = 5.0 
+            # eliminate uncontrollable subcatchment flooding
+            model.inp.xsections.loc["conduit_Csc","Geom1"] = 3.0
+            model.inp.xsections.loc["conduit_N1sc","Geom1"] = 3.0
+            #print(model.inp.infiltration)
+            
+            model.inp.options.loc['VARIABLE_STEP',"Value"] = 0.00 # ensure all sims have same number of steps
+            model.inp.options.loc["ROUTING_STEP","Value"] = "0:00:05" # X second hydraulic routing
+            print(model.inp.options)
+            # change infiltration method to horton (error 200 in original)
+            #model.inp.options.loc['INFILTRATION', 'Value'] = 'MODIFIED_HORTON'   
+            # initial moisture deficit is indicated as 4.0 for most subcatchments. can't be greater than 1.0
+            for subcatch in model.inp.infiltration.index:
+                if model.inp.infiltration.loc[subcatch, 'IMDmax'] > 1.0:
+                    #print(subcatch)
+                    model.inp.infiltration.loc[subcatch, 'IMDmax'] = 0.4 # assume typo. decimal one point over.
+                
+            # increase all rainfall intensities  
+            # cast entries in model.inp.timeseries['Value'] to float
+            model.inp.timeseries.loc[:, 'Value'] = model.inp.timeseries['Value'].astype(float)
+            #print(model.inp.timeseries['Value'][-1])
+            model.inp.timeseries.loc[:, 'Value'] = 1.25*model.inp.timeseries.loc[:, 'Value']
+            #print(model.inp.timeseries['Value'][-1])
+            model.inp.save(str(self.config["swmm_input"][:-4] + "_v2.inp")) 
+            self.config["swmm_input"] = str(self.config["swmm_input"][:-4] + "_v2.inp")
 
         # Create the environment based on the physical parameters
         self.env = environment(self.config, ctrl=True)
@@ -69,9 +103,9 @@ class delta(scenario):
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
 
-    def step(self, actions=None, log=True):
+    def step(self, actions=None, log=True,version="1",level="1"):
         # Implement the actions and take a step forward
-        done = self.env.step(actions)
+        done = self.env.step(actions,level=level)
 
         # Log the flows in the networks
         if log:
