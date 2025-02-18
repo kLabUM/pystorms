@@ -187,7 +187,7 @@ class Sim_cf:
                 flow_cost = 0.0
                 for key,value in data['data_log']['flow'].items():
                     if '5' not in key and '9' not in key:
-                        flow_exceed = [x - 4.0 for x in value]
+                        flow_exceed = [x - 3.0 for x in value]
                         flow_exceed = [x if x > 0 else 0 for x in flow_exceed]
                         flow_cost += sum(flow_exceed)
                 objective_cost = flow_cost
@@ -227,7 +227,7 @@ class Sim_cf:
                 flow_cost = 0.0
                 for key,value in data['data_log']['flow'].items():
                     if '5' not in key and '9' not in key:
-                        flow_exceed = [x - 4.0 for x in value]
+                        flow_exceed = [x - 3.0 for x in value]
                         flow_exceed = [x if x > 0 else 0 for x in flow_exceed]
                         flow_cost += sum(flow_exceed)
                 objective_cost = flow_cost
@@ -320,7 +320,7 @@ class Sim_efd:
                 flow_cost = 0.0
                 for key,value in data['data_log']['flow'].items():
                     if '5' not in key and '9' not in key:
-                        flow_exceed = [x - 4.0 for x in value]
+                        flow_exceed = [x - 3.0 for x in value]
                         flow_exceed = [x if x > 0 else 0 for x in flow_exceed]
                         flow_cost += sum(flow_exceed)
                 objective_cost = flow_cost
@@ -361,7 +361,7 @@ class Sim_efd:
                 flow_cost = 0.0
                 for key,value in data['data_log']['flow'].items():
                     if '5' not in key and '9' not in key:
-                        flow_exceed = [x - 4.0 for x in value]
+                        flow_exceed = [x - 3.0 for x in value]
                         flow_exceed = [x if x > 0 else 0 for x in flow_exceed]
                         flow_cost += sum(flow_exceed)
                 objective_cost = flow_cost
@@ -404,7 +404,7 @@ if evaluating == "constant-flow":
     lower_bounds = []
     upper_bounds = []
     for i in range(9):
-        lower_bounds.append(3.5)
+        lower_bounds.append(2.5)
         upper_bounds.append(6.0)
     search_space = Box(lower_bounds, upper_bounds)
     
@@ -536,7 +536,7 @@ elif evaluating == "both":
     lower_bounds = []
     upper_bounds = []
     for i in range(9):
-        lower_bounds.append(3.5)
+        lower_bounds.append(2.5)
         upper_bounds.append(6.0)
     search_space = Box(lower_bounds, upper_bounds)
     

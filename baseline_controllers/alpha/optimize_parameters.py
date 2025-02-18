@@ -225,7 +225,7 @@ def f_efd(efd_parameters):
     CSO_penalty = 0
     for weir in CSO_flows.keys():
         CSO_penalty += sum(CSO_flows[weir])**2
-    '''
+    
     flooding_penalty = 0
     for junction in flooding.keys():
         flooding_penalty += sum(flooding[junction])*100
@@ -243,7 +243,7 @@ def f_efd(efd_parameters):
     return_value = CSO_penalty + flooding_penalty - peak_filling_reward + sum(data["final_depths"]) + np.std(data['final_depths'])
     
     return return_value
-    '''
+    
     flooding_penalty = 0
     for junction in flooding.keys():
         #flooding_penalty += sum(flooding[junction])*100
@@ -282,7 +282,7 @@ class Sim_cf:
                 flow_cost = 0.0
                 for key,value in data['data_log']['flow'].items():
                     flow_cost += sum(value)
-                objective_cost = flow_cost + sum(data['final_depths']) + np.std(data['final_depths'])
+                objective_cost = flow_cost #+ sum(data['final_depths']) + np.std(data['final_depths'])
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -311,7 +311,7 @@ class Sim_cf:
                 flow_cost = 0.0
                 for key,value in data['data_log']['flow'].items():
                     flow_cost += sum(value)
-                objective_cost = flow_cost + sum(data['final_depths']) + np.std(data['final_depths'])
+                objective_cost = flow_cost #+ sum(data['final_depths']) + np.std(data['final_depths'])
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -355,7 +355,7 @@ class Sim_efd:
                 flow_cost = 0.0
                 for key,value in data['data_log']['flow'].items():
                     flow_cost += sum(value)
-                objective_cost = flow_cost + sum(data['final_depths']) + np.std(data['final_depths'])
+                objective_cost = flow_cost #+ sum(data['final_depths']) + np.std(data['final_depths'])
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -385,7 +385,7 @@ class Sim_efd:
                 flow_cost = 0.0
                 for key,value in data['data_log']['flow'].items():
                     flow_cost += sum(value)
-                objective_cost = flow_cost + sum(data['final_depths']) + np.std(data['final_depths'])
+                objective_cost = flow_cost #+ sum(data['final_depths']) + np.std(data['final_depths'])
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -421,10 +421,10 @@ if evaluating == "constant-flow":
     for i in range(10):
         if i < 5: # orifices, set constant flow rate
             lower_bounds.append(0.5)
-            upper_bounds.append(10.0)
+            upper_bounds.append(8.0)
         else: # regulators, set constant opening percentage
             lower_bounds.append(0.0)
-            upper_bounds.append(1.0)
+            upper_bounds.append(0.62)
         
     search_space = Box(lower_bounds, upper_bounds)
     
@@ -485,14 +485,14 @@ elif evaluating == "efd":
             upper_bounds.append(10.0)
         else: # regulators, set constant opening percentage
             lower_bounds.append(0.0)
-            upper_bounds.append(1.0)
+            upper_bounds.append(0.65)
     # efd gain bounds
     lower_bounds.append(0.0)
     upper_bounds.append(2.0)
         
     search_space = Box(lower_bounds, upper_bounds)
     
-    num_initial_points = 20
+    num_initial_points = 120
     initial_data = observer_efd(search_space.sample(num_initial_points))
     
     initial_models = trieste.utils.map_values(create_bo_model, initial_data)
@@ -503,7 +503,7 @@ elif evaluating == "efd":
     )
     rule = EfficientGlobalOptimization(eci)  # type: ignore
 
-    num_steps = 20
+    num_steps = 450
     bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_efd, search_space)
 
     opt_result = bo.optimize(
@@ -545,10 +545,10 @@ elif evaluating == "both":
     for i in range(10):
         if i < 5: # orifices, set constant flow rate
             lower_bounds.append(0.5)
-            upper_bounds.append(10.0)
+            upper_bounds.append(12.0)
         else: # regulators, set constant opening percentage
             lower_bounds.append(0.0)
-            upper_bounds.append(1.0)
+            upper_bounds.append(0.6)
         
     search_space = Box(lower_bounds, upper_bounds)
     
@@ -563,7 +563,7 @@ elif evaluating == "both":
     )
     rule = EfficientGlobalOptimization(eci)  # type: ignore
 
-    num_steps = 1000
+    num_steps = 500
     bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_cf, search_space)
 
     opt_result = bo.optimize(
@@ -604,17 +604,17 @@ elif evaluating == "both":
     for i in range(10):
         if i < 5: # orifices, set constant flow rate
             lower_bounds.append(0.5)
-            upper_bounds.append(10.0)
+            upper_bounds.append(12.0)
         else: # regulators, set constant opening percentage
             lower_bounds.append(0.0)
-            upper_bounds.append(1.0)
+            upper_bounds.append(0.6)
     # efd gain bounds
     lower_bounds.append(0.0)
     upper_bounds.append(2.0)
         
     search_space = Box(lower_bounds, upper_bounds)
     
-    num_initial_points = 110
+    num_initial_points = 150
     initial_data = observer_efd(search_space.sample(num_initial_points))
     
     initial_models = trieste.utils.map_values(create_bo_model, initial_data)
@@ -625,7 +625,7 @@ elif evaluating == "both":
     )
     rule = EfficientGlobalOptimization(eci)  # type: ignore
 
-    num_steps = 1200
+    num_steps = 500
     bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_efd, search_space)
 
     opt_result = bo.optimize(

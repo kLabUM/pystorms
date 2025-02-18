@@ -21,7 +21,7 @@ np.set_printoptions(precision=3,suppress=True)
 
 # ALPHA
 # options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
-evaluating = 'equal-filling' 
+evaluating = 'uncontrolled' 
 verbose = True
 version = "2" # options are "1" and "2"
 level = "1" # options are "1" , "2", and "3"
@@ -52,8 +52,10 @@ if not os.path.exists(folder_path):
 
 
 for parameter in tuning_values:
-    if evaluating == "constant-flow" or evaluating == "uncontrolled":
+    if evaluating == "constant-flow":
         optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
+    elif evaluating == "uncontrolled":
+        optimal_constant_flows = np.array([1.0,1.0,1.0,1.0,1.0,0.15,0.6,0.5,0.5,0.65])
     elif evaluating == "equal-filling":
         optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[:-1]
         optimal_efd_params = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[-1]
@@ -140,7 +142,12 @@ for parameter in tuning_values:
                 regulator_idx = [i for i in range(len(env.config['states'])) if regulator_id in env.config['states'][i]][0]
                     
                 # assume linear scaling with opening percentage
-                u_open_pct[idx] = Q_desired / (Cd * Ao * np.sqrt(2*g*state[regulator_idx]))
+                if state[regulator_idx] > 0:
+                    u_open_pct[idx] = Q_desired / (Cd * Ao * np.sqrt(2*g*state[regulator_idx]))
+                else:
+                    u_open_pct[idx] = 1.0
+                if np.isnan(u_open_pct[idx]):
+                    print("nan value for u_open_pct")
                 if u_open_pct[idx] > 1.0:
                     u_open_pct[idx] = 1.0
                 elif u_open_pct[idx] < 0.0:

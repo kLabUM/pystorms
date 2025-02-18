@@ -34,6 +34,7 @@ class gamma(scenario):
         
         # todo: remove 5 and 9 from the scenario
         if version == "2":
+            self._performormance_threshold = 3.0
             for state in self.config['states']:
                 # if state contains 5 or 9, remove it
                 if '5' in state[0] or '9' in state[0]:

@@ -1,11 +1,12 @@
 
+'''
 # install pystorms from the current directory (this should be commented out in final version once pystorms source code isn't changing all the time)
 import subprocess
 import sys
 subprocess.check_call([sys.executable, '-m', 'pip', 'uninstall', '-y', 'pystorms'])
 subprocess.check_call([sys.executable, '-m', 'pip', 'cache', 'purge'])
 subprocess.check_call([sys.executable, '-m', 'pip', 'install', '.'])
-
+'''
 import pystorms # this will be the first line of the program when dev is done
 import copy
 import pyswmm
@@ -21,7 +22,7 @@ np.set_printoptions(precision=3,suppress=True)
 
 # GAMMA
 # options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
-evaluating = 'constant-flow' 
+evaluating = 'equal-filling' 
 verbose = True
 version = "2" # options are "1" and "2"
 level = "1" # options are "1" , "2", and "3"
@@ -191,7 +192,7 @@ for parameter in tuning_values:
             
         if (not done) and (env.env.sim.current_time > last_read + datetime.timedelta(minutes=1)) and plot: # log data 
             last_read = env.env.sim.current_time
-            state = env.state().reshape(1,len(env.config['states']))
+            state = env.state(level="1").reshape(1,len(env.config['states']))
             current_state = pd.DataFrame(data=state, columns = env.config['states'], index = [env.env.sim.current_time] )
             states = pd.concat((states,current_state))
             action = u_open_pct.reshape(1,len(env.config['action_space']))
@@ -208,7 +209,7 @@ for parameter in tuning_values:
                 
 
         if (not done) and env.env.sim.current_time > env.env.sim.end_time - datetime.timedelta(hours=1):
-            final_depths = env.state(level=level)
+            final_depths = env.state(level="1")
 
         done = env.step(u_open_pct.flatten(),level=level)
         
@@ -222,8 +223,8 @@ for parameter in tuning_values:
             print(key, sum(value))
     print("flow threshold exceedance")
     for key,value in env.data_log['flow'].items():
-        value = [x-4.0 for x in value]
-        value = [x if x > 0 else 0 for x in value]
+        value = [x-env._performormance_threshold for x in value]
+        value = [x if x > 0 else 0 for x in value] 
         # high flows
         if sum(value) > 0:
             print(key, sum(value))

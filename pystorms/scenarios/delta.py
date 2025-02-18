@@ -55,7 +55,7 @@ class delta(scenario):
         
         if version == "2":
             # threshold more stringent
-            self.threshold = 1.0
+            self.threshold = 0.5
             model = swmmio.Model(self.config["swmm_input"])
             # extend end date
             model.inp.options.loc['END_DATE', 'Value'] = '4/27/2016'
@@ -69,7 +69,7 @@ class delta(scenario):
             
             model.inp.options.loc['VARIABLE_STEP',"Value"] = 0.00 # ensure all sims have same number of steps
             model.inp.options.loc["ROUTING_STEP","Value"] = "0:00:05" # X second hydraulic routing
-            print(model.inp.options)
+            #print(model.inp.options)
             # change infiltration method to horton (error 200 in original)
             #model.inp.options.loc['INFILTRATION', 'Value'] = 'MODIFIED_HORTON'   
             # initial moisture deficit is indicated as 4.0 for most subcatchments. can't be greater than 1.0
@@ -82,7 +82,7 @@ class delta(scenario):
             # cast entries in model.inp.timeseries['Value'] to float
             model.inp.timeseries.loc[:, 'Value'] = model.inp.timeseries['Value'].astype(float)
             #print(model.inp.timeseries['Value'][-1])
-            model.inp.timeseries.loc[:, 'Value'] = 1.25*model.inp.timeseries.loc[:, 'Value']
+            model.inp.timeseries.loc[:, 'Value'] = 1.3*model.inp.timeseries.loc[:, 'Value']
             #print(model.inp.timeseries['Value'][-1])
             model.inp.save(str(self.config["swmm_input"][:-4] + "_v2.inp")) 
             self.config["swmm_input"] = str(self.config["swmm_input"][:-4] + "_v2.inp")

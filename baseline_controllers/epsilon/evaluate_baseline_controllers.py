@@ -22,7 +22,7 @@ np.set_printoptions(precision=3,suppress=True)
 # options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
 evaluating = 'constant-flow' 
 verbose = True
-version = "1" # options are "1" and "2"
+version = "2" # options are "1" and "2"
 level = "1" # options are "1" , "2", and "3"
 plot = True # plot True significantly increases the memory usage. 
 # set the working directory to the directory of this script
@@ -101,7 +101,7 @@ for parameter in tuning_values:
         # take control actions?
         if env.env.sim.current_time.minute % 5 == 0 and (env.env.sim.current_time > last_eval + datetime.timedelta(minutes=2)):
             last_eval = env.env.sim.current_time
-            state = env.state()[:11] # only the first eleven, controlled basins
+            state = env.state(level=level)[:11] # only the first eleven, controlled basins
             for idx in range(len(u_open_pct)): # set h_weir to achieve the desired head over the weir
        
                 max_weir_height = H[env.config['action_space'][idx]]
@@ -120,12 +120,12 @@ for parameter in tuning_values:
             for idx, state in enumerate(env.config['states']):
                 if 'depth' in state[1]:
                     node_id = state[0]
-                    peak_filling_degrees[node_id] = max(peak_filling_degrees[node_id],env.state()[idx]/max_depths[node_id])
+                    peak_filling_degrees[node_id] = max(peak_filling_degrees[node_id],env.state(level="1")[idx]/max_depths[node_id]) # state level 1 because we're recording info for later
             if evaluating == "constant-flow":
                 for i in range(len(u_open_pct)):
                     if u_open_pct[i,0]< 0.09:
                         u_open_pct[i,0] = 0.09
-                done = env.step(u_open_pct.flatten())
+                done = env.step(u_open_pct.flatten(),level=level)
             elif evaluating == "efd":
                 # this is a slightly different formulation for equal filling degree
                 # the fixed depth of the inline storages is based on the height of the weir
@@ -143,13 +143,13 @@ for parameter in tuning_values:
                 #for i in range(len(u_open_pct)):
                 #    if u_open_pct[i,0]< 0.09:
                 #        print("efd using storage above the weir")
-                done = env.step(u_open_pct.flatten())
+                done = env.step(u_open_pct.flatten(),level=level)
                 
             elif evaluating == 'uncontrolled':
                 u_open_pct = np.ones((len(env.config['action_space']),1))
             if verbose and env.env.sim.current_time.minute == 0 and env.env.sim.current_time.hour % 2 == 0: 
                 u_print = u_open_pct.flatten()
-                y_measured = env.state().reshape(-1,1)
+                y_measured = env.state(level=level).reshape(-1,1)
                 print("              y_measured,  u")
                 print(np.c_[np.array(env.config['states'][:11]),np.round(y_measured[:11],2) , np.round(u_print.reshape(-1,1),3)])
                 print("current time, end time")
@@ -158,7 +158,7 @@ for parameter in tuning_values:
             
         if (env.env.sim.current_time > last_read + datetime.timedelta(minutes=1)) and plot: # log data 
             last_read = env.env.sim.current_time
-            state = env.state().reshape(1,len(env.config['states']))
+            state = env.state(level="1").reshape(1,len(env.config['states'])) # state level 1 - get the true data for plotting
             current_state = pd.DataFrame(data=state, columns = env.config['states'], index = [env.env.sim.current_time] )
             states = pd.concat((states,current_state))
             action = u_open_pct.reshape(1,len(env.config['action_space']))
@@ -168,7 +168,7 @@ for parameter in tuning_values:
             weir_heads32_rn = np.array([])
             for asset_idx in range(len(env.config['action_space'])):
                 #print("junction ", env.config['states'][asset_idx], " is upstream of ", env.config['action_space'][asset_idx])
-                h_up = env.state()[asset_idx]
+                h_up = env.state(level="1")[asset_idx]
                 h_weir = (1 - u_open_pct[asset_idx])*H[env.config['action_space'][asset_idx]] # weir height
                 if h_weir >= h_up: # weir is taller than the water pooled behind it, so no flow
                     h = 0
@@ -181,7 +181,7 @@ for parameter in tuning_values:
             weir_heads32 = pd.concat((weir_heads32,pd.DataFrame(data=weir_heads32_rn, columns=env.config['action_space'], index = [env.env.sim.current_time])),axis=0)
             
         if env.env.sim.current_time > env.env.sim.end_time - datetime.timedelta(hours=1):
-            final_depths = env.state()[:11]
+            final_depths = env.state(level="1")[:11]
 
         done = env.step(u_open_pct.flatten(),level=level)
     

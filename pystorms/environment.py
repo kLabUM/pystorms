@@ -83,7 +83,11 @@ class environment:
                     actuator_schedule.loc[fault_datetime, actuator] = "stuck"
                     fix_datetime = fault_datetime + (self.sim.end_time - self.sim.start_time) * fault_duration
                     actuator_schedule.loc[fix_datetime, actuator] = "fix"
+            
+            # ensure there are no duplicate columns in actuator_schedule
+            actuator_schedule = actuator_schedule.loc[:,~actuator_schedule.columns.duplicated()]
             self.actuator_schedule = actuator_schedule
+            
             # if actuator_schedule is empty, make it None
             if actuator_schedule.empty:
                 self.actuator_schedule = None
@@ -100,6 +104,7 @@ class environment:
                     sensor_schedule.loc[fault_datetime, sensor] = "stuck"
                     fix_datetime = fault_datetime + (self.sim.end_time - self.sim.start_time) * fault_duration
                     sensor_schedule.loc[fix_datetime, sensor] = "fix"
+            sensor_schedule = sensor_schedule.loc[:,~sensor_schedule.columns.duplicated()]
             self.sensor_schedule = sensor_schedule
             if sensor_schedule.empty:
                 self.sensor_schedule = None 
@@ -116,6 +121,7 @@ class environment:
                     actuator_schedule.loc[fault_datetime, actuator] = "stuck"
                     fix_datetime = fault_datetime + (self.sim.end_time - self.sim.start_time) * fault_duration
                     actuator_schedule.loc[fix_datetime, actuator] = "fix"
+            actuator_schedule = actuator_schedule.loc[:,~actuator_schedule.columns.duplicated()]
             self.actuator_schedule = actuator_schedule
             if actuator_schedule.empty:
                 self.actuator_schedule = None
@@ -146,7 +152,7 @@ class environment:
                 ID = _temp[0]
                 attribute = _temp[1]
 
-                if level == "3" and self.sensor_schedule is not None:
+                if level == "3" and self.sensor_schedule is not None and self.sensor_schedule[ID] is not None:
                     # if the current time has a "stuck" before it and a "fix" after it for the column "ID"
                     # assign the most recent value in the data_log and continue
                     # check if self.current_time has "stuck" before and "fix" after in sensor_schedule[ID]
@@ -227,7 +233,7 @@ class environment:
             # if actions are an array or a list
             if type(actions) == list or type(actions) == np.ndarray:
                 for asset, valve_position in zip(self.config["action_space"], actions):
-                    if level == "2" or level == "3" and self.actuator_schedule is not None:
+                    if (level == "2" or level == "3") and self.actuator_schedule is not None and self.actuator_schedule[asset] is not None:
                         # if the current time has a "stuck" before it and a "fix" after it for the column "asset"
                         # assign the most recent value in the data_log and continue
                         # check if self.current_time has "stuck" before and "fix" after in actuator_schedule[asset]
@@ -244,7 +250,7 @@ class environment:
                     self._setValvePosition(asset, valve_position)
             elif type(actions) == dict:
                 for valve_position, asset in enumerate(actions):
-                    if level == "2" or level == "3" and self.actuator_schedule is not None:
+                    if (level == "2" or level == "3") and self.actuator_schedule is not None and self.actuator_schedule[asset] is not None:
                         stuck_times = self.actuator_schedule[asset].index[self.actuator_schedule[asset] == "stuck"]
                         fix_times = self.actuator_schedule[asset].index[self.actuator_schedule[asset] == "fix"]
                         if len(stuck_times) > 0:
