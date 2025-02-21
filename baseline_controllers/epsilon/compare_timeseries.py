@@ -11,7 +11,7 @@ from matplotlib.gridspec import GridSpec
 import os
 
 # EPSILON SCENARIO
-version = "1"
+version = "2"
 level = "1"
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))

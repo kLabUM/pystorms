@@ -110,7 +110,6 @@ def run_swmm(constant_flows, efd_parameters=None,verbose=False):
                 # so by making the weirs more similar opening percentages, the fixed depths are converging
                 u_avg = np.mean(u_open_pct)
                 u_diff = u_avg - u_open_pct
-                
                 for i in [0,3,8]: # the most downstream dams
                     TSS_conc = env.state()[-1]
                     delta_TSS = TSS_conc - 150 # 150 is roughly the long term average
@@ -121,6 +120,11 @@ def run_swmm(constant_flows, efd_parameters=None,verbose=False):
                 #for i in range(len(u_open_pct)):
                 #    if u_open_pct[i,0]< 0.09:
                 #        print("efd using storage above the weir")
+                for i in range(len(u_open_pct)):
+                    if u_open_pct[i,0]< 0.0:
+                        u_open_pct[i,0] = 0.0
+                    elif u_open_pct[i,0]> 1.0:
+                        u_open_pct[i,0] = 1.0
                 done = env.step(u_open_pct.flatten())
 
             else:
@@ -138,12 +142,13 @@ def run_swmm(constant_flows, efd_parameters=None,verbose=False):
             
             if env.env.sim.current_time > env.env.sim.end_time - datetime.timedelta(hours=1):
                 final_depths = env.state()[:11]
+                final_weir_settings = u_open_pct.flatten()
                 
         else:
             done = env.step(u_open_pct.flatten())
             
 
-    return {"data_log": env.data_log, "final_depths": final_depths,"peak_filling_degrees": peak_filling_degrees}
+    return {"data_log": env.data_log, "final_depths": final_depths,"peak_filling_degrees": peak_filling_degrees, "final_weir_settings":final_weir_settings}
 
 '''
 def f_constant_flows(constant_flows):
@@ -177,7 +182,8 @@ class Sim_cf:
                 loading_cost = 0.0
                 for key,value in data['data_log']['loading'].items():
                     loading_cost += sum(value)
-                objective_cost = loading_cost + sum(data['final_depths'])*1e2 + np.std(data['final_depths'])*1e3
+                #objective_cost = loading_cost + sum(data['final_depths'])*5e1 + np.std(data['final_depths'])*1e3
+                objective_cost = loading_cost + np.std(data['final_weir_settings'])*1e5
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -206,7 +212,7 @@ class Sim_cf:
                 loading_cost = 0.0
                 for key,value in data['data_log']['flow'].items():
                     loading_cost += sum(value)
-                objective_cost = loading_cost + sum(data['final_depths'])*1e2 + np.std(data['final_depths'])*1e3
+                objective_cost = loading_cost + np.std(data['final_weir_settings'])*1e5
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -249,7 +255,7 @@ class Sim_efd:
                 loading_cost = 0.0
                 for key,value in data['data_log']['loading'].items():
                     loading_cost += sum(value)
-                objective_cost = loading_cost + sum(data['final_depths'])*1e2 + np.std(data['final_depths'])*1e3
+                objective_cost = loading_cost + np.std(data['final_weir_settings'])*1e5
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -279,7 +285,7 @@ class Sim_efd:
                 loading_cost = 0.0
                 for key,value in data['data_log']['flow'].items():
                     loading_cost += sum(value)
-                objective_cost = loading_cost + sum(data['final_depths'])*1e2 + np.std(data['final_depths'])*1e3
+                objective_cost = loading_cost + np.std(data['final_weir_settings'])*1e5
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -310,8 +316,8 @@ if evaluating == "constant-flow":
     lower_bounds = []
     upper_bounds = []
     for i in range(11):
-        lower_bounds.append(0.3)
-        upper_bounds.append(6.0)
+        lower_bounds.append(0.7)
+        upper_bounds.append(4.0)
 
         
     search_space = Box(lower_bounds, upper_bounds)
@@ -368,8 +374,8 @@ elif evaluating == "efd":
     lower_bounds = []
     upper_bounds = []
     for i in range(11):
-        lower_bounds.append(0.3)
-        upper_bounds.append(6.0)
+        lower_bounds.append(0.7)
+        upper_bounds.append(4.0)
     lower_bounds.append(-1e-1) # tss feedback
     upper_bounds.append(-1e-4)
     lower_bounds.append(0.0) # efd gain
@@ -377,7 +383,7 @@ elif evaluating == "efd":
         
     search_space = Box(lower_bounds, upper_bounds)
     
-    num_initial_points = 100
+    num_initial_points = 2 # 100
     initial_data = observer_efd(search_space.sample(num_initial_points))
     
     initial_models = trieste.utils.map_values(create_bo_model, initial_data)
@@ -388,7 +394,7 @@ elif evaluating == "efd":
     )
     rule = EfficientGlobalOptimization(eci)  # type: ignore
 
-    num_steps = 450
+    num_steps = 1 # 450
     bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_efd, search_space)
 
     opt_result = bo.optimize(
@@ -428,8 +434,8 @@ elif evaluating == 'both':
     lower_bounds = []
     upper_bounds = []
     for i in range(11):
-        lower_bounds.append(0.3)
-        upper_bounds.append(6.0)
+        lower_bounds.append(0.7)
+        upper_bounds.append(4.0)
 
         
     search_space = Box(lower_bounds, upper_bounds)
@@ -485,8 +491,8 @@ elif evaluating == 'both':
     lower_bounds = []
     upper_bounds = []
     for i in range(11):
-        lower_bounds.append(0.3)
-        upper_bounds.append(6.0)
+        lower_bounds.append(0.7)
+        upper_bounds.append(4.0)
     lower_bounds.append(-1e-1) # tss feedback
     upper_bounds.append(-1e-4)
     lower_bounds.append(0.0) # efd gain
@@ -494,7 +500,7 @@ elif evaluating == 'both':
         
     search_space = Box(lower_bounds, upper_bounds)
     
-    num_initial_points = 100
+    num_initial_points = 120
     initial_data = observer_efd(search_space.sample(num_initial_points))
     
     initial_models = trieste.utils.map_values(create_bo_model, initial_data)

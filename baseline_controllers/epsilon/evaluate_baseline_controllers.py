@@ -20,7 +20,7 @@ np.set_printoptions(precision=3,suppress=True)
 
 # EPSILON
 # options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
-evaluating = 'constant-flow' 
+evaluating = 'constant-flow'
 verbose = True
 version = "2" # options are "1" and "2"
 level = "1" # options are "1" , "2", and "3"
@@ -126,7 +126,7 @@ for parameter in tuning_values:
                     if u_open_pct[i,0]< 0.09:
                         u_open_pct[i,0] = 0.09
                 done = env.step(u_open_pct.flatten(),level=level)
-            elif evaluating == "efd":
+            elif evaluating == "equal-filling":
                 # this is a slightly different formulation for equal filling degree
                 # the fixed depth of the inline storages is based on the height of the weir
                 # so by making the weirs more similar opening percentages, the fixed depths are converging
@@ -143,6 +143,11 @@ for parameter in tuning_values:
                 #for i in range(len(u_open_pct)):
                 #    if u_open_pct[i,0]< 0.09:
                 #        print("efd using storage above the weir")
+                for i in range(len(u_open_pct)):
+                    if u_open_pct[i,0]< 0.0:
+                        u_open_pct[i,0] = 0.0
+                    elif u_open_pct[i,0]> 1.0:
+                        u_open_pct[i,0] = 1.0
                 done = env.step(u_open_pct.flatten(),level=level)
                 
             elif evaluating == 'uncontrolled':
