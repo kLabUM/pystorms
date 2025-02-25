@@ -40,7 +40,7 @@ from trieste.acquisition.rule import EfficientGlobalOptimization
 
 
 # ALPHA
-evaluating = "both" # "constant-flow" or "efd" or "both"
+evaluating = "constant-flow" # "constant-flow" or "efd" or "both"
 version = "2" # "1" or "2" - 2 will be the updated, more difficult version
 level = "1"
 # level should always be 1 when optimizing parameters. controllers will be evaluated but not optimized on higher levels
@@ -421,14 +421,17 @@ if evaluating == "constant-flow":
     for i in range(10):
         if i < 5: # orifices, set constant flow rate
             lower_bounds.append(0.5)
-            upper_bounds.append(8.0)
+            upper_bounds.append(20.0)
         else: # regulators, set constant opening percentage
             lower_bounds.append(0.0)
-            upper_bounds.append(0.62)
+            upper_bounds.append(0.7)
         
     search_space = Box(lower_bounds, upper_bounds)
     
-    num_initial_points = 20
+    num_initial_points = 150
+        
+    search_space = Box(lower_bounds, upper_bounds)
+    
     initial_data = observer_cf(search_space.sample(num_initial_points))
     
     initial_models = trieste.utils.map_values(create_bo_model, initial_data)
@@ -439,7 +442,7 @@ if evaluating == "constant-flow":
     )
     rule = EfficientGlobalOptimization(eci)  # type: ignore
 
-    num_steps = 20
+    num_steps = 300
     bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_cf, search_space)
 
     opt_result = bo.optimize(

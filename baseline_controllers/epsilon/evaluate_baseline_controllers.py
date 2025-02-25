@@ -50,8 +50,12 @@ if not os.path.exists(folder_path):
     os.makedirs(folder_path)
 
 for parameter in tuning_values:
-    optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
-    efd_parameters = np.loadtxt(str("./v" + version + "/optimal_efd_params.txt"))
+    if evaluating == "constant-flow":
+        optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
+        efd_parameters = None
+    elif evaluating == "equal-filling":
+        efd_parameters = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[-2:]
+        optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[:-2]
 
     print("tuning value: ", parameter)
     optimal_constant_flows = optimal_constant_flows*(1+parameter)
@@ -140,9 +144,9 @@ for parameter in tuning_values:
                     # so efd_parameters[0] should be negative
 
                 u_open_pct = u_open_pct + efd_parameters[1]*u_diff 
-                #for i in range(len(u_open_pct)):
-                #    if u_open_pct[i,0]< 0.09:
-                #        print("efd using storage above the weir")
+                for i in range(len(u_open_pct)):
+                    if u_open_pct[i,0]< 0.01:
+                        pass
                 for i in range(len(u_open_pct)):
                     if u_open_pct[i,0]< 0.0:
                         u_open_pct[i,0] = 0.0

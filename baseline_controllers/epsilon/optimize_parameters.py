@@ -35,7 +35,7 @@ from trieste.models.gpflow import build_gpr, GaussianProcessRegression
 from trieste.acquisition.rule import EfficientGlobalOptimization
 
 # EPSILON
-evaluating = "both" # "constant-flow" or "efd" or "both"
+evaluating = "efd" # "constant-flow" or "efd" or "both"
 version = "2" # "1" or "2" - 2 will be the updated, more difficult version
 level = "1"
 # level should always be 1 when optimizing parameters. controllers will be evaluated but not optimized on higher levels
@@ -182,8 +182,10 @@ class Sim_cf:
                 loading_cost = 0.0
                 for key,value in data['data_log']['loading'].items():
                     loading_cost += sum(value)
+                flow_cost = np.std(np.array(data['data_log']['flow']['001']).flatten()) # penalize the outflow variation
+                
                 #objective_cost = loading_cost + sum(data['final_depths'])*5e1 + np.std(data['final_depths'])*1e3
-                objective_cost = loading_cost + np.std(data['final_weir_settings'])*1e5
+                objective_cost = np.std(data['final_weir_settings'])*5e4 + flow_cost*1e3
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -212,7 +214,10 @@ class Sim_cf:
                 loading_cost = 0.0
                 for key,value in data['data_log']['flow'].items():
                     loading_cost += sum(value)
-                objective_cost = loading_cost + np.std(data['final_weir_settings'])*1e5
+                flow_cost = np.std(np.array(data['data_log']['flow']['001']).flatten()) # penalize the outflow variation
+                
+                #objective_cost = loading_cost + sum(data['final_depths'])*5e1 + np.std(data['final_depths'])*1e3
+                objective_cost = np.std(data['final_weir_settings'])*5e4 + flow_cost*1e3
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -255,7 +260,10 @@ class Sim_efd:
                 loading_cost = 0.0
                 for key,value in data['data_log']['loading'].items():
                     loading_cost += sum(value)
-                objective_cost = loading_cost + np.std(data['final_weir_settings'])*1e5
+                flow_cost = np.std(np.array(data['data_log']['flow']['001']).flatten()) # penalize the outflow variation
+                
+                #objective_cost = loading_cost + sum(data['final_depths'])*5e1 + np.std(data['final_depths'])*1e3
+                objective_cost = loading_cost + np.std(data['final_weir_settings'])*9e4 + flow_cost*1e2
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -285,7 +293,10 @@ class Sim_efd:
                 loading_cost = 0.0
                 for key,value in data['data_log']['flow'].items():
                     loading_cost += sum(value)
-                objective_cost = loading_cost + np.std(data['final_weir_settings'])*1e5
+                flow_cost = np.std(np.array(data['data_log']['flow']['001']).flatten()) # penalize the outflow variation
+                
+                #objective_cost = loading_cost + sum(data['final_depths'])*5e1 + np.std(data['final_depths'])*1e3
+                objective_cost = loading_cost + np.std(data['final_weir_settings'])*9e4 + flow_cost*1e2
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -383,7 +394,7 @@ elif evaluating == "efd":
         
     search_space = Box(lower_bounds, upper_bounds)
     
-    num_initial_points = 2 # 100
+    num_initial_points = 120
     initial_data = observer_efd(search_space.sample(num_initial_points))
     
     initial_models = trieste.utils.map_values(create_bo_model, initial_data)
@@ -394,7 +405,7 @@ elif evaluating == "efd":
     )
     rule = EfficientGlobalOptimization(eci)  # type: ignore
 
-    num_steps = 1 # 450
+    num_steps = 450
     bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_efd, search_space)
 
     opt_result = bo.optimize(
