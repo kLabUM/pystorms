@@ -263,7 +263,7 @@ class Sim_efd:
                 flow_cost = np.std(np.array(data['data_log']['flow']['001']).flatten()) # penalize the outflow variation
                 
                 #objective_cost = loading_cost + sum(data['final_depths'])*5e1 + np.std(data['final_depths'])*1e3
-                objective_cost = loading_cost + np.std(data['final_weir_settings'])*9e4 + flow_cost*1e2
+                objective_cost = loading_cost + np.std(data['final_weir_settings'])*5e5 + flow_cost*1e2
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -296,7 +296,7 @@ class Sim_efd:
                 flow_cost = np.std(np.array(data['data_log']['flow']['001']).flatten()) # penalize the outflow variation
                 
                 #objective_cost = loading_cost + sum(data['final_depths'])*5e1 + np.std(data['final_depths'])*1e3
-                objective_cost = loading_cost + np.std(data['final_weir_settings'])*9e4 + flow_cost*1e2
+                objective_cost = loading_cost + np.std(data['final_weir_settings'])*5e5 + flow_cost*1e2
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
