@@ -61,11 +61,14 @@ def observer_unconstrained(query_points):
 def create_bo_model(data):
     gpr = build_gpr(data, search_space)
     return GaussianProcessRegression(gpr)
+
 # set the random seed
+rand_seed = 42
+np.random.seed(rand_seed)
 
 search_space = Box([1.0], [2.0])
 num_init_points = 4
-num_steps = 6
+num_steps = 4
 init_data_cons = observer_constrained(search_space.sample(num_init_points))
 init_query_points = init_data_cons[OBJECTIVE].query_points
 init_data_uncons = observer_unconstrained(init_query_points)
@@ -81,6 +84,26 @@ init_string = "Initial\nn = " + str(num_init_points)
 ax[0,0].set_ylabel(init_string,fontsize='x-large',rotation=0,labelpad=25)
 final_string = "Final\nn = " + str(num_init_points + num_steps)
 ax[1,0].set_ylabel(final_string,fontsize='x-large',rotation=0,labelpad=25)
+
+# annotate f'(x) in math script on ax[0,0], bottom right corner
+ax[0,0].annotate(r"$f'(x)$", xy=(0.1, 0.85), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
+ax[1,0].annotate(r"$f'(x)$", xy=(0.1, 0.85), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
+
+# annotate f(x) in math script on ax[1,0], bottom left
+ax[0,1].annotate(r"$f(x)$", xy=(0.1, 0.2), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
+ax[1,1].annotate(r"$f(x)$", xy=(0.1, 0.2), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
+
+
+# annotate c(x) at (0.8, 0.5) in figure coordinates (not axis)
+#ax[0,1].annotate(r"$c(x)$", xy=(0.8, -0.1), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
+
+# get rid of xticks on ax[0,0] and ax[0,1]
+ax[0,0].set_xticks([])
+ax[0,1].set_xticks([])
+
+# set xlabel for ax[1,0] and ax[1,1] as "x" in math script
+ax[1,0].set_xlabel(r"$x$",fontsize='xx-large')
+ax[1,1].set_xlabel(r"$x$",fontsize='xx-large')
 
 # for both the unconstrained plots, plot the true objective function
 x = np.linspace(1, 2, 500).reshape(-1,1)
@@ -116,9 +139,10 @@ mesh = ax[0,1].pcolormesh(X, Y, Z, shading='auto', cmap='RdBu', alpha=0.5,vmin=0
 #cbar = plt.colorbar(ax[0,1].collections[0], ax=ax[0,1],cmap='RdBu')
 cbar = fig.colorbar(mesh,location='bottom')
 cbar.set_ticks([0,0.5, 1])
-cbar.set_ticklabels(["Certainly\nInfeasible","Inferred\nThreshold\nValue", "Certainly\nFeasible"])
+cbar.set_ticklabels(["Certainly\nInfeasible","Inferred\nThreshold of $c(x)$", "Certainly\nFeasible"])
 
-ax[0,0].legend()
+ax[0,0].legend(loc = 'lower right',fontsize='large')
+
 
 #plt.show()
 
