@@ -70,6 +70,24 @@ class environment:
         
         # for levels 2 and 3, schedule random faults in sensors and actuators
         if level == "2":
+            # define drift rate
+            if self.sim.system_units == "SI": # metric
+                base_drift_rate = 0.03/100 # 0.03 centimeters / day (in meters)
+            elif self.sim.system_units == "US": # imperial
+                base_drift_rate = (0.03/100) * 3.28084 # 0.03 centimeters expressed in ft / day
+            chance_of_drift = 0.15 # 15% chance of drift for any given sensor
+            # define drifts as an array of length len(states) with each entry having chance_of_drift likelihood of one, and otherwise zero
+            drift_rates = np.random.choice([0, 1], size=len(self.config['states']), p=[1-chance_of_drift, chance_of_drift])
+            # multiply drifts by np.random.uniform(0.5, 1.5)
+            # to create a drift rate for each sensor
+            self.drift_rates = drift_rates * np.random.uniform(0.5, 1.5) * base_drift_rate
+            
+            #print("drifts\n", self.drift_rates)
+            # define bias
+            # an array of length len(state) with entries sampled from random uniform between 0.99 and 1.01
+            self.bias = np.random.uniform(0.99, 1.01, size=len(self.config['states']))
+            #print("bias\n", self.bias)
+
             # create an actuator schedule with columns the action space.
             # rows will be event times
             # entries will be events. for now, just "stuck" and "fix"
@@ -93,6 +111,24 @@ class environment:
                 self.actuator_schedule = None
             #print(self.actuator_schedule)
         if level == "3":
+            # define drift rate
+            if self.sim.system_units == "SI": # metric
+                base_drift_rate = 0.5/100 # 0.03 centimeters / day (in meters)
+            elif self.sim.system_units == "US": # imperial
+                base_drift_rate = (0.5/100) * 3.28084 # 0.03 centimeters expressed in ft / day
+            chance_of_drift = 0.40 # 40% chance of drift for any given sensor
+            # define drifts as an array of length len(states) with each entry having chance_of_drift likelihood of one, and otherwise zero
+            drift_rates = np.random.choice([0, 1], size=len(self.config['states']), p=[1-chance_of_drift, chance_of_drift])
+            # multiply drifts by np.random.uniform(0.5, 1.5)
+            # to create a drift rate for each sensor
+            self.drift_rates = drift_rates * np.random.uniform(0.25, 2.0) * base_drift_rate
+            
+            #print("drifts\n", self.drift_rates)
+            # define bias
+            # an array of length len(state) with entries sampled from random uniform between 0.99 and 1.01
+            self.bias = np.random.uniform(0.95, 1.05, size=len(self.config['states']))            
+
+
             sensor_ids = [self.config['states'][i][0] for i in range(len(self.config['states']))]
             sensor_schedule = pd.DataFrame(columns = sensor_ids)
             for sensor in sensor_schedule.columns:
@@ -193,18 +229,27 @@ class environment:
             
             if level == "1":
                 noise_multiplier = 0.0
+                drift_mag = 0.0
+                bias = np.ones(len(state))
             elif level == "2":    
                 noise_multiplier = 1.0
+                drift_mag = self.drift_rates * (self.sim.current_time - self.sim.start_time).total_seconds() / 86400.0
+                # 86400 seconds in a day
+                bias = self.bias
             elif level == "3":
                 noise_multiplier = 3.0
+                drift_mag = self.drift_rates * (self.sim.current_time - self.sim.start_time).total_seconds() / 86400.0
+                bias = self.bias
                 
             if self.sim.system_units == "SI": # metric
                 noise_mag = 0.025 # 2.5 centimeters = 0.025 meters
             elif self.sim.system_units == "US": # imperial
                 noise_mag = 0.025 * 3.28084 # 2.5 centimeters ~ 0.082 feet
                 
-            state = state + np.random.normal(0, noise_multiplier*noise_mag, state.shape)
-
+            #print("drift_mag" , drift_mag)
+            #print("clean state (faults, no noise)", state)
+            state = bias*state + drift_mag + np.random.normal(0, noise_multiplier*noise_mag, state.shape)
+            #print("state after noise", state)
             return state
         else:
             print("State config not defined! \n ctrl is defined as False")

@@ -270,6 +270,8 @@ class Sim_efd:
                 # if flood cost is more than zero, ensure it's more than one
                 if flood_cost > 0.0 and flood_cost < 1.0:
                     flood_cost = 1.0
+                elif any(np.array(data['final_weir_settings']) < 0.01): # weirs ending completely closed
+                    flood_cost = 1.0
                 elif flood_cost <= 0.0:
                     flood_cost = max(data['peak_filling_degrees'].values())
 
@@ -302,6 +304,8 @@ class Sim_efd:
                     flood_cost += sum(value)
                 # if flood cost is more than zero, ensure it's more than one
                 if flood_cost > 0.0 and flood_cost < 1.0:
+                    flood_cost = 1.0
+                elif any(np.array(data['final_weir_settings']) < 0.01): # weirs ending completely closed
                     flood_cost = 1.0
                 elif flood_cost <= 0.0:
                     flood_cost = max(data['peak_filling_degrees'].values())

@@ -50,9 +50,16 @@ class theta(scenario):
             #print(model.inp.storage.loc[self.config['states'][0][0] , 'MaxD'])
             model.inp.storage.loc[self.config['states'][0][0] , 'MaxD'] = model.inp.storage.loc[self.config['states'][0][0] , 'MaxD'] / 2.0
             #print(model.inp.storage)
+            
+            #print(self.config["swmm_input"])
+            # end the simulation sooner, half the length of the original
+            #print(model.inp.options)
+            model.inp.options.loc['END_DATE', 'Value'] = "2/26/2018"
+            model.inp.options.loc["END_TIME", "Value"] = "12:00:00"
+            #print(model.inp.options)
             model.inp.save(str(self.config["swmm_input"][:-4] + "_v2.inp")) 
             self.config["swmm_input"] = str(self.config["swmm_input"][:-4] + "_v2.inp")
-            #print(self.config["swmm_input"])
+
             
         # Create the environment based on the physical parameters
         self.env = environment(self.config, ctrl=True,version=version,level=level)

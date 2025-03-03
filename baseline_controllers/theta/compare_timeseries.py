@@ -111,7 +111,7 @@ ax_8flows.plot(uncontrolled_data_log['simulation_time'], uncontrolled_data_log['
 ax_8flows.plot(constant_flow_data_log['simulation_time'], constant_flow_data_log['flow']['8'], label='constant flow', color='green', alpha=0.6,linewidth=linewidth)
 ax_8flows.set_ylabel('$m^3 / s$',rotation=0, fontsize='xx-large', labelpad = 25)
 # threshold line
-ax_8flows.axhline(flow_threshold, color='red', linestyle='--', label='Threshold',linewidth=linewidth)
+ax_8flows.axhline(flow_threshold, color='red', linestyle='--', label='Threshold',alpha=0.6,linewidth=linewidth)
 # title
 ax_8flows.set_title('Flow at 8',y=0.8,fontsize='xx-large')
 

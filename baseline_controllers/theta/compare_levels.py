@@ -13,7 +13,7 @@ import os
 
 # THETA SCENARIO
 version = "2"
-control = "constant-flow" # or "constant-flow"
+control = "equal-filling" # or "constant-flow"
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
@@ -57,59 +57,66 @@ ax_1flow = fig.add_subplot(gs[1, 0])
 ax_2flows = fig.add_subplot(gs[1, 1])
 ax_8flows = fig.add_subplot(gs[2, :])
 
-ax_1depth.plot(level1_depths.index, level1_depths["('P1', 'depthN')"], label='level 1', color='blue', alpha=0.5)
-ax_1depth.plot(level2_depths.index, level2_depths["('P1', 'depthN')"], label='level 2', color='green', alpha=0.5)
-ax_1depth.plot(level3_depths.index, level3_depths["('P1', 'depthN')"], label='level 3', color='red', alpha=0.5)
-ax_1depth.plot(uncontrolled_depths.index, uncontrolled_depths["('P1', 'depthN')"], label='uncontrolled', color='black', alpha=0.5)
+linewidth = 3
+
+ax_1depth.plot(level1_depths.index, level1_depths["('P1', 'depthN')"], label='level 1', color='blue', alpha=0.6,linewidth=linewidth)
+ax_1depth.plot(level2_depths.index, level2_depths["('P1', 'depthN')"], label='level 2', color='green', alpha=0.6,linewidth=linewidth)
+ax_1depth.plot(level3_depths.index, level3_depths["('P1', 'depthN')"], label='level 3', color='red', alpha=0.6,linewidth=linewidth)
+ax_1depth.plot(uncontrolled_depths.index, uncontrolled_depths["('P1', 'depthN')"], label='uncontrolled', color='black', alpha=0.6,linewidth=linewidth)
 # horizontal line at max depth, dotted red
-ax_1depth.axhline(p1_max_depth, color='red', linestyle='--', label='Threshold')
-ax_1depth.set_ylabel('Depth [m]')
+ax_1depth.axhline(p1_max_depth, color='red', linestyle='--', label='Threshold',linewidth=linewidth)
+ax_1depth.set_ylabel('$m$',rotation=0, fontsize='xx-large', labelpad = 15)
 # remove the x ticks
 ax_1depth.set_xticks([])
 # add a legend
 ax_1depth.legend(loc='right', fontsize='x-large')
-ax_1depth.set_title('Depth in P1',y=0.8)
+ax_1depth.set_title('Depth in P1',y=0.8,fontsize='xx-large')
 
 # plot the depth in P2
-ax_2depth.plot(level1_depths.index, level1_depths["('P2', 'depthN')"], label='level 1', color='blue', alpha=0.5)
-ax_2depth.plot(level2_depths.index, level2_depths["('P2', 'depthN')"], label='level 2', color='green', alpha=0.5)
-ax_2depth.plot(level3_depths.index, level3_depths["('P2', 'depthN')"], label='level 3', color='red', alpha=0.5)
-ax_2depth.plot(uncontrolled_depths.index, uncontrolled_depths["('P2', 'depthN')"], label='uncontrolled', color='black', alpha=0.5)
+ax_2depth.plot(level1_depths.index, level1_depths["('P2', 'depthN')"], label='level 1', color='blue', alpha=0.6,linewidth=linewidth)
+ax_2depth.plot(level2_depths.index, level2_depths["('P2', 'depthN')"], label='level 2', color='green', alpha=0.6,linewidth=linewidth)
+ax_2depth.plot(level3_depths.index, level3_depths["('P2', 'depthN')"], label='level 3', color='red', alpha=0.6,linewidth=linewidth)
+ax_2depth.plot(uncontrolled_depths.index, uncontrolled_depths["('P2', 'depthN')"], label='uncontrolled', color='black', alpha=0.6,linewidth=linewidth)
 # horizontal line at max depth, dotted red
-ax_2depth.axhline(p2_max_depth, color='red', linestyle='--', label='Threshold')
-ax_2depth.set_ylabel('Depth [m]')
+ax_2depth.axhline(p2_max_depth, color='red', linestyle='--', label='Threshold',linewidth=linewidth)
+#ax_2depth.set_ylabel('Depth [m]')
 # remove the x ticks
 ax_2depth.set_xticks([])
 # title
-ax_2depth.set_title('Depth in P2',y=0.8)
+ax_2depth.set_title('Depth in P2',y=0.8,fontsize='xx-large')
 
 # plot flows out of p1
-ax_1flow.plot(level1_flows.index, level1_flows["1"], label='level 1', color='blue', alpha=0.5)
-ax_1flow.plot(level2_flows.index, level2_flows["1"], label='level 2', color='green', alpha=0.5)
-ax_1flow.plot(level3_flows.index, level3_flows["1"], label='level 3', color='red', alpha=0.5)
-ax_1flow.plot(uncontrolled_flows.index, uncontrolled_flows["1"], label='uncontrolled', color='black', alpha=0.5)
-ax_1flow.set_ylabel('Flow [m3/s]')
+ax_1flow.plot(level1_flows.index, level1_flows["1"], label='level 1', color='blue', alpha=0.6,linewidth=linewidth)
+ax_1flow.plot(level2_flows.index, level2_flows["1"], label='level 2', color='green', alpha=0.6,linewidth=linewidth)
+ax_1flow.plot(level3_flows.index, level3_flows["1"], label='level 3', color='red', alpha=0.6,linewidth=linewidth)
+ax_1flow.plot(uncontrolled_flows.index, uncontrolled_flows["1"], label='uncontrolled', color='black', alpha=0.6,linewidth=linewidth)
+ax_1flow.set_ylabel('$m^3 / s$',rotation=0, fontsize='xx-large', labelpad = 25)
+
 # title
-ax_1flow.set_title('Flow out of P1',y=0.8)
+ax_1flow.set_title('Flow out of P1',y=0.8,fontsize='xx-large')
+ax_1flow.set_xticks([])
 
 # plot flows out of p2
-ax_2flows.plot(level1_flows.index, level1_flows["2"], label='level 1', color='blue', alpha=0.5)
-ax_2flows.plot(level2_flows.index, level2_flows["2"], label='level 2', color='green', alpha=0.5)
-ax_2flows.plot(level3_flows.index, level3_flows["2"], label='level 3', color='red', alpha=0.5)
-ax_2flows.plot(uncontrolled_flows.index, uncontrolled_flows["2"], label='uncontrolled', color='black', alpha=0.5)
-ax_2flows.set_ylabel('Flow [m3/s]')
+ax_2flows.plot(level1_flows.index, level1_flows["2"], label='level 1', color='blue', alpha=0.6,linewidth=linewidth)
+ax_2flows.plot(level2_flows.index, level2_flows["2"], label='level 2', color='green', alpha=0.6,linewidth=linewidth)
+ax_2flows.plot(level3_flows.index, level3_flows["2"], label='level 3', color='red', alpha=0.6,linewidth=linewidth)
+ax_2flows.plot(uncontrolled_flows.index, uncontrolled_flows["2"], label='uncontrolled', color='black', alpha=0.6,linewidth=linewidth)
+#ax_2flows.set_ylabel('Flow [m3/s]')
 # title
-ax_2flows.set_title('Flow out of P2',y=0.8)
+ax_2flows.set_title('Flow out of P2',y=0.8,fontsize='xx-large')
+ax_2flows.set_xticks([])
 
 # plot flows out of p3
-ax_8flows.plot(uncontrolled_data_log['simulation_time'], uncontrolled_data_log['flow']['8'], label='uncontrolled', color='black', alpha=0.5)
-ax_8flows.plot(level1_data_log['simulation_time'], level1_data_log['flow']['8'], label='level 1', color='blue', alpha=0.5)
-ax_8flows.plot(level2_data_log['simulation_time'], level2_data_log['flow']['8'], label='level 2', color='green', alpha=0.5)
-ax_8flows.plot(level3_data_log['simulation_time'], level3_data_log['flow']['8'], label='level 3', color='red', alpha=0.5)
-ax_8flows.set_ylabel('Flow [m3/s]')
+ax_8flows.plot(uncontrolled_data_log['simulation_time'], uncontrolled_data_log['flow']['8'], label='uncontrolled', color='black', alpha=0.6,linewidth=linewidth)
+ax_8flows.plot(level1_data_log['simulation_time'], level1_data_log['flow']['8'], label='level 1', color='blue', alpha=0.6,linewidth=linewidth)
+ax_8flows.plot(level2_data_log['simulation_time'], level2_data_log['flow']['8'], label='level 2', color='green', alpha=0.6,linewidth=linewidth)
+ax_8flows.plot(level3_data_log['simulation_time'], level3_data_log['flow']['8'], label='level 3', color='red', alpha=0.6,linewidth=linewidth)
+ax_8flows.set_ylabel('$m^3 / s$',rotation=0, fontsize='xx-large', labelpad = 25)
+
 # title
-ax_8flows.set_title('Flow at 8',y=0.8)
-ax_8flows.axhline(flow_threshold, color='red', linestyle='--', label='Threshold')
+ax_8flows.set_title('Flow at 8',y=0.8,fontsize='xx-large')
+
+ax_8flows.axhline(flow_threshold, color='red', linestyle='--', label='Threshold',alpha=0.6,linewidth=linewidth)
 
 unc_perf = sum(uncontrolled_data_log['performance_measure'])
 level1_perf = sum(level1_data_log['performance_measure'])
@@ -117,8 +124,14 @@ level2_perf = sum(level2_data_log['performance_measure'])
 level3_perf = sum(level3_data_log['performance_measure'])
 
 perfstr = "Cost Difference from Uncontrolled\nLevel 1 = {:+.1%}\nLevel 2 = {:+.1%}\nLevel 3 = {:+.1%}".format((level1_perf - unc_perf)/unc_perf, (level2_perf - unc_perf)/unc_perf, (level3_perf - unc_perf)/unc_perf)
-ax_8flows.annotate(perfstr, xy=(0.6, 0.6), xycoords='axes fraction', ha='center', va='center',fontsize='x-large')
+ax_8flows.annotate(perfstr, xy=(0.7, 0.5), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
 
+
+ax_8flows.tick_params(axis='both', labelsize='x-large')
+ax_1depth.tick_params(axis='both', labelsize='x-large')
+ax_2depth.tick_params(axis='both', labelsize='x-large')
+ax_1flow.tick_params(axis='both', labelsize='x-large')
+ax_2flows.tick_params(axis='both', labelsize='x-large')
 
 fig.suptitle("Scenario Theta | Version " + version + " | Control: " + control, fontsize='xx-large')
 plt.tight_layout()

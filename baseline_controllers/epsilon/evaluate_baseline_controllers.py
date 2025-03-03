@@ -1,11 +1,11 @@
-'''
+
 # install pystorms from the current directory (this should be commented out in final version once pystorms source code isn't changing all the time)
 import subprocess
 import sys
 subprocess.check_call([sys.executable, '-m', 'pip', 'uninstall', '-y', 'pystorms'])
 subprocess.check_call([sys.executable, '-m', 'pip', 'cache', 'purge'])
 subprocess.check_call([sys.executable, '-m', 'pip', 'install', '.'])
-'''
+
 import pystorms # this will be the first line of the program when dev is done
 
 import pyswmm
@@ -23,7 +23,7 @@ np.set_printoptions(precision=3,suppress=True)
 evaluating = 'equal-filling'
 verbose = True
 version = "2" # options are "1" and "2"
-level = "1" # options are "1" , "2", and "3"
+level = "3" # options are "1" , "2", and "3"
 plot = True # plot True significantly increases the memory usage. 
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -159,8 +159,9 @@ for parameter in tuning_values:
             if verbose and env.env.sim.current_time.minute == 0 and env.env.sim.current_time.hour % 2 == 0: 
                 u_print = u_open_pct.flatten()
                 y_measured = env.state(level=level).reshape(-1,1)
-                print("              y_measured,  u")
-                print(np.c_[np.array(env.config['states'][:11]),np.round(y_measured[:11],2) , np.round(u_print.reshape(-1,1),3)])
+                y_actual = env.state(level="1").reshape(-1,1)
+                print("              y_actual,  y_measured,  u")
+                print(np.c_[np.array(env.config['states'][:11]),np.round(y_actual[:11],2),np.round(y_measured[:11],2) , np.round(u_print.reshape(-1,1),3)])
                 print("current time, end time")
                 print(env.env.sim.current_time, env.env.sim.end_time)
                 print("\n")

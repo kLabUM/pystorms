@@ -323,7 +323,7 @@ if evaluating == "constant-flow":
         upper_bounds.append(1.0)
     search_space = Box(lower_bounds, upper_bounds)
     
-    num_initial_points = 2 # 100
+    num_initial_points = 100
     initial_data = observer_cf(search_space.sample(num_initial_points))
     
     initial_models = trieste.utils.map_values(create_bo_model, initial_data)
@@ -334,7 +334,7 @@ if evaluating == "constant-flow":
     )
     rule = EfficientGlobalOptimization(eci)  # type: ignore
 
-    num_steps = 2 # 300
+    num_steps = 300
     bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_cf, search_space)
 
     opt_result = bo.optimize(
@@ -396,10 +396,10 @@ if evaluating == "constant-flow":
     ax[1].tick_params(axis='both', labelsize='large')
     
     # colorbar
-    plt.colorbar(c, ax=ax[0], label="Mean Model Prediction")
-    ax[0].set_title("Objective",fontsize='x-large')
+    plt.colorbar(c, ax=ax[0])
+    ax[0].set_title("Objective",fontsize='xx-large')
     ax[0].set_xlabel("Constant Flow 1",fontsize='x-large')
-    ax[0].set_ylabel("Constant\nFlow 2",rotation=0,labelpad=20,fontsize='x-large')
+    ax[0].set_ylabel("Constant\nFlow 2",rotation=0,labelpad=35,fontsize='x-large')
 
     # plot the constraint observations and model on the right
     ax[1].scatter(data[CONSTRAINT].query_points[:, 0], data[CONSTRAINT].query_points[:,1], c=data[CONSTRAINT].observations, label="observations")
@@ -410,13 +410,14 @@ if evaluating == "constant-flow":
     ax[1].contour(X1, X2, constraint_mean_predicted.reshape(100,100), levels=[Sim_cf.threshold], colors='black')
     # put it on the objective function plot too
     ax[0].contour(X1, X2, constraint_mean_predicted.reshape(100,100), levels=[Sim_cf.threshold], colors='black')
-    cbar = plt.colorbar(c, ax=ax[1], label="Mean Model Prediction")
-    ax[1].set_title("Constraint",fontsize='x-large')
+    cbar = plt.colorbar(c, ax=ax[1])
+    ax[1].set_title("Constraint",fontsize='xx-large')
     ax[1].set_xlabel("Constant Flow 1",fontsize='x-large')
+    plt.tight_layout()
     plt.savefig(str("v" +version + "/constrained_bo_cf.png"))
     plt.savefig(str("v" +version + "/constrained_bo_cf.svg"))
-    plt.show()
-    #plt.close('all')
+    #plt.show()
+    plt.close('all')
     
 
 
