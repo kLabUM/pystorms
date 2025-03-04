@@ -21,7 +21,7 @@ np.set_printoptions(precision=3,suppress=True)
 
 # ALPHA
 # options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
-evaluating = 'equal-filling' 
+evaluating = 'uncontrolled' 
 verbose = True
 version = "2" # options are "1" and "2"
 level = "1" # options are "1" , "2", and "3"
@@ -55,7 +55,9 @@ for parameter in tuning_values:
     if evaluating == "constant-flow":
         optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
     elif evaluating == "uncontrolled":
-        optimal_constant_flows = np.array([1.0,1.0,1.0,1.0,1.0,0.15,0.6,0.5,0.5,0.65])
+        #optimal_constant_flows = np.array([1.0,1.0,1.0,1.0,1.0,0.15,0.6,0.5,0.5,0.65])
+        optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
+        optimal_constant_flows[0:4] = 1.0 # orifices are fully open, weirs are set to the optimal percentage
     elif evaluating == "equal-filling":
         optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[:-1]
         optimal_efd_params = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[-1]

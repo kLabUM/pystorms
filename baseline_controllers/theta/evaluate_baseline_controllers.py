@@ -1,11 +1,11 @@
-
+'''
 # install pystorms from the current directory (this should be commented out in final version once pystorms source code isn't changing all the time)
 import subprocess
 import sys
 subprocess.check_call([sys.executable, '-m', 'pip', 'uninstall', '-y', 'pystorms'])
 subprocess.check_call([sys.executable, '-m', 'pip', 'cache', 'purge'])
 subprocess.check_call([sys.executable, '-m', 'pip', 'install', '.'])
-
+'''
 import pystorms # this will be the first line of the program when dev is done
 
 import pyswmm
@@ -23,12 +23,12 @@ np.set_printoptions(precision=3,suppress=True)
 control_scenario = 'equal-filling' 
 verbose = True
 version = "2" # options are "1" and "2"
-level = "2" # options are "1" , "2", and "3"
+level = "3" # options are "1" , "2", and "3"
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
-# set the random seed
-rand_seed = 0
+# set the random seed to get a visible sensor or actuator fault for the paper figure
+rand_seed = 7
 np.random.seed(rand_seed)
 
 if control_scenario == "constant-flow":
