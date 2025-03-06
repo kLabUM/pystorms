@@ -110,8 +110,8 @@ ax.axis('off')
 
 plt.tight_layout()
 # only going to use one plot for level (at most) so don't worry about tracking parameters
-plt.savefig(str("./v" + version + "/lev" + level + "/actions_states.png")) 
-plt.savefig(str("./v" + version + "/lev" + level + "/actions_states.svg"))
+plt.savefig(str("./v" + version + "/lev" + level + "/actions_states_lev" + level + ".png")) 
+plt.savefig(str("./v" + version + "/lev" + level + "/actions_states_lev" + level + ".svg"))
 #plt.show()
 plt.close('all')
 
@@ -261,8 +261,8 @@ ax.annotate("Pystorms Scenario Gamma", xy=(0.5, 0.65), xycoords='axes fraction',
 '''
     
 ax.axis('off')
-plt.savefig(str("./v" + version + "/lev" + level + "/evaluate_all_U.png"),dpi=450)
-plt.savefig(str("./v" + version + "/lev" + level + "/evaluate_all_U.svg"),dpi=450)
+plt.savefig(str("./v" + version + "/lev" + level + "/evaluate_all_U_lev" + level + ".png"),dpi=450)
+plt.savefig(str("./v" + version + "/lev" + level + "/evaluate_all_U_lev" + level + ".svg"),dpi=450)
 plt.tight_layout()
 #plt.show(block=True)
 plt.close('all')

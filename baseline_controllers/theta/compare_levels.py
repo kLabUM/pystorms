@@ -13,7 +13,7 @@ import os
 
 # THETA SCENARIO
 version = "2"
-control = "equal-filling" # or "constant-flow"
+control = "constant-flow" # "equal-filling" or "constant-flow"
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
@@ -114,7 +114,7 @@ ax_8flows.plot(level3_data_log['simulation_time'], level3_data_log['flow']['8'],
 ax_8flows.set_ylabel('$m^3 / s$',rotation=0, fontsize='xx-large', labelpad = 25)
 
 # title
-ax_8flows.set_title('Flow at 8',y=0.8,fontsize='xx-large')
+ax_8flows.set_title('Flow at 8',y=0.8,x=0.3,fontsize='xx-large')
 
 ax_8flows.axhline(flow_threshold, color='red', linestyle='--', label='Threshold',alpha=0.6,linewidth=linewidth)
 
@@ -124,7 +124,7 @@ level2_perf = sum(level2_data_log['performance_measure'])
 level3_perf = sum(level3_data_log['performance_measure'])
 
 perfstr = "Cost Difference from Uncontrolled\nLevel 1 = {:+.1%}\nLevel 2 = {:+.1%}\nLevel 3 = {:+.1%}".format((level1_perf - unc_perf)/unc_perf, (level2_perf - unc_perf)/unc_perf, (level3_perf - unc_perf)/unc_perf)
-ax_8flows.annotate(perfstr, xy=(0.7, 0.5), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
+ax_8flows.annotate(perfstr, xy=(0.7, 0.7), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
 
 
 ax_8flows.tick_params(axis='both', labelsize='x-large')

@@ -20,10 +20,10 @@ np.set_printoptions(precision=3,suppress=True)
 
 # EPSILON
 # options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
-evaluating = 'equal-filling'
+evaluating = 'constant-flow'
 verbose = True
 version = "2" # options are "1" and "2"
-level = "1" # options are "1" , "2", and "3"
+level = "3" # options are "1" , "2", and "3"
 plot = True # plot True significantly increases the memory usage. 
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))

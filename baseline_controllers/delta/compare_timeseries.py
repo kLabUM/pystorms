@@ -13,7 +13,7 @@ import os
 
 # DELTA SCENARIO
 version = "2"
-level = "1"
+level = "3"
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
@@ -160,7 +160,7 @@ axes[-2,1].annotate(perfstr, xy=(0.5, 0.45), xycoords='axes fraction', ha='cente
 
 plt.tight_layout()
 # only going to use one plot for level (at most) so don't worry about tracking parameters
-plt.savefig(str("./v" + version + "/lev" + level + "/actions_states.png")) 
-plt.savefig(str("./v" + version + "/lev" + level + "/actions_states.svg"))
+plt.savefig(str("./v" + version + "/lev" + level + "/actions_states_lev" + level + ".png")) 
+plt.savefig(str("./v" + version + "/lev" + level + "/actions_states_lev" + level + ".svg"))
 #plt.show()
 plt.close('all')

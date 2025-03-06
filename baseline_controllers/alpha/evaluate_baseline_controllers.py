@@ -20,8 +20,8 @@ import swmmio
 np.set_printoptions(precision=3,suppress=True)
 
 # ALPHA
-# options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
-evaluating = 'uncontrolled' 
+# options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled') or 'structural' 
+evaluating = 'equal-filling' 
 verbose = True
 version = "2" # options are "1" and "2"
 level = "1" # options are "1" , "2", and "3"
@@ -43,7 +43,7 @@ tuning_values = [0.0]
 
 if evaluating == "constant-flow" or evaluating == "equal-filling":
     folder_path = str("./v" + version + "/lev" + level + "/results")
-elif evaluating == "uncontrolled":
+elif evaluating == "uncontrolled" or evaluating == "structural":
     folder_path = str("./v" + version + "/results")
 
 if not os.path.exists(folder_path):
@@ -54,13 +54,15 @@ if not os.path.exists(folder_path):
 for parameter in tuning_values:
     if evaluating == "constant-flow":
         optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
-    elif evaluating == "uncontrolled":
+    elif evaluating == "structural":
         #optimal_constant_flows = np.array([1.0,1.0,1.0,1.0,1.0,0.15,0.6,0.5,0.5,0.65])
         optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_constant_flows.txt"))
-        optimal_constant_flows[0:4] = 1.0 # orifices are fully open, weirs are set to the optimal percentage
+        optimal_constant_flows[0:5] = 1.0 # orifices are fully open, weirs are set to the optimal percentage
     elif evaluating == "equal-filling":
         optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[:-1]
         optimal_efd_params = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[-1]
+    elif evaluating == "uncontrolled":
+        optimal_constant_flows = np.ones(10)
     
 
     print("tuning value: ", parameter)
@@ -161,9 +163,24 @@ for parameter in tuning_values:
                 regulator_id = "R" + orifice_id[2:]
                 max_depth = max_depths[regulator_id]
                     
+
                 # find the index of the entry in the states which contains the regulator_id
                 regulator_idx = [i for i in range(len(env.config['states'])) if regulator_id in env.config['states'][i]][0]
-                filling_degrees.append(state[regulator_idx] / max_depth)
+                flooding_filling_degree = state[regulator_idx] / max_depth
+                #filling_degrees.append(state[regulator_idx] / max_depth)
+
+                # try filling degree as approach to cso rather than flooding
+                weir_id = "W" + orifice_id[2:]
+                # inlet offset of the weir from the regulator junction is listed as crest height
+                weir_offset = model.inp.weirs.loc[weir_id, 'CrestHeight']
+                # weir height is the open space above the crest. the current height of the weir will be (1-open percentage)*weir height
+                # geom1 is the height for a rectangular open weir
+                weir_height = model.inp.xsections.loc[weir_id, 'Geom1']
+                weir_current_height = (1-u_open_pct[5 + idx])*weir_height # check this line
+                depth_to_cso = weir_offset + weir_current_height
+                cso_filling_degree = state[regulator_idx] / depth_to_cso
+                filling_degrees.append(state[regulator_idx] / depth_to_cso)
+
                 
             filling_degrees = np.array(filling_degrees)
             filling_degree_avg = np.mean(filling_degrees)
@@ -181,10 +198,12 @@ for parameter in tuning_values:
                         u_open_pct[i] = 1.0
                     elif u_open_pct[i] < 0.0:
                         u_open_pct[i] = 0.0
-                #done = env.step(u_open_pct.flatten(),level=level)
+
+            elif evaluating == "structural":
+                u_open_pct[0:5] = 1.0 # all orifices open
             elif evaluating == "uncontrolled":
-                u_open_pct[0:4] = 1.0
-                #done = env.step(u_open_pct.flatten(),level=level)
+                u_open_pct = np.ones(10)
+
             else:
                 print("error. control scenario not recongized.")
                 done = True
@@ -238,7 +257,7 @@ for parameter in tuning_values:
     final_filling_degrees = np.round(final_depths / max_depths_array , 2)
     # save the cost and ending filling degree to a csv
     perf_summary = pd.DataFrame(data = {"cost": perf, "final_depths": final_depths,"final_filling": final_filling_degrees})
-    if evaluating == "uncontrolled":
+    if evaluating == "uncontrolled" or evaluating == "structural":
         perf_summary.to_csv(str(folder_path + "/costs_" + evaluating + ".csv"))
     else:
         perf_summary.to_csv(str(folder_path + "/costs_" + evaluating + "_a=" + str(parameter) + ".csv"))
@@ -296,7 +315,7 @@ for parameter in tuning_values:
 
 
         plt.tight_layout()
-        if evaluating == "uncontrolled":
+        if evaluating == "uncontrolled" or evaluating == "structural":
             plt.savefig(str(folder_path + "/evaluate_" + str(evaluating) + ".png"),dpi=450)
             plt.savefig(str(folder_path + "/evaluate_" + str(evaluating) + ".svg"),dpi=450)
         else:
@@ -308,7 +327,7 @@ for parameter in tuning_values:
         states = states.resample('5min').mean()
         actions = actions.resample('5min').mean()
 
-        if evaluating == "uncontrolled":
+        if evaluating == "uncontrolled" or evaluating == "structural":
             states.to_csv(str(folder_path + "/states_" + str(evaluating) + ".csv"))
             actions.to_csv(str(folder_path + "/actions_" + str(evaluating) + ".csv"))
             # and the data log

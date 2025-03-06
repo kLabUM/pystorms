@@ -88,7 +88,7 @@ class delta(scenario):
             self.config["swmm_input"] = str(self.config["swmm_input"][:-4] + "_v2.inp")
 
         # Create the environment based on the physical parameters
-        self.env = environment(self.config, ctrl=True)
+        self.env = environment(self.config, ctrl=True,version=version,level=level)
 
         # Create an object for storing the data points
         self.data_log = {

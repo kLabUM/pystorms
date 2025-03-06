@@ -27,19 +27,24 @@ constant_flow_param = "0.0"
 equal_filling_data_log = pd.read_pickle(str("./v" + version + "/lev" + level + "/results/equal-filling_param=" + str(equal_filling_param) + "_data_log.pkl"))
 constant_flow_data_log = pd.read_pickle(str("./v" + version + "/lev" + level + "/results/constant-flow_param=" + str(constant_flow_param) + "_data_log.pkl"))
 uncontrolled_data_log = pd.read_pickle(str("./v" + version + "/results/uncontrolled_data_log.pkl"))
+structural_data_log = pd.read_pickle(str("./v" + version + "/results/structural_data_log.pkl"))
 
 # print the costs
 print("uncontrolled: ", "{:.2E}".format(sum(uncontrolled_data_log['performance_measure'])))
 print("equal filling: ", "{:.2E}".format(sum(equal_filling_data_log['performance_measure'])))
 print("constant flow: ", "{:.2E}".format(sum(constant_flow_data_log['performance_measure'])))
+print("structural: ", "{:.2E}".format(sum(structural_data_log['performance_measure'])))
 
 # load the actions and states
 uncontrolled_actions = pd.read_csv("./v" + version + "/results/actions_uncontrolled.csv",index_col=0,parse_dates=True)
 uncontrolled_states = pd.read_csv("./v" + version + "/results/states_uncontrolled.csv",index_col=0,parse_dates=True)
+structural_states = pd.read_csv("./v" + version + "/results/states_structural.csv",index_col=0,parse_dates=True)
+structural_actions = pd.read_csv("./v" + version + "/results/actions_structural.csv",index_col=0,parse_dates=True)
 equal_filling_actions = pd.read_csv(str("./v" + version + "/lev" + level + "/results/actions_equal-filling_param=" + equal_filling_param + ".csv"),index_col=0,parse_dates=True)
 equal_filling_states = pd.read_csv(str("./v" + version + "/lev" + level + "/results/states_equal-filling_param=" + equal_filling_param + ".csv"),index_col=0,parse_dates=True)
 constant_flow_actions = pd.read_csv(str("./v" + version + "/lev" + level + "/results/actions_constant-flow_param=" + constant_flow_param + ".csv"),index_col=0,parse_dates=True)
 constant_flow_states = pd.read_csv(str("./v" + version + "/lev" + level + "/results/states_constant-flow_param=" + constant_flow_param + ".csv"),index_col=0,parse_dates=True)
+
 
 
 plots_high = max(len(env.config['action_space']) , len(env.config['states']))
@@ -70,6 +75,7 @@ for idx in range(len(env.config['action_space'])):
 for idx in range(len(env.config['states'])):
     ax = fig.add_subplot(gs[idx,1] )  
     ax.plot(uncontrolled_states.index, uncontrolled_states[str(env.config['states'][idx])], label='Uncontrolled',color='black',alpha=0.6)
+    ax.plot(structural_states.index, structural_states[str(env.config['states'][idx])], label='Structural',color='green',alpha=0.6)
     ax.plot(equal_filling_states.index, equal_filling_states[str(env.config['states'][idx])], label='Equal Filling',color='blue',alpha=0.6)
     ax.plot(constant_flow_states.index, constant_flow_states[str(env.config['states'][idx])], label='Constant Flow',color='red',alpha=0.6)
 
@@ -93,6 +99,7 @@ for idx in range(len(env.config['states'])):
         ax.plot(uncontrolled_states.index[0:2], np.zeros((2,1)), label = 'Uncontrolled',color='black',alpha=0.6)
         ax.plot(equal_filling_states.index[0:2], np.zeros((2,1)), label = 'Equal Filling',color='blue',alpha=0.6)
         ax.plot(constant_flow_states.index[0:2], np.zeros((2,1)), label = 'Constant Flow',color='red',alpha=0.6)
+        ax.plot(structural_states.index[0:2], np.zeros((2,1)), label = 'Structural',color='green',alpha=0.6)
         ax.axis('off')
         ax.legend(fontsize='x-large')
         
@@ -100,16 +107,17 @@ for idx in range(len(env.config['states'])):
 unc_perf = sum(uncontrolled_data_log['performance_measure'])
 cf_perf = sum(constant_flow_data_log['performance_measure'])
 ef_perf = sum(equal_filling_data_log['performance_measure'])
+struct_perf = sum(structural_data_log['performance_measure'])
 
-perfstr = "Cost Difference from Uncontrolled\nConstant Flow = {:+.1%}\nEqual Filling = {:+.1%}".format((cf_perf - unc_perf)/unc_perf, (ef_perf - unc_perf)/unc_perf)
+perfstr = "Cost Difference from Uncontrolled\nStructual = {:+.1%}\nConstant Flow = {:+.1%}\nEqual Filling = {:+.1%}".format((struct_perf - unc_perf)/unc_perf,(cf_perf - unc_perf)/unc_perf, (ef_perf - unc_perf)/unc_perf)
 ax = fig.add_subplot(gs[-1,0])
 ax.annotate(perfstr, xy=(0.5, 0.6), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
 ax.axis('off')
 
 plt.tight_layout()
 # only going to use one plot for level (at most) so don't worry about tracking parameters
-plt.savefig(str("./v" + version + "/lev" + level + "/actions_states.png")) 
-plt.savefig(str("./v" + version + "/lev" + level + "/actions_states.svg"))
+plt.savefig(str("./v" + version + "/lev" + level + "/actions_states_lev" + level + ".png")) 
+plt.savefig(str("./v" + version + "/lev" + level + "/actions_states_lev" + level + ".svg"))
 #plt.show()
 plt.close('all')
 
@@ -119,6 +127,7 @@ plt.close('all')
 unc_response = pd.concat([uncontrolled_actions, uncontrolled_states],axis=1)
 cf_response = pd.concat([constant_flow_actions, constant_flow_states],axis=1)
 ef_response = pd.concat([equal_filling_actions, equal_filling_states],axis=1)
+struct_response = pd.concat([structural_actions, structural_states],axis=1)
 
 
 
@@ -248,6 +257,7 @@ for n in subway['graph']:
     
     if "depthN" in n[0] or "depthN" in n[1]:
         a.plot(unc_response[str(n)], label ='Uncontrolled',color='black',alpha=0.6)
+        a.plot(struct_response[str(n)], label ='Structural',color='green',alpha=0.6)
         a.plot(cf_response[str(n)], label ='Constant Flow',color='red',alpha=0.6)
         a.plot(ef_response[str(n)], label ='Equal Filling',color='blue',alpha=0.6)
         a.plot(unc_response.index,np.ones(len(unc_response.index))*max_depths[n[0]], color='red', linestyle='--')
@@ -258,6 +268,7 @@ for n in subway['graph']:
     else:
         #a.plot(response[n])    
         a.plot(unc_response[str(n)], label ='Uncontrolled',color='black',alpha=0.6)
+        a.plot(struct_response[str(n)], label ='Structural',color='green',alpha=0.6)
         a.plot(cf_response[str(n)], label ='Constant Flow',color='red',alpha=0.6)
         a.plot(ef_response[str(n)], label ='Equal Filling',color='blue',alpha=0.6)
         #a.plot(response.index,np.ones(len(response.index))*0.11, color='red', linestyle='--')
@@ -287,13 +298,14 @@ for n in subway['graph']:
 unc_patch = mpatches.Patch(color='black', label='Uncontrolled')
 cf_patch = mpatches.Patch(color='red', label='Constant Flow')
 ef_patch = mpatches.Patch(color='blue', label='Equal Filling')
+struct_patch = mpatches.Patch(color='green', label='Structural')
 # put the legend slightly below the center of the figure
-plt.legend(handles=[unc_patch,cf_patch,ef_patch], loc='upper center', bbox_to_anchor=(0.5, -0.1),ncol=3)
+plt.legend(handles=[unc_patch,cf_patch,ef_patch,struct_patch], loc='upper center', bbox_to_anchor=(0.5, -0.1),ncol=3)
 
 
 ax.axis('off')
-plt.savefig(str("./v" + version + "/lev" + level + "/CSO_subway.png")) 
-plt.savefig(str("./v" + version + "/lev" + level + "/CSO_subway.svg"))
+plt.savefig(str("./v" + version + "/lev" + level + "/CSO_subway_lev" + level + ".png")) 
+plt.savefig(str("./v" + version + "/lev" + level + "/CSO_subway_lev" + level + ".svg"))
 #plt.tight_layout()
 #plt.show()
 plt.close('all')

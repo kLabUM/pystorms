@@ -49,9 +49,12 @@ class alpha(scenario):
             for item in model.inp.weirs.index.tolist():
                 self.config['action_space'].append(item)
             #print(self.config['action_space'])
+            #print(model.inp.xsections)
+            for idx in model.inp.xsections.index:
+                if "Or" in idx:
+                    model.inp.xsections.loc[idx, 'Geom1'] = 1.5 # make all the same diameter as the maximum interceptor diameter
+            #print(model.inp.xsections)    
             '''
-            for col in model.inp.xsections:
-                print(col)
             for col in model.inp.weirs:
                 print(col)
             # set the max weir height such that they can completely block flow
@@ -65,9 +68,9 @@ class alpha(scenario):
                 model.inp.xsections.loc[weir, 'Geom1'] = model.inp.junctions.loc[regulator, 'MaxDepth'] - model.inp.weirs.loc[weir, 'CrestHeight']
                 
                 '''
-            # no changes to the underlying model (at least for now)
-            #model.inp.save(str(self.config["swmm_input"][:-4] + "_v2.inp"))
-            #self.config["swmm_input"] = str(self.config["swmm_input"][:-4] + "_v2.inp")
+            # save changes to the model
+            model.inp.save(str(self.config["swmm_input"][:-4] + "_v2.inp"))
+            self.config["swmm_input"] = str(self.config["swmm_input"][:-4] + "_v2.inp")
             
 
 

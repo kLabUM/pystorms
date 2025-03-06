@@ -40,7 +40,7 @@ from trieste.acquisition.rule import EfficientGlobalOptimization
 
 
 # ALPHA
-evaluating = "constant-flow" # "constant-flow" or "efd" or "both"
+evaluating = "efd" # "constant-flow" or "efd" or "both"
 version = "2" # "1" or "2" - 2 will be the updated, more difficult version
 level = "1"
 # level should always be 1 when optimizing parameters. controllers will be evaluated but not optimized on higher levels
@@ -131,10 +131,22 @@ def run_swmm(constant_flows, efd_gain=None,verbose=False):
                     
                 # find the index of the entry in the states which contains the regulator_id
                 regulator_idx = [i for i in range(len(env.config['states'])) if regulator_id in env.config['states'][i]][0]
-                filling_degrees.append(state[regulator_idx] / max_depth)
+                #filling_degrees.append(state[regulator_idx] / max_depth)
+                
+                # try filling degree as approach to cso rather than flooding
+                weir_id = "W" + orifice_id[2:]
+                # inlet offset of the weir from the regulator junction is listed as crest height
+                weir_offset = model.inp.weirs.loc[weir_id, 'CrestHeight']
+                # weir height is the open space above the crest. the current height of the weir will be (1-open percentage)*weir height
+                # geom1 is the height for a rectangular open weir
+                weir_height = model.inp.xsections.loc[weir_id, 'Geom1']
+                weir_current_height = (1-u_open_pct[5 + idx])*weir_height # check this line
+                depth_to_cso = weir_offset + weir_current_height
+                cso_filling_degree = state[regulator_idx] / depth_to_cso
+                filling_degrees.append(state[regulator_idx] / depth_to_cso) # using the cso filling degree for the control logic
                
                 if state[regulator_idx] / max_depth > peak_filling_degrees[regulator_id]:
-                    peak_filling_degrees[regulator_id] = state[regulator_idx] / max_depth
+                    peak_filling_degrees[regulator_id] = state[regulator_idx] / max_depth # using the flooding filling degree for the constraint function
                 
             filling_degrees = np.array(filling_degrees)
             filling_degree_avg = np.mean(filling_degrees)
@@ -480,22 +492,24 @@ if evaluating == "constant-flow":
 
 
 elif evaluating == "efd":
-    lower_bounds = []
-    upper_bounds = []
+    lower_bounds = [0.0,4.0,4.0,4.0,4.0,0.0,0.42,0.08,0.22,0.08]
+    upper_bounds = [3.0,30.0,30.0,30.0,30.0,0.15,0.65,0.28,0.45,0.32]
+    '''
     for i in range(10):
         if i < 5: # orifices, set constant flow rate
             lower_bounds.append(0.5)
-            upper_bounds.append(10.0)
+            upper_bounds.append(12.0)
         else: # regulators, set constant opening percentage
             lower_bounds.append(0.0)
-            upper_bounds.append(0.65)
+            upper_bounds.append(0.6)
+    '''
     # efd gain bounds
     lower_bounds.append(0.0)
-    upper_bounds.append(2.0)
+    upper_bounds.append(3.0)
         
     search_space = Box(lower_bounds, upper_bounds)
     
-    num_initial_points = 120
+    num_initial_points = 250
     initial_data = observer_efd(search_space.sample(num_initial_points))
     
     initial_models = trieste.utils.map_values(create_bo_model, initial_data)
@@ -506,7 +520,7 @@ elif evaluating == "efd":
     )
     rule = EfficientGlobalOptimization(eci)  # type: ignore
 
-    num_steps = 450
+    num_steps = 400
     bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_efd, search_space)
 
     opt_result = bo.optimize(
@@ -543,8 +557,9 @@ elif evaluating == "efd":
     
 elif evaluating == "both":
     evaluating = "constant-flow"
-    lower_bounds = []
-    upper_bounds = []
+    lower_bounds = [0.0,5.0,5.0,5.0,5.0,0.0,0.45,0.1,0.25,0.10]
+    upper_bounds = [2.0,30.0,30.0,30.0,30.0,0.1,0.6,0.25,0.4,0.25]
+    '''
     for i in range(10):
         if i < 5: # orifices, set constant flow rate
             lower_bounds.append(0.5)
@@ -552,7 +567,7 @@ elif evaluating == "both":
         else: # regulators, set constant opening percentage
             lower_bounds.append(0.0)
             upper_bounds.append(0.6)
-        
+    '''
     search_space = Box(lower_bounds, upper_bounds)
     
     num_initial_points = 100
@@ -602,8 +617,9 @@ elif evaluating == "both":
             pickle.dump(opt_result, f)
     
     evaluating = "efd"
-    lower_bounds = []
-    upper_bounds = []
+    lower_bounds = [0.0,5.0,5.0,5.0,5.0,0.0,0.45,0.1,0.25,0.10]
+    upper_bounds = [2.0,30.0,30.0,30.0,30.0,0.1,0.6,0.25,0.4,0.25]
+    '''
     for i in range(10):
         if i < 5: # orifices, set constant flow rate
             lower_bounds.append(0.5)
@@ -611,6 +627,7 @@ elif evaluating == "both":
         else: # regulators, set constant opening percentage
             lower_bounds.append(0.0)
             upper_bounds.append(0.6)
+    '''
     # efd gain bounds
     lower_bounds.append(0.0)
     upper_bounds.append(2.0)

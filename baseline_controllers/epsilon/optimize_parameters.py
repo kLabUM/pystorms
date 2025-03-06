@@ -264,7 +264,8 @@ class Sim_efd:
                 
                 #objective_cost = loading_cost + sum(data['final_depths'])*5e1 + np.std(data['final_depths'])*1e3
                 #objective_cost = loading_cost + np.std(data['final_weir_settings'])*2e5 + flow_cost*1e2
-                objective_cost = loading_cost  + flow_cost*1e2
+                #objective_cost = loading_cost  + flow_cost*1e2
+                objective_cost = loading_cost + np.std(data['final_weir_settings'])*5e4 + flow_cost*1e3
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
@@ -300,7 +301,8 @@ class Sim_efd:
                 
                 #objective_cost = loading_cost + sum(data['final_depths'])*5e1 + np.std(data['final_depths'])*1e3
                 #objective_cost = loading_cost + np.std(data['final_weir_settings'])*2e5 + flow_cost*1e2
-                objective_cost = loading_cost  + flow_cost*1e2
+                #objective_cost = loading_cost  + flow_cost*1e2
+                objective_cost = loading_cost + np.std(data['final_weir_settings'])*5e4 + flow_cost*1e3
                 flood_cost = 0.0
                 for key, value in data['data_log']['flooding'].items():
                     flood_cost += sum(value)
