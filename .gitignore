@@ -61,3 +61,15 @@ baseline_controllers/alpha/v2/lev1/results/constant-flow_param=0.0_data_log.pkl
 *.pkl
 *.pkl
 *.pkl
+baseline_controllers/theta/v2/equal-filling_level_3_data_log.pkl
+baseline_controllers/theta/v2/equal-filling_level_2_data_log.pkl
+baseline_controllers/theta/v2/constant-flow_level_3_data_log.pkl
+baseline_controllers/theta/v2/constant-flow_level_2_data_log.pkl
+baseline_controllers/theta/v2/constant-flow_level_1_data_log.pkl
+baseline_controllers/theta/bo_efd_params.pkl
+baseline_controllers/theta/bo_constant_flows.pkl
+baseline_controllers/epsilon/v2/lev1/results/equal-filling_param=0.0_data_log.pkl
+baseline_controllers/epsilon/v2/lev1/results/constant-flow_param=0.0_data_log.pkl
+baseline_controllers/alpha/v2/results/uncontrolled_data_log.pkl
+baseline_controllers/alpha/v2/lev1/results/equal-filling_param=0.0_data_log.pkl
+baseline_controllers/alpha/v2/lev1/results/constant-flow_param=0.0_data_log.pkl

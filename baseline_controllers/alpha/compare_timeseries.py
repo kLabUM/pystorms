@@ -46,8 +46,10 @@ constant_flow_actions = pd.read_csv(str("./v" + version + "/lev" + level + "/res
 constant_flow_states = pd.read_csv(str("./v" + version + "/lev" + level + "/results/states_constant-flow_param=" + constant_flow_param + ".csv"),index_col=0,parse_dates=True)
 
 
+# don't plot the states with "C" in them
+states_to_plot = [state for state in env.config['states'] if "C" not in state[0]]
 
-plots_high = max(len(env.config['action_space']) , len(env.config['states']))
+plots_high = max(len(env.config['action_space']) , len(states_to_plot))
 
 fig = plt.figure(figsize=(10,2*plots_high))
 gs = GridSpec(plots_high,2,figure=fig)
@@ -72,29 +74,29 @@ for idx in range(len(env.config['action_space'])):
     ax.annotate(str(env.config['action_space'][idx]), xy=(0.5, 0.8), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
 
 # plot the states
-for idx in range(len(env.config['states'])):
+for idx in range(len(states_to_plot)):
     ax = fig.add_subplot(gs[idx,1] )  
-    ax.plot(uncontrolled_states.index, uncontrolled_states[str(env.config['states'][idx])], label='Uncontrolled',color='black',alpha=0.6)
-    ax.plot(structural_states.index, structural_states[str(env.config['states'][idx])], label='Structural',color='green',alpha=0.6)
-    ax.plot(equal_filling_states.index, equal_filling_states[str(env.config['states'][idx])], label='Equal Filling',color='blue',alpha=0.6)
-    ax.plot(constant_flow_states.index, constant_flow_states[str(env.config['states'][idx])], label='Constant Flow',color='red',alpha=0.6)
+    ax.plot(uncontrolled_states.index, uncontrolled_states[str(states_to_plot[idx])], label='Uncontrolled',color='black',alpha=0.6)
+    ax.plot(structural_states.index, structural_states[str(states_to_plot[idx])], label='Structural',color='green',alpha=0.6)
+    ax.plot(equal_filling_states.index, equal_filling_states[str(states_to_plot[idx])], label='Equal Filling',color='blue',alpha=0.6)
+    ax.plot(constant_flow_states.index, constant_flow_states[str(states_to_plot[idx])], label='Constant Flow',color='red',alpha=0.6)
 
-    ax.annotate(str(env.config['states'][idx]), xy=(0.5, 0.8), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
+    ax.annotate(str(states_to_plot[idx]), xy=(0.5, 0.8), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
     
 
 
-    if idx == len(env.config['states']) - 1:
+    if idx == len(states_to_plot) - 1:
         ax.set_xlabel("time")
         # just add ticks in the beginning, middle, and end of the index
         ax.set_xticks([equal_filling_states.index[0],equal_filling_states.index[int(len(equal_filling_states.index)/2)],equal_filling_states.index[-1]])
         
     if idx == 0:
         ax.set_title("States")
-    if idx != len(env.config['states']) - 1: # not the last row
+    if idx != len(states_to_plot) - 1: # not the last row
         ax.set_xticks([])
         ax.set_xticklabels([])
 
-    if idx == len(env.config['states']) - 2: # second to last row, for the legend
+    if idx == len(states_to_plot) - 2: # second to last row, for the legend
         ax = fig.add_subplot(gs[idx,0])
         ax.plot(uncontrolled_states.index[0:2], np.zeros((2,1)), label = 'Uncontrolled',color='black',alpha=0.6)
         ax.plot(equal_filling_states.index[0:2], np.zeros((2,1)), label = 'Equal Filling',color='blue',alpha=0.6)

@@ -44,9 +44,10 @@ level2_states = pd.read_csv("./v" + version + "/lev2/results/states_" + control 
 level3_actions = pd.read_csv("./v" + version + "/lev3/results/actions_" + control + "_param=0.0.csv",index_col=0,parse_dates=True)
 level3_states = pd.read_csv("./v" + version + "/lev3/results/states_" + control + "_param=0.0.csv",index_col=0,parse_dates=True)
 
+# don't plot the states with "C" in them
+states_to_plot = [state for state in env.config['states'] if "C" not in state[0]]
 
-
-plots_high = max(len(env.config['action_space']) , len(env.config['states']))
+plots_high = max(len(env.config['action_space']) , len(states_to_plot))
 
 fig = plt.figure(figsize=(10,2*plots_high))
 gs = GridSpec(plots_high,2,figure=fig)
@@ -73,29 +74,29 @@ for idx in range(len(env.config['action_space'])):
     ax.annotate(str(env.config['action_space'][idx]), xy=(0.5, 0.8), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
 
 # plot the states
-for idx in range(len(env.config['states'])):
+for idx in range(len(states_to_plot)):
     ax = fig.add_subplot(gs[idx,1] )  
-    ax.plot(uncontrolled_states.index, uncontrolled_states[str(env.config['states'][idx])], label='Uncontrolled',color='black',alpha=0.6)
-    ax.plot(level1_states.index, level1_states[str(env.config['states'][idx])], label='Level 1',color='blue',alpha=0.6)
-    ax.plot(level2_states.index, level2_states[str(env.config['states'][idx])], label='Level 2',color='green',alpha=0.6)
-    ax.plot(level3_states.index, level3_states[str(env.config['states'][idx])], label='Level 3',color='red',alpha=0.6)
+    ax.plot(uncontrolled_states.index, uncontrolled_states[str(states_to_plot[idx])], label='Uncontrolled',color='black',alpha=0.6)
+    ax.plot(level1_states.index, level1_states[str(states_to_plot[idx])], label='Level 1',color='blue',alpha=0.6)
+    ax.plot(level2_states.index, level2_states[str(states_to_plot[idx])], label='Level 2',color='green',alpha=0.6)
+    ax.plot(level3_states.index, level3_states[str(states_to_plot[idx])], label='Level 3',color='red',alpha=0.6)
 
-    ax.annotate(str(env.config['states'][idx]), xy=(0.5, 0.8), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
+    ax.annotate(str(states_to_plot[idx]), xy=(0.5, 0.8), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
     
 
 
-    if idx == len(env.config['states']) - 1:
+    if idx == len(states_to_plot) - 1:
         ax.set_xlabel("time")
         # just add ticks in the beginning, middle, and end of the index
         ax.set_xticks([level1_states.index[0],level1_states.index[int(len(level1_states.index)/2)],level1_states.index[-1]])
         
     if idx == 0:
         ax.set_title("States")
-    if idx != len(env.config['states']) - 1: # not the last row
+    if idx != len(states_to_plot) - 1: # not the last row
         ax.set_xticks([])
         ax.set_xticklabels([])
 
-    if idx == len(env.config['states']) - 2: # second to last row, for the legend
+    if idx == len(states_to_plot) - 2: # second to last row, for the legend
         ax = fig.add_subplot(gs[idx,0])
         ax.plot(uncontrolled_states.index[0:2], np.zeros((2,1)), label = 'Uncontrolled',color='black',alpha=0.6)
         ax.plot(level1_states.index[0:2], np.zeros((2,1)), label = 'Level 1',color='blue',alpha=0.6)
