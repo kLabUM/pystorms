@@ -12,7 +12,7 @@ import os
 
 # EPSILON SCENARIO
 version = "2"
-control = "constant-flow" # "equal-filling" or "constant-flow"
+control = "equal-filling" # "equal-filling" or "constant-flow"
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())

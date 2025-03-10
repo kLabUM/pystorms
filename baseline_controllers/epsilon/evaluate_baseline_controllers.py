@@ -20,7 +20,7 @@ np.set_printoptions(precision=3,suppress=True)
 
 # EPSILON
 # options are: 'equal-filling' and 'constant-flow' (or 'uncontrolled')
-evaluating = 'constant-flow'
+evaluating = 'equal-filling'
 verbose = True
 version = "2" # options are "1" and "2"
 level = "3" # options are "1" , "2", and "3"
@@ -56,6 +56,9 @@ for parameter in tuning_values:
     elif evaluating == "equal-filling":
         efd_parameters = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[-2:]
         optimal_constant_flows = np.loadtxt(str("./v" + version + "/optimal_efd.txt"))[:-2]
+    elif evaluating == "uncontrolled":
+        optimal_constant_flows = np.ones(11)
+        efd_parameters = None
 
     print("tuning value: ", parameter)
     optimal_constant_flows = optimal_constant_flows*(1+parameter)
@@ -148,8 +151,8 @@ for parameter in tuning_values:
                     if u_open_pct[i,0]< 0.01:
                         pass
                 for i in range(len(u_open_pct)):
-                    if u_open_pct[i,0]< 0.0:
-                        u_open_pct[i,0] = 0.0
+                    if u_open_pct[i,0]< 0.09:
+                        u_open_pct[i,0] = 0.09
                     elif u_open_pct[i,0]> 1.0:
                         u_open_pct[i,0] = 1.0
                 done = env.step(u_open_pct.flatten(),level=level)

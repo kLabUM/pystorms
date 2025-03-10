@@ -121,8 +121,8 @@ def run_swmm(constant_flows, efd_parameters=None,verbose=False):
                 #    if u_open_pct[i,0]< 0.09:
                 #        print("efd using storage above the weir")
                 for i in range(len(u_open_pct)):
-                    if u_open_pct[i,0]< 0.0:
-                        u_open_pct[i,0] = 0.0
+                    if u_open_pct[i,0]< 0.09:
+                        u_open_pct[i,0] = 0.09
                     elif u_open_pct[i,0]> 1.0:
                         u_open_pct[i,0] = 1.0
                 done = env.step(u_open_pct.flatten())
@@ -390,15 +390,17 @@ if evaluating == "constant-flow":
 
 
 elif evaluating == "efd":
-    lower_bounds = []
-    upper_bounds = []
+    lower_bounds = list(np.loadtxt(str("v" +version +"/optimal_constant_flows.txt"))*0.9)
+    upper_bounds = list(np.loadtxt(str("v" +version +"/optimal_constant_flows.txt"))*1.1)
+    '''
     for i in range(11):
         lower_bounds.append(0.7)
         upper_bounds.append(4.0)
+    '''
     lower_bounds.append(-1e-1) # tss feedback
-    upper_bounds.append(-1e-4)
+    upper_bounds.append(-1e-3)
     lower_bounds.append(0.0) # efd gain
-    upper_bounds.append(3.0)
+    upper_bounds.append(1.0)
         
     search_space = Box(lower_bounds, upper_bounds)
     
