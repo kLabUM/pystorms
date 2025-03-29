@@ -1,0 +1,20 @@
+Theta,Uncontrolled,Constant Flow,Equal Filling
+Level 1,6.92e+03,5.45e+03 (-21.2%),5.42e+03 (-21.6%)
+Level 2,6.92e+03,5.46e+03 (-21.1%),5.47e+03 (-20.9%)
+Level 3,6.92e+03,6.36e+03 (-8.1%),6.36e+03 (-8.1%)
+Alpha,Uncontrolled,Structural,Constant Flow,Equal Filling
+Level 1,7.58e+03,4.19e+03 (-44.7%),3.74e+03 (-50.7%),3.81e+03 (-49.7%)
+Level 2,7.58e+03,4.19e+03 (-44.7%),3.73e+03 (-50.8%),3.81e+03 (-49.8%)
+Level 3,7.58e+03,4.19e+03 (-44.7%),3.85e+03 (-49.2%),3.89e+03 (-48.6%)
+Gamma,Uncontrolled,Constant Flow,Equal Filling
+Level 1,2.68e+05,1.01e+05 (-62.2%),1.18e+05 (-56.0%)
+Level 2,2.68e+05,9.69e+04 (-63.8%),1.16e+05 (-56.8%)
+Level 3,2.68e+05,8.23e+05 (207.5%),1.36e+05 (-49.0%)
+Delta,Uncontrolled,Static Plus Rule,Prop Outflow
+Level 1,1.04e+05,9.68e+03 (-90.7%),7.67e+03 (-92.6%)
+Level 2,1.04e+05,5.9e+08 (565988.1%),1.29e+08 (123604.8%)
+Level 3,1.04e+05,3.04e+10 (29198508.5%),5.06e+10 (48606713.3%)
+Epsilon,Uncontrolled,Constant Flow,Equal Filling
+Level 1,7.35e+04,6.9e+04 (-6.0%),6.85e+04 (-6.8%)
+Level 2,7.35e+04,6.98e+04 (-5.0%),6.94e+04 (-5.6%)
+Level 3,7.35e+04,6.13e+04 (-16.5%),6.15e+04 (-16.3%)

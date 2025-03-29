@@ -13,7 +13,7 @@ import os
 
 # DELTA SCENARIO
 version = "2"
-control = "prop-outflow" # "static-plus-rule" or "prop-outflow"
+control = "static-plus-rule" # "static-plus-rule" or "prop-outflow"
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())

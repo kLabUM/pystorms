@@ -64,7 +64,8 @@ def run_swmm(static_settings, prop_gain=None, verbose=False):
     start_time = env.env.sim.start_time
     #u_open_pct = constant_flows
     # make u_open_pct a deep copy of constant_flows (constant_flows should not change)
-    u_open_pct = copy.deepcopy(static_settings)
+    #u_open_pct = copy.deepcopy(static_settings)
+    u_open_pct = copy.deepcopy(static_settings[:-1])
 
     states = pd.DataFrame(columns = env.config['states'])
     actions = pd.DataFrame(columns = env.config['action_space'])
@@ -80,13 +81,33 @@ def run_swmm(static_settings, prop_gain=None, verbose=False):
             
             # first bit is the same for all 3 controllers
             # set the weirs
-            u_open_pct[:-1] = static_settings[:-1]
+            #u_open_pct[:-1] = static_settings[:-1]
+            u_open_pct[:-1] = static_settings[:-2]
             # open valve?
             if evaluating != "uncontrolled":
+                '''
                 if state[0] > static_settings[-1]: # basin c depth above optimized threshold?
                     u_open_pct[-1] = 1.0 # fully open valve above threshold depth in basin c
                 else:
+                    u_open_pct[-1] = 0.0 # close the valve to preserve capacity in the infiltration basin    
+                '''
+                # try proprtional valve opening between two setpoint depths
+                if state[0] < static_settings[-2]: # below lower threshold
                     u_open_pct[-1] = 0.0 # close the valve to preserve capacity in the infiltration basin
+                elif state[0] > static_settings[-1]: # above upper threshold
+                    u_open_pct[-1] = 1.0 # fully open valve above upper threshold depth in basin c
+                else: # between the two thresholds
+                    # linearly interpolate the valve opening based on the current depth in basin C
+                    # find the range between the two thresholds
+                    lower_threshold = static_settings[-2] # lower threshold depth
+                    upper_threshold = static_settings[-1] # upper threshold depth
+                    range_threshold = upper_threshold - lower_threshold
+                    # calculate the current depth in the range
+                    current_depth_in_range = state[0] - lower_threshold
+                    # calculate the percentage of the way through the range
+                    percentage_in_range = current_depth_in_range / range_threshold
+                    # set the valve opening based on the percentage in range
+                    u_open_pct[-1] = percentage_in_range # linearly interpolate the valve opening based on the current depth in basin C
                             
 
             if evaluating == "prop-outflow":
@@ -199,7 +220,6 @@ def run_swmm(static_settings, prop_gain=None, verbose=False):
             if fill > max_fill:
                 max_fill = fill
         exceedance_cost = max_fill
-    print("exceedance cost:","{:.4e}".format(exceedance_cost))
     # round final_depths to 2 decimal places
     final_depths = np.round(final_depths,2)
 
@@ -271,7 +291,7 @@ class Sim_po:
             else:
                 static_settings = np.array(sample).flatten()[:-1] 
                 prop_gain = sample[-1]
-                data = run_swmm(static_settings, prop_gain,verbose=True)
+                data = run_swmm(static_settings, prop_gain,verbose=False)
                 objective_cost = data['flow_cost'] + data['op_bounds_cost']
                 constraint_cost = data['flood_cost'] + data['exceedance_cost']
 
@@ -291,7 +311,7 @@ class Sim_po:
             else:
                 static_settings = np.array(sample).flatten()[:-1] 
                 prop_gain = sample[-1]
-                data = run_swmm(static_settings, prop_gain,verbose=True)
+                data = run_swmm(static_settings, prop_gain,verbose=False)
                 objective_cost = data['flow_cost'] + data['op_bounds_cost']
                 constraint_cost = data['flood_cost'] + data['exceedance_cost']
 
@@ -422,8 +442,8 @@ if evaluating == "prop-outflow":
             
 if evaluating == "both":
     evaluating = "static-plus-rule"
-    lower_bounds = [0.95, 0.25,0.10, 0.4, 3.0]
-    upper_bounds = [1.0, 0.38, 0.2, 0.55, 4.0]
+    lower_bounds = [0.95, 0.25,0.10, 0.4, 3.65 , 3.83]
+    upper_bounds = [1.0, 0.38, 0.2, 0.55, 3.77 , 3.95]
 
     search_space = Box(lower_bounds, upper_bounds)
     
@@ -474,8 +494,10 @@ if evaluating == "both":
             pickle.dump(opt_result, f)
     
     evaluating = "prop-outflow"
-    lower_bounds = [0.95, 0.25,0.10, 0.4, 3.0,1e-4]
-    upper_bounds = [1.0, 0.38, 0.2, 0.55, 4.0,0.1]
+    #lower_bounds = [0.95, 0.25,0.10, 0.4, 3.0,1e-4]
+    #upper_bounds = [1.0, 0.38, 0.2, 0.55, 4.0,0.1]
+    lower_bounds = [0.95, 0.25,0.10, 0.4, 3.65 , 3.83,1e-4]
+    upper_bounds = [1.0, 0.38, 0.2, 0.55, 3.77 , 3.95,0.1]
 
     search_space = Box(lower_bounds, upper_bounds)
     

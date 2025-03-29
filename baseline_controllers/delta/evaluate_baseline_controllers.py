@@ -24,16 +24,17 @@ np.set_printoptions(precision=3,suppress=True)
 # options are: 'static-plus-rule' and 'prop-outflow' (or 'uncontrolled')
 # static plus rule is fixed positions for the 4 weirs plus a height to open the infiltration valve at
 # prop outflow adds proportional feedback to weir openings to increase outflows when far below the threshold
-evaluating = 'prop-outflow' 
+evaluating = 'static-plus-rule' 
 verbose = True
 version = "2" # options are "1" and "2"
-level = "3" # options are "1" , "2", and "3"
+level = "1" # options are "1" , "2", and "3"
+#hysteresis = 0.05 # hysteresis for the infiltration valve to avoid rapid cycling between open and closed
 plot = True # plot True significantly increases the memory usage. 
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
 # set the random seed
-rand_seed = 42
+rand_seed = 7
 np.random.seed(rand_seed)
 
 print("evaluating ", evaluating, " for delta scenario")
@@ -71,12 +72,13 @@ exceedance_bounds_df = pd.DataFrame(exceedance_bounds_data, index=["N3", "N2", "
 for parameter in tuning_values:
     if evaluating == "static-plus-rule":
         optimal_static_settings = np.loadtxt(str("./v" + version + "/optimal_static.txt"))
+        #optimal_static_settings = np.array([0.95,0.3,0.11,0.47,3.73,3.93])
     elif evaluating == "prop-outflow":
         optimal_static_settings = np.loadtxt(str("./v" + version + "/optimal_prop.txt"))[:-1]
         optimal_prop = np.loadtxt(str("./v" + version + "/optimal_prop.txt"))[-1]
     elif evaluating == "uncontrolled":
         optimal_static_settings = np.loadtxt(str("./v" + version + "/optimal_static.txt"))
-        optimal_static_settings[-1] = 0.05 # infiltration valve always a little open
+        optimal_static_settings[-2] = 0.05 # infiltration valve always a little open
 
     print("tuning value: ", parameter)
     optimal_static_settings = optimal_static_settings*(1+parameter)
@@ -89,7 +91,10 @@ for parameter in tuning_values:
     start_time = env.env.sim.start_time
     #u_open_pct = constant_flows
     # make u_open_pct a deep copy of constant_flows (constant_flows should not change)
-    u_open_pct = copy.deepcopy(optimal_static_settings)
+    #u_open_pct = copy.deepcopy(optimal_static_settings)
+    u_open_pct = copy.deepcopy(optimal_static_settings[:-1])
+    # start with valve closed
+    
 
     states = pd.DataFrame(columns = env.config['states'])
     actions = pd.DataFrame(columns = env.config['action_space'])
@@ -102,13 +107,33 @@ for parameter in tuning_values:
             
             # first bit is the same for all 3 controllers
             # set the weirs
-            u_open_pct[:-1] = optimal_static_settings[:-1]
+            #u_open_pct[:-1] = optimal_static_settings[:-1]
+            u_open_pct[:-1] = optimal_static_settings[:-2]
             # open valve?
             if evaluating != "uncontrolled":
+                '''
                 if state[0] > optimal_static_settings[-1]: # basin c depth above optimized threshold?
                     u_open_pct[-1] = 1.0 # fully open valve above threshold depth in basin c
                 else:
+                    u_open_pct[-1] = 0.0 # close the valve to preserve capacity in the infiltration basin    
+                '''
+                # try proprtional valve opening between two setpoint depths
+                if state[0] < optimal_static_settings[-2]: # below lower threshold
                     u_open_pct[-1] = 0.0 # close the valve to preserve capacity in the infiltration basin
+                elif state[0] > optimal_static_settings[-1]: # above upper threshold
+                    u_open_pct[-1] = 1.0 # fully open valve above upper threshold depth in basin c
+                else: # between the two thresholds
+                    # linearly interpolate the valve opening based on the current depth in basin C
+                    # find the range between the two thresholds
+                    lower_threshold = optimal_static_settings[-2] # lower threshold depth
+                    upper_threshold = optimal_static_settings[-1] # upper threshold depth
+                    range_threshold = upper_threshold - lower_threshold
+                    # calculate the current depth in the range
+                    current_depth_in_range = state[0] - lower_threshold
+                    # calculate the percentage of the way through the range
+                    percentage_in_range = current_depth_in_range / range_threshold
+                    # set the valve opening based on the percentage in range
+                    u_open_pct[-1] = percentage_in_range # linearly interpolate the valve opening based on the current depth in basin C
                             
 
             if evaluating == "prop-outflow":

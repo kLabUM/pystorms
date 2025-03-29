@@ -73,3 +73,4 @@ baseline_controllers/epsilon/v2/lev1/results/constant-flow_param=0.0_data_log.pk
 baseline_controllers/alpha/v2/results/uncontrolled_data_log.pkl
 baseline_controllers/alpha/v2/lev1/results/equal-filling_param=0.0_data_log.pkl
 baseline_controllers/alpha/v2/lev1/results/constant-flow_param=0.0_data_log.pkl
+*.pkl
