@@ -24,10 +24,10 @@ np.set_printoptions(precision=3,suppress=True)
 # options are: 'static-plus-rule' and 'prop-outflow' (or 'uncontrolled')
 # static plus rule is fixed positions for the 4 weirs plus a height to open the infiltration valve at
 # prop outflow adds proportional feedback to weir openings to increase outflows when far below the threshold
-evaluating = 'static-plus-rule' 
+evaluating = 'prop-outflow' 
 verbose = True
 version = "2" # options are "1" and "2"
-level = "1" # options are "1" , "2", and "3"
+level = "3" # options are "1" , "2", and "3"
 #hysteresis = 0.05 # hysteresis for the infiltration valve to avoid rapid cycling between open and closed
 plot = True # plot True significantly increases the memory usage. 
 # set the working directory to the directory of this script
@@ -98,12 +98,18 @@ for parameter in tuning_values:
 
     states = pd.DataFrame(columns = env.config['states'])
     actions = pd.DataFrame(columns = env.config['action_space'])
+    state = env.state(level=level) # get the initial state of the environment
+    old_state = state.copy()
+    old_old_state = old_state.copy()
     
     while not done:
         # take control actions?
         if env.env.sim.current_time.minute % 5 == 0 and (env.env.sim.current_time > last_eval + datetime.timedelta(minutes=2)):
             last_eval = env.env.sim.current_time
             state = env.state(level=level)
+            old_old_state = old_state.copy() # save the old state before updating
+            old_state = state.copy() # save the current state as the old state for next iteration
+            state_for_control = (state + old_state + old_old_state) / 3.0 # use the average of the current, previous, and previous previous states for control to smooth out noise in the state space
             
             # first bit is the same for all 3 controllers
             # set the weirs
@@ -118,9 +124,9 @@ for parameter in tuning_values:
                     u_open_pct[-1] = 0.0 # close the valve to preserve capacity in the infiltration basin    
                 '''
                 # try proprtional valve opening between two setpoint depths
-                if state[0] < optimal_static_settings[-2]: # below lower threshold
+                if state_for_control[0] < optimal_static_settings[-2]: # below lower threshold
                     u_open_pct[-1] = 0.0 # close the valve to preserve capacity in the infiltration basin
-                elif state[0] > optimal_static_settings[-1]: # above upper threshold
+                elif state_for_control[0] > optimal_static_settings[-1]: # above upper threshold
                     u_open_pct[-1] = 1.0 # fully open valve above upper threshold depth in basin c
                 else: # between the two thresholds
                     # linearly interpolate the valve opening based on the current depth in basin C
@@ -129,7 +135,7 @@ for parameter in tuning_values:
                     upper_threshold = optimal_static_settings[-1] # upper threshold depth
                     range_threshold = upper_threshold - lower_threshold
                     # calculate the current depth in the range
-                    current_depth_in_range = state[0] - lower_threshold
+                    current_depth_in_range = state_for_control[0] - lower_threshold
                     # calculate the percentage of the way through the range
                     percentage_in_range = current_depth_in_range / range_threshold
                     # set the valve opening based on the percentage in range
@@ -149,10 +155,10 @@ for parameter in tuning_values:
                     op_bound_width = operational_bounds_df.loc[name,"Upper Limit"] - operational_bounds_df.loc[name, "Lower Limit"]
                     lower_tight_bound = operational_bounds_df.loc[name, "Lower Limit"] + 0.1 * op_bound_width
                     upper_tight_bound = operational_bounds_df.loc[name,"Upper Limit"] - 0.25 * op_bound_width
-                    if state[idx_state[0]] < upper_tight_bound and state[idx_state[0]] > lower_tight_bound:
+                    if state_for_control[idx_state[0]] < upper_tight_bound and state_for_control[idx_state[0]] > lower_tight_bound:
                         # only use proportional feedback on the outflow if we're safe regarding depth bounds
                         u_open_pct[idx] += optimal_prop * flow_capacity
-                    elif state[idx_state[0]] >= upper_tight_bound and optimal_prop*flow_capacity > 0: # allow extra opening if close to exceeding upper bound
+                    elif state_for_control[idx_state[0]] >= upper_tight_bound and optimal_prop*flow_capacity > 0: # allow extra opening if close to exceeding upper bound
                         u_open_pct[idx] += optimal_prop * flow_capacity
                     if u_open_pct[idx] > 1.0:
                         u_open_pct[idx] = 1.0
