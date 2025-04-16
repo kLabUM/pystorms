@@ -8,7 +8,7 @@ subprocess.check_call([sys.executable, '-m', 'pip', 'install', '.'])
 
 import pystorms # this will be the first line of the program when dev is done
 import copy
-import pyswmm
+import pyswmm # done using 1.5.1. may need to revert
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
