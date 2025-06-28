@@ -21,7 +21,7 @@ For the motivation behind this effort, we refer the reader to our manuscript [*p
 
 - PyYAML >= 5.3
 - numpy >= 18.4
-- pyswmm
+- pyswmm < 2.0.0
 
 
 ```bash 
@@ -58,5 +58,19 @@ while not done:
 performance = env.performance()
 
 ```
+
+Updated versions of _theta_, _alpha_, _gamma_, _delta_, and _epsilon_ are accessible via a version keyword in the initialization command.
+
+```python
+env = pystorms.scenarios.theta(version=version) # "1" is the default and original, "2" are the updated versions.
+```
+
+Sensor noise and actuator faults can also be enabled via the level keyword. The options are 1, 2, and 3 in ascending order of difficulty. Version or level or both can be specified. 
+
+```python
+env = pystorms.scenarios.theta(version=version, level=level) # "1" is the ideal, original, and default case. "2" is realistic and "3" is adverse.
+env = pystorms.scenarios.theta(level=level) # also valid. This would load version 1 of the model.
+```
+More details on the updates are accessible at (preprint link). As of June 2025, these updates are only in the "dev" branch and have not yet been merged in "master."
 
 Detailed documentation can be found on the [webpage](https://www.pystorms.org)
