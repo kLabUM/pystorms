@@ -32,7 +32,8 @@ from trieste.models.gpflow import build_gpr, GaussianProcessRegression
 from trieste.acquisition.rule import EfficientGlobalOptimization
 import dill as pickle
 # GAMMA
-evaluating = "both" # "constant-flow" or "efd" or "both"
+mode = "compare" # "compare" or "optimize"
+evaluating = "constant-flow" # "constant-flow" or "efd" or "both"
 version = "2" # "1" or "2" - 2 will be the updated, more difficult version
 level = "1"
 # level should always be 1 when optimizing parameters. controllers will be evaluated but not optimized on higher levels
@@ -207,10 +208,14 @@ class Sim_cf:
                         if final_depth > 0.10:
                             drainage_cost += 10*final_depth # drainage cost will always be at least 1.0 if greater than zero
                 constraint_cost = flood_cost + drainage_cost
+                
+                # Store the native pystorms performance measure
+                #pystorms_cost = sum(data['data_log']['performance_measure'])
 
                 Sim_cf.computed_return_values[tuple(sample.numpy())] = dict()
                 Sim_cf.computed_return_values[tuple(sample.numpy())]['objective'] = objective_cost
                 Sim_cf.computed_return_values[tuple(sample.numpy())]['constraint'] = constraint_cost
+                #Sim_cf.computed_return_values[tuple(sample.numpy())]['pystorms_cost'] = pystorms_cost
                 return_values.append(objective_cost)
         return_values = np.array(return_values).reshape(-1,1)
         return return_values
@@ -247,10 +252,14 @@ class Sim_cf:
                         if final_depth > 0.10:
                             drainage_cost += 10*final_depth # drainage cost will always be at least 1.0 if greater than zero
                 constraint_cost = flood_cost + drainage_cost
-                
+                # Store the native pystorms performance measure
+                #pystorms_cost = sum(data['data_log']['performance_measure'])
+
                 Sim_cf.computed_return_values[tuple(sample.numpy())] = dict()
                 Sim_cf.computed_return_values[tuple(sample.numpy())]['objective'] = objective_cost
                 Sim_cf.computed_return_values[tuple(sample.numpy())]['constraint'] = flood_cost
+                #Sim_cf.computed_return_values[tuple(sample.numpy())]['pystorms_cost'] = pystorms_cost
+
                 return_values.append(flood_cost)
         return_values = np.array(return_values).reshape(-1,1)
         return return_values
@@ -400,7 +409,7 @@ def create_bo_model(data):
         gpr = build_gpr(data, search_space)
         return GaussianProcessRegression(gpr)
 
-if evaluating == "constant-flow":
+if evaluating == "constant-flow" and mode == "optimize":
     lower_bounds = []
     upper_bounds = []
     for i in range(9):
@@ -475,7 +484,7 @@ if evaluating == "constant-flow":
     np.savetxt(str("v" + version +"/optimal_constant_flows_cost.txt"), np.array([bo.fun]))
     '''
 
-elif evaluating == "efd":
+elif evaluating == "efd" and mode == "optimize":
     lower_bounds = []
     upper_bounds = []
     for i in range(9):
@@ -510,7 +519,7 @@ elif evaluating == "efd":
     if len(feasible_indices) == 0:
         print("No feasible points found.")
     else:
-        # find the index of the best feasible query point (tf doesn't play nice with np argmin)
+        # find the index of the best feasible query point (tf doesn't play nice with np.argmin)
         best_feasible_index = -1
         for idx in feasible_indices:
             if best_feasible_index == -1:
@@ -531,7 +540,7 @@ elif evaluating == "efd":
         #with open("bo_efd.pkl", "wb") as f:
         #    pickle.dump(opt_result, f)
     
-elif evaluating == "both":
+elif evaluating == "both" and mode == "optimize":
     evaluating = "constant-flow"
     lower_bounds = []
     upper_bounds = []
@@ -565,7 +574,7 @@ elif evaluating == "both":
     if len(feasible_indices) == 0:
         print("No feasible points found.")
     else:
-        # find the index of the best feasible query point (tf doesn't play nice with np argmin)
+        # find the index of the best feasible query point (tf doesn't play nice with np.argmin)
         best_feasible_index = -1
         for idx in feasible_indices:
             if best_feasible_index == -1:
@@ -619,7 +628,7 @@ elif evaluating == "both":
     if len(feasible_indices) == 0:
         print("No feasible points found.")
     else:
-        # find the index of the best feasible query point (tf doesn't play nice with np argmin)
+        # find the index of the best feasible query point (tf doesn't play nice with np.argmin)
         best_feasible_index = -1
         for idx in feasible_indices:
             if best_feasible_index == -1:
@@ -636,3 +645,435 @@ elif evaluating == "both":
         # save the optimal constant heads and the entire optimization object
         np.savetxt(str("v" +version +"/optimal_efd.txt"), best_feasible_point.numpy())
         np.savetxt(str("v" +version +"/optimal_efd_cost.txt"), best_feasible_observation.numpy())
+
+elif evaluating == "constant-flow" and mode == "compare":
+    print("\nComparing optimization methods for constant flow in gamma scenario\n")
+    
+    # Common setup for all methods
+    lower_bounds = [2.5] * 9  # Nine parameters for gamma
+    upper_bounds = [6.0] * 9
+    search_space = Box(lower_bounds, upper_bounds)
+    
+    # Import required libraries for additional optimization methods
+    from scipy.optimize import dual_annealing, differential_evolution
+    import time
+    from trieste.acquisition.function import ExpectedImprovement
+    import matplotlib.ticker as mticker
+    import csv
+    
+    # For tracking function calls
+    function_call_count = 0
+    
+    # Define a combined objective function for methods that don't separate constraint and objective
+    def combined_objective(params):
+        global function_call_count
+        function_call_count += 1
+        
+        params_array = np.array(params).flatten()
+        
+        # Use existing simulation infrastructure to evaluate
+        data = run_swmm(params_array, None, verbose=False)
+        return sum(data['data_log']['performance_measure'])
+        
+    # For tracking performance across methods
+    results = {
+        "BOUC": {"costs": [], "fcalls": [], "best_params": None, "best_cost": float('inf')},
+        "BO": {"costs": [], "fcalls": [], "best_params": None, "best_cost": float('inf')},
+        "DA": {"costs": [], "fcalls": [], "best_params": None, "best_cost": float('inf')},
+        "DE": {"costs": [], "fcalls": [], "best_params": None, "best_cost": float('inf')}
+    }
+    
+    # Generate common initial points for all methods
+    num_initial_points = 50  # Number of initial points
+    num_steps = 200  
+    initial_seed = 7  # Use fixed seed for reproducibility
+    tf.random.set_seed(initial_seed)
+    np.random.seed(initial_seed)
+    
+    # Generate initial points that all methods will use
+    initial_points = search_space.sample(num_initial_points)
+    initial_points_np = initial_points.numpy()
+    
+    # 1. Bayesian Optimization with Unknown Constraints (BOUC) using Trieste
+    print("Running BOUC optimization...")
+    function_call_count = 0  # Reset counter
+    initial_data = observer_cf(initial_points)
+    bouc_fcalls = 0
+    obj_data = initial_data[OBJECTIVE]
+    con_data = initial_data[CONSTRAINT]
+    best_feasible_obj = float('inf')
+    best_feasible_point = None
+    bouc_costs = []  # Original BOUC objective values
+    bouc_pystorms_costs = []  # Store pystorms costs for fair comparison
+    bouc_fcalls_arr = []
+
+    # Run optimization
+    initial_models = trieste.utils.map_values(create_bo_model, initial_data)
+    pof = trieste.acquisition.ProbabilityOfFeasibility(threshold=Sim_cf.threshold)
+    eci = trieste.acquisition.ExpectedConstrainedImprovement(
+        OBJECTIVE, pof.using(CONSTRAINT)
+    )
+    rule = EfficientGlobalOptimization(eci)
+    
+    bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_cf, search_space)
+    bouc_start_time = time.time()
+    opt_result = bo.optimize(
+        num_steps, initial_data, initial_models, rule
+    )
+    bouc_total_time = time.time() - bouc_start_time
+    datasets = opt_result.try_get_final_datasets()
+    obj_data = datasets[OBJECTIVE]
+    con_data = datasets[CONSTRAINT]
+    bouc_fcalls = len(obj_data.query_points)
+        # Process BOUC results and calculate pystorms costs
+    for i in range(len(obj_data.query_points)):
+        point = obj_data.query_points[i].numpy()
+        
+        # Calculate pystorms cost for this point
+        data = run_swmm(point, None, verbose=False)
+        pystorms_cost = sum(data['data_log']['performance_measure'])
+        bouc_pystorms_costs.append(pystorms_cost)
+        
+        # Record original BOUC objective value
+        obj_value = float(obj_data.observations[i][0])
+        con_value = float(con_data.observations[i][0])
+        
+        # Track best feasible point according to BOUC's objective
+        if con_value <= Sim_cf.threshold and obj_value < best_feasible_obj:
+            best_feasible_obj = obj_value
+            best_feasible_point = point
+            best_feasible_idx = i  # Store the index here for later reference
+            
+        bouc_costs.append(obj_value)
+        bouc_fcalls_arr.append(i + 1)
+
+    # Store results for comparison
+    results["BOUC"]["costs"] = bouc_costs
+    results["BOUC"]["pystorms_costs"] = bouc_pystorms_costs
+    results["BOUC"]["fcalls"] = bouc_fcalls_arr
+    
+    # Use the already calculated pystorms cost for the best point
+    if best_feasible_point is not None:
+        results["BOUC"]["best_params"] = best_feasible_point
+        results["BOUC"]["best_cost"] = bouc_pystorms_costs[best_feasible_idx]
+    else:
+        # If no feasible point, use the best objective point
+        idx = np.argmin(obj_data.observations)
+        results["BOUC"]["best_params"] = obj_data.query_points[idx].numpy()
+        results["BOUC"]["best_cost"] = bouc_pystorms_costs[idx]
+
+    print("BOUC function calls:", bouc_fcalls_arr)
+    print("BOUC pystorms costs:", bouc_pystorms_costs)
+    
+    # 2. Vanilla Bayesian Optimization using Trieste
+    print("\nRunning vanilla BO optimization...")
+    function_call_count = 0  # Reset counter
+    bo_fcalls = 0
+    bo_costs = []
+    bo_fcalls_arr = []
+    class Sim_vanilla_bo:
+        computed_return_values = dict()
+        @staticmethod
+        def objective(input_data):
+            global bo_fcalls
+            return_values = []
+            for sample in input_data:
+                if tuple(sample.numpy()) in Sim_vanilla_bo.computed_return_values.keys():
+                    return_values.append(Sim_vanilla_bo.computed_return_values[tuple(sample.numpy())])
+                else:
+                    bo_fcalls += 1
+                    value = combined_objective(sample.numpy())
+                    Sim_vanilla_bo.computed_return_values[tuple(sample.numpy())] = value
+                    return_values.append(value)
+            return np.array(return_values).reshape(-1, 1)
+    
+    def observer_vanilla_bo(query_points):
+        return Dataset(query_points, Sim_vanilla_bo.objective(query_points))
+        
+    def vanilla_bo_create_model(data):
+        gpr = build_gpr(data, search_space)
+        return GaussianProcessRegression(gpr)
+        
+    initial_data_bo = observer_vanilla_bo(initial_points)
+    initial_model_bo = vanilla_bo_create_model(initial_data_bo)
+    ei = ExpectedImprovement()
+    rule_bo = EfficientGlobalOptimization(ei)
+    bo_vanilla = trieste.bayesian_optimizer.BayesianOptimizer(observer_vanilla_bo, search_space)
+    bo_start_time = time.time()
+    opt_result_bo = bo_vanilla.optimize(
+        num_steps, initial_data_bo, initial_model_bo, rule_bo
+    )
+    bo_total_time = time.time() - bo_start_time
+    final_data_bo = opt_result_bo.try_get_final_dataset()
+    
+    for i in range(len(final_data_bo.query_points)):
+        value = float(final_data_bo.observations[i][0])
+        bo_costs.append(value)
+        bo_fcalls_arr.append(i + 1)
+        
+    best_idx = np.argmin(final_data_bo.observations)
+    best_point = final_data_bo.query_points[best_idx].numpy()
+    best_value = float(final_data_bo.observations[best_idx].numpy()[0])
+    results["BO"]["costs"] = bo_costs
+    results["BO"]["fcalls"] = bo_fcalls_arr
+    results["BO"]["best_params"] = best_point
+    results["BO"]["best_cost"] = best_value
+    
+    print("BO function calls:", len(bo_fcalls_arr))
+    print("BO best cost:", results["BO"]["best_cost"])
+    
+    # 3. Dual Annealing
+    print("\nRunning Dual Annealing optimization...")
+    function_call_count = 0  # Reset counter
+    bounds_da = list(zip(lower_bounds, upper_bounds))
+    da_costs = []
+    da_fcalls_arr = []
+    x0_costs = []
+    
+    for i in range(len(initial_points_np)):
+        x0_costs.append(combined_objective(initial_points_np[i]))
+        da_costs.append(x0_costs[-1])
+        da_fcalls_arr.append(i + 1)
+        
+    best_idx = np.argmin(x0_costs)
+    x0 = initial_points_np[best_idx]
+    da_best_cost = x0_costs[best_idx]
+    global da_best_params
+    da_best_params = x0.copy()
+    
+    def da_callback(x, f, context):
+        global da_best_params
+        da_fcalls_arr.append(function_call_count)
+        if f < da_costs[-1]:
+            da_best_params = x.copy()
+            da_costs.append(f)
+        else:
+            da_costs.append(da_costs[-1])
+        return False
+    
+    # Run optimization
+    da_max_calls = num_steps * 2
+    da_max_iter = num_steps // 5
+    
+    da_start_time = time.time()
+    res_da = dual_annealing(combined_objective, bounds=bounds_da, 
+                          maxfun=da_max_calls, maxiter=da_max_iter, callback=da_callback,
+                          x0=x0, no_local_search=True)
+    da_total_time = time.time() - da_start_time
+    
+    if da_costs[-1] != res_da.fun or da_fcalls_arr[-1] != function_call_count:
+        da_fcalls_arr.append(function_call_count)
+        da_costs.append(res_da.fun)
+        print(f"Added final DA state: cost={res_da.fun}, fcalls={function_call_count}")
+        
+    results["DA"]["costs"] = da_costs
+    results["DA"]["fcalls"] = da_fcalls_arr
+    results["DA"]["best_params"] = res_da.x
+    results["DA"]["best_cost"] = res_da.fun
+    
+    print("DA function calls:", len(da_fcalls_arr))
+    print("DA best cost:", results["DA"]["best_cost"])
+    
+    # 4. Differential Evolution
+    print("\nRunning Differential Evolution optimization...")
+    function_call_count = 0  # Reset counter
+    bounds_de = list(zip(lower_bounds, upper_bounds))
+    de_costs = []
+    de_fcalls_arr = []
+    x0_costs = []
+    
+    for i in range(len(initial_points_np)):
+        x0_costs.append(combined_objective(initial_points_np[i]))
+        de_costs.append(x0_costs[-1])
+        de_fcalls_arr.append(i + 1)
+        
+    best_idx = np.argmin(x0_costs)
+    x0 = initial_points_np[best_idx]
+    de_best_cost = x0_costs[best_idx]
+    global de_best_params
+    de_best_params = x0.copy()
+    
+    def de_callback(x, convergence):
+        global de_best_params, function_call_count, de_costs, de_fcalls_arr
+        de_fcalls_arr.append(function_call_count)
+        f = combined_objective(x)
+        function_call_count -= 1  # Decrement to avoid double counting
+        if f < de_costs[-1]:
+            de_best_params = x.copy()
+            de_costs.append(f)
+        else:
+            de_costs.append(de_costs[-1])
+        return False
+    
+    # Create initial population that includes our initial points
+    popsize = num_initial_points
+    population = np.array(initial_points_np)
+    
+    # Set maxiter to ensure comparable number of function evaluations
+    de_max_iter = 2*max(1, num_steps // (popsize * len(lower_bounds)))
+    print(f"DE max iterations: {de_max_iter}, popsize: {popsize}, function evaluations: {(de_max_iter + 1) * popsize * (len(lower_bounds) - 1)}")
+    
+    de_start_time = time.time()
+    res_de = differential_evolution(
+        combined_objective, 
+        bounds=bounds_de, 
+        maxiter=de_max_iter, 
+        callback=de_callback,
+        popsize=popsize,
+        init=population,
+        polish=False
+    )
+    de_total_time = time.time() - de_start_time
+    
+    if de_costs[-1] != res_de.fun or de_fcalls_arr[-1] != function_call_count:
+        de_fcalls_arr.append(function_call_count)
+        de_costs.append(res_de.fun)
+        print(f"Added final DE state: cost={res_de.fun}, fcalls={function_call_count}")
+        
+    results["DE"]["costs"] = de_costs
+    results["DE"]["fcalls"] = de_fcalls_arr
+    results["DE"]["best_params"] = res_de.x
+    results["DE"]["best_cost"] = res_de.fun
+    
+    print("DE function calls:", len(de_fcalls_arr))
+    print("DE best cost:", results["DE"]["best_cost"])
+    
+    # Compare results
+    print("\nOptimization Results Comparison (using consistent performance measure):")
+    print("Starting costs (from pystorms performance measure):")
+    print(f"  BOUC: {bouc_pystorms_costs[0]:.4f}, BO: {bo_costs[0]:.4f}, DA: {da_costs[0]:.4f}, DE: {de_costs[0]:.4f}")
+    print("-" * 80)
+    print(f"{'Method':<10} | {'Best Cost':<15} | {'Function Calls':<15} | {'Time (s)':<15}")
+    print("-" * 80)
+    for method, data in results.items():
+        if method == "BOUC":
+            total_time = bouc_total_time
+            fcalls = max(data["fcalls"]) if data["fcalls"] else 0
+        elif method == "BO":
+            total_time = bo_total_time
+            fcalls = max(data["fcalls"]) if data["fcalls"] else 0
+        elif method == "DA":
+            total_time = da_total_time
+            fcalls = max(data["fcalls"]) if data["fcalls"] else 0
+        elif method == "DE":
+            total_time = de_total_time
+            fcalls = max(data["fcalls"]) if data["fcalls"] else 0
+            
+        if data["best_params"] is not None:
+            print(f"{method:<10} | {data['best_cost']:<15.4f} | {fcalls:<15} | {total_time:<15.2f}")
+    print("-" * 80)
+    
+    # Save best parameters and costs for all methods into a single CSV
+    csv_path = f"v{version}/optimal_constant_flows_summary.csv"
+    param_count = len(lower_bounds)
+    header = [
+        "method",
+        "best_cost",
+        "optimization_time_sec",
+        "num_function_calls"
+    ] + [f"param_{i+1}" for i in range(param_count)]
+
+    with open(csv_path, "w", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(header)
+        for method, data in results.items():
+            if data["best_params"] is not None:
+                # Get timing and function call info
+                if method == "BOUC":
+                    total_time = bouc_total_time
+                    fcalls = max(data["fcalls"]) if data["fcalls"] else 0
+                elif method == "BO":
+                    total_time = bo_total_time
+                    fcalls = max(data["fcalls"]) if data["fcalls"] else 0
+                elif method == "DA":
+                    total_time = da_total_time
+                    fcalls = max(data["fcalls"]) if data["fcalls"] else 0
+                elif method == "DE":
+                    total_time = de_total_time
+                    fcalls = max(data["fcalls"]) if data["fcalls"] else 0
+                else:
+                    total_time = 0
+                    fcalls = 0
+                params = np.array(data["best_params"]).flatten()
+                row = [method, data["best_cost"], total_time, fcalls]
+                row.extend(params)
+                writer.writerow(row)
+    print(f"Saved summary CSV to {csv_path}")
+    
+    labels = {
+        "BOUC": f"BOUC ({bouc_total_time/60.0:.1f}min)",
+        "BO": f"BO ({bo_total_time/60.0:.1f}min)",
+        "DA": f"DA ({da_total_time/60.0:.1f}min)",
+        "DE": f"DE ({de_total_time/60.0:.1f}min)"
+    }        
+    
+    # --- Rolling minimum (best cost so far) arrays for convergence plots ---
+    def rolling_min(costs, feasible=None):
+        best = []
+        min_so_far = float('inf')
+        for i, c in enumerate(costs):
+            if feasible is not None:
+                if feasible[i]:
+                    min_so_far = min(min_so_far, c)
+            else:
+                min_so_far = min(min_so_far, c)
+            best.append(min_so_far)
+        return best
+
+    # For BOUC, use pystorms cost directly
+    results["BOUC"]["best_cost_so_far"] = rolling_min(results["BOUC"]["pystorms_costs"])
+
+    # For other methods, all are assumed feasible
+    for method in ["BO", "DA", "DE"]:
+        results[method]["best_cost_so_far"] = rolling_min(results[method]["costs"])
+
+    # --- Plotting ---
+    plt.figure(figsize=(12, 8))
+    
+    # Make the ylimit just above the maximum bouc cost
+    all_costs = []
+    for method, data in results.items():
+        all_costs.extend(data["best_cost_so_far"])
+    min_cost = min(all_costs)
+    
+    # give the y axis a log10 scale
+    plt.yscale('log')
+    
+    for method, data in results.items():
+        if data["fcalls"] and data["best_cost_so_far"]:
+            plt.plot(data["fcalls"], data["best_cost_so_far"], 'o-', label=labels[method], markersize=8)
+            
+    plt.xlabel('Function Evaluations', fontsize=14)
+    plt.ylabel('Best Cost Found', fontsize=14)
+    plt.title('Optimization Methods Comparison by Function Evaluations - Gamma Scenario', fontsize=16)
+    plt.grid(True, alpha=0.3)
+    plt.legend(fontsize='x-large')
+    plt.tight_layout()
+    plt.savefig(f"v{version}/optimization_methods_comparison_by_fcalls.png")
+    plt.savefig(f"v{version}/optimization_methods_comparison_by_fcalls.svg")
+    
+    # --- Create a zoomed-in plot ---
+    plt.figure(figsize=(12, 8))
+
+    # Find the best cost achieved across all methods
+    min_cost_all = float('inf')
+    for method in results.keys():
+        if results[method]["best_cost_so_far"] and min(results[method]["best_cost_so_far"]) < min_cost_all:
+            min_cost_all = min(results[method]["best_cost_so_far"])
+
+    # Set y-limits from slightly below best cost to twice the best cost
+    plt.ylim(0.95 * min_cost_all, 2.0 * min_cost_all)
+
+    for method, data in results.items():
+        if data["fcalls"] and data["best_cost_so_far"]:
+            plt.plot(data["fcalls"], data["best_cost_so_far"], 'o-', label=labels[method], markersize=8)
+
+    plt.xlabel('Function Evaluations', fontsize=14)
+    plt.ylabel('Best Cost Found', fontsize=14)
+    plt.title('Optimization Methods Comparison (Zoomed) - Gamma Scenario', fontsize=16)
+    plt.grid(True, alpha=0.3)
+    plt.legend(fontsize='x-large')
+    plt.tight_layout()
+    plt.savefig(f"v{version}/optimization_methods_comparison_by_fcalls_zoom.png")
+    plt.savefig(f"v{version}/optimization_methods_comparison_by_fcalls_zoom.svg")
+    plt.show()

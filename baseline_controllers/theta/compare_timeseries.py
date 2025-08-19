@@ -12,8 +12,8 @@ import os
 
 
 # THETA SCENARIO
-version = "2"
-level = "3"
+version = "1"
+level = "1"
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
@@ -64,7 +64,7 @@ ax_1depth.set_xticks([])
 # set the title
 ax_1depth.set_title('Depth in P1',y=0.8,fontsize='xx-large')
 # add a legend to this axis, top right x-large
-ax_1depth.legend(loc='right', fontsize='x-large')
+#ax_1depth.legend(loc='right', fontsize='x-large')
 
 # plot the depth in P2
 ax_2depth.plot(equal_filling_depths.index, equal_filling_depths["('P2', 'depthN')"], label='equal filling', color='blue', alpha=0.6,linewidth=linewidth)
