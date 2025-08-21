@@ -69,7 +69,7 @@ def observer_cf(query_points):
         }
 
 def create_bo_model(data):
-        gpr = build_gpr(data, search_space)
+        gpr = build_gpr(data, search_space, likelihood_variance=1e-7) # trying small likelihood variance (noiseless data)
         return GaussianProcessRegression(gpr)
 
 def disk(sample): # constraint function
@@ -218,7 +218,7 @@ class Sim_vanilla_bo:
 def observer_vanilla_bo(query_points):
     return Dataset(query_points, Sim_vanilla_bo.objective(query_points))
 def vanilla_bo_create_model(data):
-    gpr = build_gpr(data, search_space)
+    gpr = build_gpr(data, search_space, likelihood_variance=1e-7)
     return GaussianProcessRegression(gpr)
 initial_data_bo = observer_vanilla_bo(initial_points)
 '''
@@ -514,8 +514,8 @@ plt.show()
 
 # plot the true objective function and each optimization's best point
 
-x = np.linspace(lower_bounds[0], upper_bounds[0], 100)
-y = np.linspace(lower_bounds[1], upper_bounds[1], 100)
+x = np.linspace(lower_bounds[0], upper_bounds[0], 250)
+y = np.linspace(lower_bounds[1], upper_bounds[1], 250)
 X, Y = np.meshgrid(x, y)
 Z = ackley([X, Y])
 # include the disk constraint boundary

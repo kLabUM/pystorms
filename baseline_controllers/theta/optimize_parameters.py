@@ -131,39 +131,64 @@ def run_swmm(constant_flows, efd_parameters=None,verbose=False):
 
     return {"data_log": env.data_log, "final_depths": final_depths,"peak_filling_degrees":peak_filling_degrees}
 
-'''
-def feas_constant_flows(constant_flows):
-    constant_flow_params = np.array(constant_flows).flatten()    
+# --- Shared evaluator for objective/constraint with caching ---
+def evaluate_cf_point(params_array):
+    """
+    Compute objective and constraint once, cache into Sim_cf.computed_return_values,
+    and return a dict with 'objective' and 'constraint'.
+    """
+    key = tuple(np.array(params_array).flatten())
+    if key in Sim_cf.computed_return_values:
+        return Sim_cf.computed_return_values[key]
 
-    # defines the feasible region. anwyhere flooding occurs is infeasible, anywhere else is fine.
+    # Run the simulation once
+    data = run_swmm(np.array(params_array).flatten(), None, verbose=False)
 
-    data = run_swmm(constant_flow_params, None,verbose=False)
-    if any(any(data['data_log']['flooding'])) > 0.0:
-        return 1.0
+    # Objective (same formula as Sim_cf.objective)
+    flow_cost = 0.0
+    for _, value in data['data_log']['flow'].items():
+        flow_exceed = [x - 0.25 for x in value]
+        flow_exceed = [x if x > 0 else 0 for x in flow_exceed]
+        flow_cost += sum(flow_exceed)
+    objective_cost = float(flow_cost + sum(data['final_depths']) + np.std(data['final_depths']))
+
+    # Constraint (same formula as Sim_cf.constraint)
+    flood_cost = 0.0
+    for _, value in data['data_log']['flooding'].items():
+        flood_cost += sum(value)
+    if 0.0 < flood_cost < 1.0:
+        flood_cost = 1.0
+    elif flood_cost <= 0.0:
+        flood_cost = float(max(data['peak_filling_degrees']))
     else:
-        return 0.0
+        flood_cost = float(flood_cost)
 
-def f_constant_flows(constant_flows):
-    # flatten the actions
-    constant_flow_params = np.array(constant_flows).flatten()    
+    Sim_cf.computed_return_values[key] = {
+        'objective': objective_cost,
+        'constraint': flood_cost
+    }
+    return Sim_cf.computed_return_values[key]
 
-    data = run_swmm(constant_flow_params, None,verbose=False)
-    # don't penalize flooding as it's defining the feasible region. want cost to slope downward toward that boundary.
-
-
-    return_value = sum(data['data_log']['performance_measure']) + sum(data["final_depths"]) + 10*np.std(data['final_depths'])
-    return float(return_value)
-
-def f_efd(efd_parameters):
-    efd_params = np.array(efd_parameters).flatten()
-
-    data = run_swmm(optimal_constant_flows, efd_params,verbose=False)
-    return float(data['cost'] + sum(data['final_depths'])) + 10*np.std(data['final_depths'])
-'''
 class Sim_cf:
     threshold = 0.99 # on the constraint function to define the feasible (safe) region
     computed_return_values = dict()
-    
+
+    @staticmethod
+    def objective(input_data):
+        return_values = []
+        for sample in input_data:
+            res = evaluate_cf_point(sample.numpy())
+            return_values.append(res['objective'])
+        return np.array(return_values).reshape(-1, 1)
+
+    @staticmethod
+    def constraint(input_data):
+        return_values = []
+        for sample in input_data:
+            res = evaluate_cf_point(sample.numpy())
+            return_values.append(res['constraint'])
+        return np.array(return_values).reshape(-1, 1)
+    '''
     @staticmethod
     def objective(input_data):
         return_values = []
@@ -231,6 +256,7 @@ class Sim_cf:
                 return_values.append(flood_cost)
         return_values = np.array(return_values).reshape(-1,1)
         return return_values
+'''
     
 OBJECTIVE = "OBJECTIVE"
 CONSTRAINT = "CONSTRAINT"
@@ -318,7 +344,7 @@ def observer_efd(query_points):
 
 
 def create_bo_model(data):
-        gpr = build_gpr(data, search_space)
+        gpr = build_gpr(data, search_space, likelihood_variance = 1e-7)
         return GaussianProcessRegression(gpr)
 
 
@@ -719,15 +745,13 @@ elif evaluating == "constant-flow" and mode == "compare":
     def combined_objective(params):
         global function_call_count
         function_call_count += 1
-        
-        params_array = np.array(params).flatten()
 
-        # speed this up to correct the plotting logic
-        #return 50*(params[0]**0.5) + 50*(params[1]**0.2) + 600 + 1/params[0] + 1/params[1]
-        
-        # Use existing simulation infrastructure to evaluate
-        data = run_swmm(params_array, None, verbose=False)
-        return sum(data['data_log']['performance_measure']) 
+        params_array = np.array(params).flatten()
+        res = evaluate_cf_point(params_array)
+        # If the constraint is violated, return a large penalty
+        if res['constraint'] > Sim_cf.threshold:
+            return 1e6
+        return float(res['objective'])
 
     # For tracking performance across methods
     results = {
@@ -738,8 +762,8 @@ elif evaluating == "constant-flow" and mode == "compare":
     }
     
     # Generate common initial points for all methods
-    num_initial_points = 20  # Number of initial points (5 is the min for differential evolution)
-    num_steps = 200  # Reduced for comparison
+    num_initial_points = 25  # Number of initial points (5 is the min for differential evolution)
+    num_steps = 50#200  # Reduced for comparison
     initial_seed = 42  # Use fixed seed for reproducibility
     tf.random.set_seed(initial_seed)
     np.random.seed(initial_seed)
@@ -758,7 +782,7 @@ elif evaluating == "constant-flow" and mode == "compare":
     best_feasible_obj = float('inf')
     best_feasible_point = None
     bouc_costs = []  # Original BOUC objective values
-    bouc_pystorms_costs = []  # Store pystorms costs for fair comparison
+    bouc_combined_costs = []  # Store combined costs for fair comparison
     bouc_fcalls_arr = []
 
     # Run optimization
@@ -778,46 +802,46 @@ elif evaluating == "constant-flow" and mode == "compare":
     datasets = opt_result.try_get_final_datasets()
     obj_data = datasets[OBJECTIVE]
     con_data = datasets[CONSTRAINT]
+    models = opt_result.try_get_final_models()
     bouc_fcalls = len(obj_data.query_points)
-        # Process BOUC results and get pystorms costs for each point
+    # Process BOUC results and get combined costs for each point
+    bouc_combined_costs = []
     for i in range(len(obj_data.query_points)):
         point = obj_data.query_points[i].numpy()
-        
-        # Calculate pystorms cost for this point
-        data = run_swmm(point, None, verbose=False)
-        pystorms_cost = sum(data['data_log']['performance_measure'])
-        bouc_pystorms_costs.append(pystorms_cost)
-        
-        # Record original BOUC objective value
+
+        # Use the same combined objective used by the other methods
+        combined_cost = combined_objective(point)
+        bouc_combined_costs.append(combined_cost)
+
+        # Record original BOUC objective/constraint
         obj_value = float(obj_data.observations[i][0])
         con_value = float(con_data.observations[i][0])
-        
+
         # Track best feasible point according to BOUC's objective
         if con_value <= Sim_cf.threshold and obj_value < best_feasible_obj:
             best_feasible_obj = obj_value
             best_feasible_point = point
-            best_feasible_idx = i  # Store the index here for later reference
-            
+            best_feasible_idx = i
+
         bouc_costs.append(obj_value)
         bouc_fcalls_arr.append(i + 1)
 
     # Store results for comparison
     results["BOUC"]["costs"] = bouc_costs
-    results["BOUC"]["pystorms_costs"] = bouc_pystorms_costs
+    results["BOUC"]["combined_costs"] = bouc_combined_costs
     results["BOUC"]["fcalls"] = bouc_fcalls_arr
-    
-    # Use the already calculated pystorms cost for the best point
+
+    # Use the combined cost for the best point
     if best_feasible_point is not None:
         results["BOUC"]["best_params"] = best_feasible_point
-        results["BOUC"]["best_cost"] = bouc_pystorms_costs[best_feasible_idx]
+        results["BOUC"]["best_cost"] = bouc_combined_costs[best_feasible_idx]
     else:
-        # If no feasible point, use the best objective point
-        idx = np.argmin(obj_data.observations)
+        idx = int(np.argmin(bouc_combined_costs))
         results["BOUC"]["best_params"] = obj_data.query_points[idx].numpy()
-        results["BOUC"]["best_cost"] = bouc_pystorms_costs[idx]
+        results["BOUC"]["best_cost"] = bouc_combined_costs[idx]
 
     print("BOUC function calls:", bouc_fcalls_arr)
-    print("BOUC pystorms costs:", bouc_pystorms_costs)
+    print("BOUC combined costs:", bouc_combined_costs)
     
     # 2. Vanilla Bayesian Optimization using Trieste
     print("\nRunning vanilla BO...")
@@ -843,7 +867,7 @@ elif evaluating == "constant-flow" and mode == "compare":
     def observer_vanilla_bo(query_points):
         return Dataset(query_points, Sim_vanilla_bo.objective(query_points))
     def vanilla_bo_create_model(data):
-        gpr = build_gpr(data, search_space)
+        gpr = build_gpr(data, search_space, likelihood_variance = 1e-7)
         return GaussianProcessRegression(gpr)
     initial_data_bo = observer_vanilla_bo(initial_points)
     '''
@@ -989,7 +1013,7 @@ elif evaluating == "constant-flow" and mode == "compare":
     # Compare results
     print("\nOptimization Results Comparison (using consistent performance measure):")
     print("Starting costs (from pystorms performance measure):")
-    print(f"  BOUC: {bouc_pystorms_costs[0]:.4f}, BO: {bo_costs[0]:.4f}, DA: {da_costs[0]:.4f}, DE: {de_costs[0]:.4f}")
+    print(f"  BOUC: {bouc_combined_costs[0]:.4f}, BO: {bo_costs[0]:.4f}, DA: {da_costs[0]:.4f}, DE: {de_costs[0]:.4f}")
     print("-" * 80)
     print(f"{'Method':<10} | {'Best Cost':<15} | {'Function Calls':<15} | {'Time (s)':<15}")
     print("-" * 80)
@@ -1086,7 +1110,7 @@ elif evaluating == "constant-flow" and mode == "compare":
             feasible = False
         bouc_feasible.append(feasible)
     # For BOUC, use pystorms cost directly 
-    results["BOUC"]["best_cost_so_far"] = rolling_min(results["BOUC"]["pystorms_costs"])
+    results["BOUC"]["best_cost_so_far"] = rolling_min(results["BOUC"]["combined_costs"])
 
     # For other methods, all are assumed feasible
     for method in ["BO", "DA", "DE"]:
@@ -1135,3 +1159,53 @@ elif evaluating == "constant-flow" and mode == "compare":
     plt.savefig(f"v{version}/optimization_methods_comparison_by_fcalls_zoom.png")
     plt.savefig(f"v{version}/optimization_methods_comparison_by_fcalls_zoom.svg")
     plt.show()
+
+        # --- BOUC GP estimate: objective contour + feasibility boundary + best points ---
+    try:
+        # Grid across the search space
+        x = np.linspace(lower_bounds[0], upper_bounds[0], 100)
+        y = np.linspace(lower_bounds[1], upper_bounds[1], 100)
+        X1, X2 = np.meshgrid(x, y)
+        X = np.stack([X1, X2], axis=-1)
+
+        # Predict objective and constraint with BOUC GP models
+        objective_predicted = models[OBJECTIVE].predict_y(X)
+        objective_mean_predicted = objective_predicted[0]
+        constraint_predicted = models[CONSTRAINT].predict_y(X)
+        constraint_mean_predicted = constraint_predicted[0]
+
+        # Allow reshape on TF tensors
+        tf.experimental.numpy.experimental_enable_numpy_behavior()
+
+        plt.figure(figsize=(10, 8))
+        cp = plt.contourf(
+            X1, X2,
+            objective_mean_predicted.reshape(100, 100),
+            levels=50, cmap='viridis'
+        )
+        plt.colorbar(cp)
+        # Feasibility boundary from BOUC constraint GP
+        plt.contour(
+            X1, X2,
+            constraint_mean_predicted.reshape(100, 100),
+            levels=Sim_cf.threshold, colors='black', linestyles='solid'
+        )
+
+        # Plot each method's best point
+        for method, data in results.items():
+            if data["best_params"] is not None:
+                plt.plot(
+                    data["best_params"][0], data["best_params"][1],
+                    'x', label=f'{method} Best', markersize=12
+                )
+
+        plt.title('BOUC GP Objective Estimate with Feasibility Boundary')
+        plt.xlabel('Constant Flow 1')
+        plt.ylabel('Constant Flow 2')
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(f"v{version}/bouc_gp_objective_with_best_points.png")
+        plt.savefig(f"v{version}/bouc_gp_objective_with_best_points.svg")
+        plt.show()
+    except Exception as e:
+        print(f"Skipping BOUC GP contour plot due to: {e}")

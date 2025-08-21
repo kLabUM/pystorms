@@ -172,10 +172,78 @@ def run_swmm(constant_flows, efd_parameters=None,verbose=False):
         
     return {"data_log": env.data_log,"peak_filling_degrees":peak_filling_degrees}
 
+
+# --- Shared evaluator for objective/constraint with caching ---
+def evaluate_cf_point(params_array):
+    """
+    Compute objective and constraint once, cache into Sim_cf.computed_return_values,
+    and return a dict with 'objective' and 'constraint'.
+    """
+    key = tuple(np.array(params_array).flatten())
+    if key in Sim_cf.computed_return_values:
+        return Sim_cf.computed_return_values[key]
+
+    data = run_swmm(np.array(params_array).flatten(), None, verbose=False)
+
+    # Objective (flow exceedance)
+    flow_cost = 0.0
+    for node_id, series in data['data_log']['flow'].items():
+        if '5' in node_id or '9' in node_id:
+            continue
+        flow_exceed = [x - 3.0 for x in series]
+        flow_exceed = [x if x > 0 else 0 for x in flow_exceed]
+        flow_cost += sum(flow_exceed)
+    objective_cost = float(flow_cost)
+
+    # Constraint = flood + drainage
+    flood_cost = 0.0
+    for node_id, series in data['data_log']['flooding'].items():
+        if '5' in node_id or '9' in node_id:
+            continue
+        flood_cost += sum(series)
+    if 0.0 < flood_cost < 1.0:
+        flood_cost = 1.0
+    elif flood_cost <= 0.0:
+        flood_cost = float(max(data['peak_filling_degrees']))
+    else:
+        flood_cost = float(flood_cost)
+
+    drainage_cost = 0.0
+    for node_id, series in data['data_log']['depthN'].items():
+        if '5' in node_id or '9' in node_id:
+            continue
+        final_depth = series[-1]
+        if final_depth > 0.10:
+            drainage_cost += 10.0 * final_depth
+
+    constraint_cost = float(flood_cost + drainage_cost)
+
+    Sim_cf.computed_return_values[key] = {
+        "objective": objective_cost,
+        "constraint": constraint_cost,
+    }
+    return Sim_cf.computed_return_values[key]
+
 class Sim_cf:
     threshold = 0.99 # on the constraint function to define the feasible (safe) region
     computed_return_values = dict()
     
+    @staticmethod
+    def objective(input_data):
+        return_values = []
+        for sample in input_data:
+            res = evaluate_cf_point(sample.numpy())
+            return_values.append(res["objective"])
+        return np.array(return_values).reshape(-1, 1)
+
+    @staticmethod
+    def constraint(input_data):
+        return_values = []
+        for sample in input_data:
+            res = evaluate_cf_point(sample.numpy())
+            return_values.append(res["constraint"])
+        return np.array(return_values).reshape(-1, 1)
+    '''
     @staticmethod
     def objective(input_data):
         return_values = []
@@ -263,6 +331,7 @@ class Sim_cf:
                 return_values.append(flood_cost)
         return_values = np.array(return_values).reshape(-1,1)
         return return_values
+    '''
     
 OBJECTIVE = "OBJECTIVE"
 CONSTRAINT = "CONSTRAINT"
@@ -406,7 +475,7 @@ def observer_efd(query_points):
         }
 
 def create_bo_model(data):
-        gpr = build_gpr(data, search_space)
+        gpr = build_gpr(data, search_space,likelihood_variance = 1e-7)
         return GaussianProcessRegression(gpr)
 
 if evaluating == "constant-flow" and mode == "optimize":
@@ -670,10 +739,17 @@ elif evaluating == "constant-flow" and mode == "compare":
         function_call_count += 1
         
         params_array = np.array(params).flatten()
-        
+        res = evaluate_cf_point(params_array)
+        # If the constraint is violated, return a large penalty
+        if res['constraint'] > Sim_cf.threshold:
+            return 1e6*(res['constraint'] - Sim_cf.threshold) # if all initial samples have the same value some methods will error out.
+        return float(res['objective'])
+
+        '''
         # Use existing simulation infrastructure to evaluate
         data = run_swmm(params_array, None, verbose=False)
         return sum(data['data_log']['performance_measure'])
+        '''
         
     # For tracking performance across methods
     results = {
@@ -684,9 +760,9 @@ elif evaluating == "constant-flow" and mode == "compare":
     }
     
     # Generate common initial points for all methods
-    num_initial_points = 50  # Number of initial points
-    num_steps = 200  
-    initial_seed = 7  # Use fixed seed for reproducibility
+    num_initial_points = 5#25  # Number of initial points
+    num_steps = 5#25  
+    initial_seed = 42  # Use fixed seed for reproducibility
     tf.random.set_seed(initial_seed)
     np.random.seed(initial_seed)
     
@@ -724,46 +800,46 @@ elif evaluating == "constant-flow" and mode == "compare":
     datasets = opt_result.try_get_final_datasets()
     obj_data = datasets[OBJECTIVE]
     con_data = datasets[CONSTRAINT]
+    models = opt_result.try_get_final_models()  # capture models (not used for 9D plotting)
     bouc_fcalls = len(obj_data.query_points)
-        # Process BOUC results and calculate pystorms costs
+
+    # Process BOUC results and compute combined costs for each point (no re-simulation)
+    bouc_combined_costs = []
     for i in range(len(obj_data.query_points)):
         point = obj_data.query_points[i].numpy()
-        
-        # Calculate pystorms cost for this point
-        data = run_swmm(point, None, verbose=False)
-        pystorms_cost = sum(data['data_log']['performance_measure'])
-        bouc_pystorms_costs.append(pystorms_cost)
-        
-        # Record original BOUC objective value
+
+        combined_cost = combined_objective(point)
+        bouc_combined_costs.append(combined_cost)
+
+        # Record original BOUC objective/constraint
         obj_value = float(obj_data.observations[i][0])
         con_value = float(con_data.observations[i][0])
-        
+
         # Track best feasible point according to BOUC's objective
         if con_value <= Sim_cf.threshold and obj_value < best_feasible_obj:
             best_feasible_obj = obj_value
             best_feasible_point = point
-            best_feasible_idx = i  # Store the index here for later reference
-            
+            best_feasible_idx = i
+
         bouc_costs.append(obj_value)
         bouc_fcalls_arr.append(i + 1)
 
     # Store results for comparison
     results["BOUC"]["costs"] = bouc_costs
-    results["BOUC"]["pystorms_costs"] = bouc_pystorms_costs
+    results["BOUC"]["combined_costs"] = bouc_combined_costs
     results["BOUC"]["fcalls"] = bouc_fcalls_arr
-    
-    # Use the already calculated pystorms cost for the best point
+
+    # Use the combined cost for the best point
     if best_feasible_point is not None:
         results["BOUC"]["best_params"] = best_feasible_point
-        results["BOUC"]["best_cost"] = bouc_pystorms_costs[best_feasible_idx]
+        results["BOUC"]["best_cost"] = bouc_combined_costs[best_feasible_idx]
     else:
-        # If no feasible point, use the best objective point
-        idx = np.argmin(obj_data.observations)
+        idx = int(np.argmin(bouc_combined_costs))
         results["BOUC"]["best_params"] = obj_data.query_points[idx].numpy()
-        results["BOUC"]["best_cost"] = bouc_pystorms_costs[idx]
+        results["BOUC"]["best_cost"] = bouc_combined_costs[idx]
 
     print("BOUC function calls:", bouc_fcalls_arr)
-    print("BOUC pystorms costs:", bouc_pystorms_costs)
+    print("BOUC combined costs:", bouc_combined_costs)
     
     # 2. Vanilla Bayesian Optimization using Trieste
     print("\nRunning vanilla BO optimization...")
@@ -791,7 +867,7 @@ elif evaluating == "constant-flow" and mode == "compare":
         return Dataset(query_points, Sim_vanilla_bo.objective(query_points))
         
     def vanilla_bo_create_model(data):
-        gpr = build_gpr(data, search_space)
+        gpr = build_gpr(data, search_space, likelihood_variance = 1e-7)
         return GaussianProcessRegression(gpr)
         
     initial_data_bo = observer_vanilla_bo(initial_points)
@@ -940,8 +1016,8 @@ elif evaluating == "constant-flow" and mode == "compare":
     
     # Compare results
     print("\nOptimization Results Comparison (using consistent performance measure):")
-    print("Starting costs (from pystorms performance measure):")
-    print(f"  BOUC: {bouc_pystorms_costs[0]:.4f}, BO: {bo_costs[0]:.4f}, DA: {da_costs[0]:.4f}, DE: {de_costs[0]:.4f}")
+    print("Starting costs (combined objective):")
+    print(f"  BOUC: {bouc_combined_costs[0]:.4f}, BO: {bo_costs[0]:.4f}, DA: {da_costs[0]:.4f}, DE: {de_costs[0]:.4f}")
     print("-" * 80)
     print(f"{'Method':<10} | {'Best Cost':<15} | {'Function Calls':<15} | {'Time (s)':<15}")
     print("-" * 80)
@@ -1021,7 +1097,7 @@ elif evaluating == "constant-flow" and mode == "compare":
         return best
 
     # For BOUC, use pystorms cost directly
-    results["BOUC"]["best_cost_so_far"] = rolling_min(results["BOUC"]["pystorms_costs"])
+    results["BOUC"]["best_cost_so_far"] = rolling_min(results["BOUC"]["combined_costs"])
 
     # For other methods, all are assumed feasible
     for method in ["BO", "DA", "DE"]:
