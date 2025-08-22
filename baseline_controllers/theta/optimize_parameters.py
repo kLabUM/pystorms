@@ -356,7 +356,7 @@ if evaluating == "constant-flow" and mode == "optimize":
         upper_bounds.append(1.0)
     search_space = Box(lower_bounds, upper_bounds)
     
-    num_initial_points = 2#100
+    num_initial_points = 100
     initial_data = observer_cf(search_space.sample(num_initial_points))
     
     initial_models = trieste.utils.map_values(create_bo_model, initial_data)
@@ -367,7 +367,7 @@ if evaluating == "constant-flow" and mode == "optimize":
     )
     rule = EfficientGlobalOptimization(eci)  # type: ignore
 
-    num_steps = 2#300
+    num_steps = 200
     bo = trieste.bayesian_optimizer.BayesianOptimizer(observer_cf, search_space)
 
     opt_result = bo.optimize(
@@ -510,50 +510,7 @@ elif evaluating == "efd" and mode == "optimize":
     #with open("bo_efd_params.pkl", "wb") as f:
     #    pickle.dump(opt_result, f)
 
-    '''
-    # plot the model and observations of the objective function
-    fig, ax = plt.subplots(1,2,figsize=(12,6))
-    # query points is 1 dimensional, so make a simple lineplot
-    # x values will be: data['OBJECITVE'].query_points
-    # y values will be: data['OBJECTIVE'].observations
-    # plot the observations
-    ax[0].scatter(data[OBJECTIVE].query_points, data[OBJECTIVE].observations, label="observations")
-    
 
-    # plot the GP model outputs across a range of points
-    # make a range of points across the search space
-    x = np.linspace(lower_bounds[0], upper_bounds[0], 100).reshape(-1, 1)
-    objective_predicted = models['OBJECTIVE'].predict_y(x)
-    objective_mean_predicted = objective_predicted[0]
-    # plot the predicted values
-    ax[0].plot(x, objective_mean_predicted, label="model")
-    # plot the variance as well
-    objective_variance_predicted = objective_predicted[1]
-    ax[0].fill_between(x.flatten(), objective_mean_predicted.numpy().flatten() - np.sqrt(objective_variance_predicted.numpy().flatten()), objective_mean_predicted.numpy().flatten() + np.sqrt(objective_variance_predicted.numpy().flatten()), alpha=0.2)
-    ax[0].set_title("Objective observations and gp model")
-    ax[0].set_xlabel("efd_gain")
-    ax[0].set_ylabel("Objective function")
-    
-    # plot the constraint observations and model on the right
-    ax[1].scatter(data[CONSTRAINT].query_points, data[CONSTRAINT].observations, label="observations")
-    constraint_predicted = models[CONSTRAINT].predict_y(x)
-    constraint_mean_predicted = constraint_predicted[0]
-    ax[1].plot(x, constraint_mean_predicted, label="model")
-    # plot the variance as well of the constraint function estimate
-    constraint_variance_predicted = constraint_predicted[1]
-    ax[1].fill_between(x.flatten(), constraint_mean_predicted.numpy().flatten() - np.sqrt(constraint_variance_predicted.numpy().flatten()), constraint_mean_predicted.numpy().flatten() + np.sqrt(constraint_variance_predicted.numpy().flatten()), alpha=0.2)
-    # add a black line to show the boundary of the feasible region
-    ax[1].axhline(Sim_efd.threshold, color='black')
-    ax[1].set_title("Constraint observations and gp model")
-    ax[1].set_xlabel("efd_gain")
-    ax[1].set_ylabel("Constraint function")
-
-
-    plt.savefig(str("v" +version + "/constrained_bo_efd.png"))
-    plt.savefig(str("v" +version + "/constrained_bo_efd.svg"))
-    #plt.show()
-    plt.close('all')
-    '''
 
 
 elif evaluating == 'both' and mode == "optimize":
@@ -1144,7 +1101,7 @@ elif evaluating == "constant-flow" and mode == "compare":
             min_cost_all = min(results[method]["best_cost_so_far"])
     
     # Set y-limits from slightly below best cost to twice the best cost
-    plt.ylim(0.95 * min_cost_all, 2.0 * min_cost_all)
+    #plt.ylim(0.95 * min_cost_all, 2.0 * min_cost_all)
     
     for method, data in results.items():
         if data["fcalls"] and data["best_cost_so_far"]:
@@ -1152,7 +1109,7 @@ elif evaluating == "constant-flow" and mode == "compare":
     
     plt.xlabel('Function Evaluations', fontsize=14)
     plt.ylabel('Best Cost Found', fontsize=14)
-    plt.title('Optimization Methods Comparison (Zoomed)', fontsize=16)
+    plt.title('Optimization Methods Comparison', fontsize=16)
     plt.grid(True, alpha=0.3)
     plt.legend(fontsize='x-large')
     plt.tight_layout()

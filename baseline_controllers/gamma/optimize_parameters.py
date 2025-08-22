@@ -722,6 +722,8 @@ elif evaluating == "constant-flow" and mode == "compare":
     lower_bounds = [2.5] * 9  # Nine parameters for gamma
     upper_bounds = [6.0] * 9
     search_space = Box(lower_bounds, upper_bounds)
+    init_space = Box([4.0] * 9, [5.0] * 9)  # Initial space for sampling
+    # a harder and higher dimensional problem, try to make sure the initial points are mostly feasible.
     
     # Import required libraries for additional optimization methods
     from scipy.optimize import dual_annealing, differential_evolution
@@ -742,7 +744,7 @@ elif evaluating == "constant-flow" and mode == "compare":
         res = evaluate_cf_point(params_array)
         # If the constraint is violated, return a large penalty
         if res['constraint'] > Sim_cf.threshold:
-            return 1e6*(res['constraint'] - Sim_cf.threshold) # if all initial samples have the same value some methods will error out.
+            return 1e10#*(res['constraint'] - Sim_cf.threshold) # if all initial samples have the same value some methods will error out.
         return float(res['objective'])
 
         '''
@@ -761,13 +763,14 @@ elif evaluating == "constant-flow" and mode == "compare":
     
     # Generate common initial points for all methods
     num_initial_points = 5#25  # Number of initial points
-    num_steps = 5#25  
+    num_steps = 25#25  
     initial_seed = 42  # Use fixed seed for reproducibility
     tf.random.set_seed(initial_seed)
     np.random.seed(initial_seed)
     
     # Generate initial points that all methods will use
-    initial_points = search_space.sample(num_initial_points)
+    #initial_points = search_space.sample(num_initial_points)
+    initial_points = init_space.sample(num_initial_points)
     initial_points_np = initial_points.numpy()
     
     # 1. Bayesian Optimization with Unknown Constraints (BOUC) using Trieste
@@ -840,6 +843,7 @@ elif evaluating == "constant-flow" and mode == "compare":
 
     print("BOUC function calls:", bouc_fcalls_arr)
     print("BOUC combined costs:", bouc_combined_costs)
+    print("BOUC best cost:", results["BOUC"]["best_cost"])
     
     # 2. Vanilla Bayesian Optimization using Trieste
     print("\nRunning vanilla BO optimization...")
@@ -928,8 +932,8 @@ elif evaluating == "constant-flow" and mode == "compare":
         return False
     
     # Run optimization
-    da_max_calls = num_steps * 2
-    da_max_iter = num_steps // 5
+    da_max_calls = int(num_steps * 1.2)
+    da_max_iter = num_steps // 7
     
     da_start_time = time.time()
     res_da = dual_annealing(combined_objective, bounds=bounds_da, 
@@ -982,11 +986,11 @@ elif evaluating == "constant-flow" and mode == "compare":
         return False
     
     # Create initial population that includes our initial points
-    popsize = num_initial_points
+    popsize = num_initial_points 
     population = np.array(initial_points_np)
     
     # Set maxiter to ensure comparable number of function evaluations
-    de_max_iter = 2*max(1, num_steps // (popsize * len(lower_bounds)))
+    de_max_iter = 3*max(1, num_steps // (popsize * len(lower_bounds)))
     print(f"DE max iterations: {de_max_iter}, popsize: {popsize}, function evaluations: {(de_max_iter + 1) * popsize * (len(lower_bounds) - 1)}")
     
     de_start_time = time.time()
@@ -1138,7 +1142,7 @@ elif evaluating == "constant-flow" and mode == "compare":
             min_cost_all = min(results[method]["best_cost_so_far"])
 
     # Set y-limits from slightly below best cost to twice the best cost
-    plt.ylim(0.95 * min_cost_all, 2.0 * min_cost_all)
+    #plt.ylim(0.95 * min_cost_all, 2.0 * min_cost_all)
 
     for method, data in results.items():
         if data["fcalls"] and data["best_cost_so_far"]:
@@ -1146,7 +1150,7 @@ elif evaluating == "constant-flow" and mode == "compare":
 
     plt.xlabel('Function Evaluations', fontsize=14)
     plt.ylabel('Best Cost Found', fontsize=14)
-    plt.title('Optimization Methods Comparison (Zoomed) - Gamma Scenario', fontsize=16)
+    plt.title('Optimization Methods Comparison - Gamma Scenario', fontsize=16)
     plt.grid(True, alpha=0.3)
     plt.legend(fontsize='x-large')
     plt.tight_layout()

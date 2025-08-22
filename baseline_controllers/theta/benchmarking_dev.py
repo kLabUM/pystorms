@@ -496,7 +496,7 @@ for method in results.keys():
         min_cost_all = min(results[method]["best_cost_so_far"])
     
 # Set y-limits from slightly below best cost to twice the best cost
-plt.ylim(0.95 * min_cost_all, 2.0 * min_cost_all)
+#plt.ylim(0.95 * min_cost_all, 2.0 * min_cost_all)
     
 for method, data in results.items():
     if data["fcalls"] and data["best_cost_so_far"]:
@@ -504,13 +504,13 @@ for method, data in results.items():
     
 plt.xlabel('Function Evaluations', fontsize=14)
 plt.ylabel('Best Cost Found', fontsize=14)
-plt.title('Optimization Methods Comparison (Zoomed)', fontsize=16)
+plt.title('Optimization Methods Comparison', fontsize=16)
 plt.grid(True, alpha=0.3)
 plt.legend(fontsize='x-large')
 plt.tight_layout()
 plt.savefig(f"benchmark_dev/optimization_methods_comparison_by_fcalls_zoom.png")
 plt.savefig(f"benchmark_dev/optimization_methods_comparison_by_fcalls_zoom.svg")
-plt.show()
+#plt.show()
 
 # plot the true objective function and each optimization's best point
 
@@ -526,7 +526,10 @@ plt.figure(figsize=(10, 8))
 cp = plt.contourf(X, Y, Z, levels=50, cmap='viridis')
 plt.colorbar(cp)
 # just draw lines where the constraint is zero
-plt.contour(X, Y, Z_disk, levels=[0], colors='black', linestyles='solid')
+plt.contour(X, Y, Z_disk, levels=[0], colors='white', linestyles='solid')
+# fill in the infeasible region with white, alpha = 0.5
+plt.contourf(X, Y, Z_disk, levels=[0, np.max(Z_disk)], colors='white', alpha=0.5)
+
 #plt.scatter(initial_points_np[:, 0], initial_points_np[:, 1], c='grey', label='Initial Points', s=20, alpha=0.5)
     
 # Plot each method's best point
