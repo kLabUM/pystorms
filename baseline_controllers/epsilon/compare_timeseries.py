@@ -12,7 +12,7 @@ import os
 
 # EPSILON SCENARIO
 version = "2"
-level = "3"
+level = "1"
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
@@ -107,11 +107,21 @@ for idx in range(len(env.config['states'])):
 
     if idx == len(env.config['states']) - 2: # second to last row, for the legend
         ax = fig.add_subplot(gs[idx,0])
-        ax.plot(uncontrolled_states.index[0:2], np.zeros((2,1)), label = 'Uncontrolled',color='black',alpha=0.6)
-        ax.plot(equal_filling_states.index[0:2], np.zeros((2,1)), label = 'Equal Filling',color='blue',alpha=0.6)
-        ax.plot(constant_flow_states.index[0:2], np.zeros((2,1)), label = 'Constant Flow',color='red',alpha=0.6)
+        # Create legend patches to match compare_levels.py style
+        uncontrolled_patch = mpatches.Patch(color='black', label='Uncontrolled', alpha=0.6)
+        ef_patch = mpatches.Patch(color='blue', label='Equal Filling', alpha=0.6)
+        cf_patch = mpatches.Patch(color='red', label='Constant Flow', alpha=0.6)
         ax.axis('off')
-        ax.legend(fontsize='x-large')
+        # Draw legend with matching style
+        leg = ax.legend(handles=[uncontrolled_patch, ef_patch, cf_patch], fontsize='x-large', frameon=True, loc='center')
+        try:
+            leg.get_frame().set_facecolor('white')
+            leg.get_frame().set_alpha(1.0)
+        except Exception:
+            pass
+        leg.set_zorder(10)
+        # Add a white rectangle behind the legend only (figure coords) so nearby plots remain visible
+        ax.add_patch(plt.Rectangle((0, 0), 1, 1, transform=ax.transAxes, color='white', zorder=9))
         
 
 unc_perf = sum(uncontrolled_data_log['performance_measure'])

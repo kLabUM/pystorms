@@ -119,7 +119,17 @@ for idx in range(len(env.config['states'])):
         ax.plot(level2_states.index[0:2], np.zeros((2,1)), label = 'Level 2',color='green',alpha=0.6)
         ax.plot(level3_states.index[0:2], np.zeros((2,1)), label = 'Level 3',color='red',alpha=0.6)
         ax.axis('off')
-        ax.legend(fontsize='x-large')
+        # draw legend with an opaque background so it hides the underlying plots
+        leg = ax.legend(fontsize='x-large', frameon=True)
+        try:
+            leg.get_frame().set_facecolor('white')
+            leg.get_frame().set_alpha(1.0)
+        except Exception:
+            pass
+        leg.set_zorder(10)
+        # put a white box across the entire axis to cover up the lines but still show the legend
+        ax.add_patch(plt.Rectangle((0, 0), 1, 1, transform=ax.transAxes, color='white', zorder=9))
+
         
 
 unc_perf = sum(uncontrolled_data_log['performance_measure'])
@@ -285,7 +295,7 @@ lev2_patch = mpatches.Patch(color='green', label='level 2',alpha=0.6)
 lev3_patch = mpatches.Patch(color='red', label='level 3',alpha=0.6)
 
 ax.legend(handles=[uncontrolled_patch,lev1_patch,lev2_patch,lev3_patch],
-           loc=(0.8,0.05), fontsize='xx-large')
+           loc=(0.8,0.02), fontsize='x-large')
 
 # annotate the relative costs
 ax.annotate(perfstr, xy=(0.9, 0.9), xycoords='axes fraction', ha='center', va='center',fontsize='large')

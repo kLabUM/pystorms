@@ -63,8 +63,11 @@ def create_bo_model(data):
     return GaussianProcessRegression(gpr)
 
 # set the random seed
-rand_seed = 42
+rand_seed = 14
 np.random.seed(rand_seed)
+# set seeds for any other packages that take them
+tf.random.set_seed(rand_seed)
+
 
 search_space = Box([1.0], [2.0])
 num_init_points = 4
@@ -172,10 +175,10 @@ fig, ax = plt.subplots(2,2,figsize=(10,6))
 ax[0,0].set_title("Unconstrained",fontsize='x-large')
 ax[0,1].set_title("Constrained",fontsize='x-large')
 # indicate number of init points in init_string
-init_string = "Initial\nn = " + str(num_init_points)
-ax[0,0].set_ylabel(init_string,fontsize='x-large',rotation=0,labelpad=25)
-final_string = "Final\nn = " + str(num_init_points + num_steps)
-ax[1,0].set_ylabel(final_string,fontsize='x-large',rotation=0,labelpad=25)
+init_string = "Initial\nn = " + str(num_init_points) + "\nsamples"
+ax[0,0].set_ylabel(init_string,fontsize='x-large',rotation=0,labelpad=30)
+final_string = "Final\nn = " + str(num_init_points + num_steps) + "\nsamples"
+ax[1,0].set_ylabel(final_string,fontsize='x-large',rotation=0,labelpad=30)
 
 # annotate f'(x) in math script on ax[0,0], bottom right corner
 ax[0,0].annotate(r"$f'(x)$", xy=(0.1, 0.85), xycoords='axes fraction', ha='center', va='center',fontsize='xx-large')
@@ -227,11 +230,17 @@ p_feasible = stats.norm.cdf((Sim_constrained.threshold - const_mean.numpy().flat
 X,Y = np.meshgrid(x.flatten(), np.linspace(ax[0,1].get_ylim()[0], ax[0,1].get_ylim()[1], 500))
 Z = np.tile(p_feasible, (500,1))
 mesh = ax[0,1].pcolormesh(X, Y, Z, shading='auto', cmap='RdBu', alpha=0.5,vmin=0.0,vmax=1.0)
-# add a colorbar with labels "certainly safe" and "certainly unsafe" at 1 and 0 respectively
-#cbar = plt.colorbar(ax[0,1].collections[0], ax=ax[0,1],cmap='RdBu')
-cbar = fig.colorbar(mesh,location='bottom')
-cbar.set_ticks([0,0.5, 1])
-cbar.set_ticklabels(["Certainly\nInfeasible","Inferred\nThreshold of $c(x)$", "Certainly\nFeasible"])
+
+# add a colorbar with both the original and new annotations
+cbar = fig.colorbar(mesh, location='bottom')
+cbar.set_ticks([0, 0.5, 1])
+cbar.set_ticklabels(["Certainly\nInfeasible", "Inferred\nThreshold of $c(x)$", "Certainly\nFeasible"])
+
+# Get colorbar axis and annotate above the colorbar
+cb_ax = cbar.ax
+cb_ax.annotate("0.0", xy=(0, 1.35), xycoords="axes fraction", ha="center", va="center", fontsize="large")
+cb_ax.annotate("1.0", xy=(1, 1.35), xycoords="axes fraction", ha="center", va="center", fontsize="large")
+cb_ax.annotate(r"$Pr(c(x) \leq 2)$", xy=(0.5, 1.55), xycoords="axes fraction", ha="center", va="center", fontsize="large")
 
 ax[0,0].legend(loc = 'lower right',fontsize='large')
 
@@ -290,6 +299,6 @@ mesh2 = ax[1,1].pcolormesh(X, Y, Z, shading='auto', cmap='RdBu', alpha=0.5,vmin=
 plt.tight_layout()
 
 plt.savefig("bouc_example.png", dpi=450)
-#plt.savefig("bouc_example.svg", dpi=450)
+plt.savefig("bouc_example.svg", dpi=450)
 plt.show()
 

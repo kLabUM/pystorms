@@ -98,11 +98,40 @@ for idx in range(len(states_to_plot)):
 
     if idx == len(states_to_plot) - 2: # second to last row, for the legend
         ax = fig.add_subplot(gs[idx,0])
-        ax.plot(uncontrolled_states.index[0:2], np.zeros((2,1)), label = 'Uncontrolled',color='black',alpha=0.6)
-        ax.plot(level1_states.index[0:2], np.zeros((2,1)), label = 'Level 1',color='blue',alpha=0.6)
-        ax.plot(level2_states.index[0:2], np.zeros((2,1)), label = 'Level 2',color='green',alpha=0.6)
-        ax.plot(level3_states.index[0:2], np.zeros((2,1)), label = 'Level 3',color='red',alpha=0.6)
-        ax.legend(fontsize='x-large')
+        # Plot lines for legend (these will be used as legend handles)
+        line1, = ax.plot([], [], label='Uncontrolled', color='black', alpha=0.6)
+        line2, = ax.plot([], [], label='Level 1', color='blue', alpha=0.6)
+        line3, = ax.plot([], [], label='Level 2', color='green', alpha=0.6)
+        line4, = ax.plot([], [], label='Level 3', color='red', alpha=0.6)
+        # Remove all spines and tick marks
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+        ax.tick_params(axis='both', which='both', length=0, labelleft=False, labelbottom=False)
+        # Draw legend with an opaque background so it hides the underlying plots
+        leg = ax.legend(handles=[line1, line2, line3, line4], fontsize='xx-large', frameon=True, loc='center')
+        try:
+            leg.get_frame().set_facecolor('white')
+            leg.get_frame().set_alpha(1.0)
+        except Exception:
+            pass
+        leg.set_zorder(10)
+        # Add a white rectangle behind the legend only (figure coords) so nearby plots remain visible
+        ax.add_patch(plt.Rectangle((-0.2, -0.2), 1.4, 1.4, transform=ax.transAxes, color='white', zorder=9))
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        # Remove any other axes that share this gridspec location
+        for other_ax in fig.axes:
+            if other_ax is not ax and hasattr(other_ax, 'get_subplotspec'):
+                try:
+                    if other_ax.get_subplotspec() == ax.get_subplotspec():
+                        other_ax.remove()
+                except Exception:
+                    pass
+        # clear off anything which is on another axis but on this gridspec location
+        
+        
+
+
         
 
 unc_perf = sum(uncontrolled_data_log['performance_measure'])

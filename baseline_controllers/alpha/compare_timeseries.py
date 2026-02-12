@@ -11,8 +11,8 @@ from matplotlib.gridspec import GridSpec
 import os
 
 # ALPHA SCENARIO
-version = "2"
-level = "3"
+version = "1"
+level = "1"
 # set the working directory to the directory of this script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 print(os.getcwd())
@@ -103,7 +103,23 @@ for idx in range(len(states_to_plot)):
         ax.plot(constant_flow_states.index[0:2], np.zeros((2,1)), label = 'Constant Flow',color='red',alpha=0.6)
         ax.plot(structural_states.index[0:2], np.zeros((2,1)), label = 'Structural',color='green',alpha=0.6)
         ax.axis('off')
-        ax.legend(fontsize='x-large')
+        ax.legend(fontsize='xx-large')
+        # draw the legend with zorder 10
+        leg = ax.get_legend()
+        leg.set_zorder(10)
+
+        # Add a white rectangle behind the legend only (figure coords) so nearby plots remain visible
+        ax.add_patch(plt.Rectangle((-0.2, -0.2), 1.4, 1.4, transform=ax.transAxes, color='white', zorder=9))
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        # Remove any other axes that share this gridspec location
+        for other_ax in fig.axes:
+            if other_ax is not ax and hasattr(other_ax, 'get_subplotspec'):
+                try:
+                    if other_ax.get_subplotspec() == ax.get_subplotspec():
+                        other_ax.remove()
+                except Exception:
+                    pass
         
 
 unc_perf = sum(uncontrolled_data_log['performance_measure'])
