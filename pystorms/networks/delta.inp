@@ -82,13 +82,13 @@ sc_N4            0.02       0.29       0.024      0.189      25         OUTLET
 ;;-------------- ---------- ---------- ----------
 sc_centralB      3.832      1.16       0.187
 sc_N1A           4.127      1.56       0.177
-sc_N2B           3          0.5        4
-sc_N1B           3          0.5        4
-sc_centralA      3          0.5        4
-sc_south         3          0.5        4
-sc_N2A           3          0.5        4
-sc_N3            3          0.5        4
-sc_N4            3          0.5        4
+sc_N2B           3          0.5        0.4
+sc_N1B           3          0.5        0.4
+sc_centralA      3          0.5        0.4
+sc_south         3          0.5        0.4
+sc_N2A           3          0.5        0.4
+sc_N3            3          0.5        0.4
+sc_N4            3          0.5        0.4
 
 [JUNCTIONS]
 ;;Name           Elevation  MaxDepth   InitDepth  SurDepth   Aponded
