@@ -1,11 +1,16 @@
+import re
+
 from setuptools import setup
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open("pystorms/__init__.py", "r") as fh:
+    version = re.search(r'__version__ = "([^"]+)"', fh.read()).group(1)
+
 setup(
     name="pystorms",
-    version="2.0.0",
+    version=version,
     description="Simulation sandbox for stormwater control algorithms",
     author="Abhiram Mullapudi, Sara C. Troutman, Sara Rimer, Branko Kerkez",
     author_email="abhiramm@umich.edu, stroutm@umich.edu",
