@@ -1,10 +1,11 @@
 from pystorms.environment import environment
-from pystorms.networks import load_network
+from pystorms.networks import load_network, derived_network_path
 from pystorms.config import load_config
 from pystorms.scenarios import scenario
 from pystorms.utilities import threshold
 import yaml
-
+#import swmm_api
+import swmmio
 
 class theta(scenario):
     r"""Theta Scenario
@@ -26,15 +27,43 @@ class theta(scenario):
 
     """
 
-    def __init__(self):
+    def __init__(self,version="1",level="1"):
         # Network configuration
         self.config = yaml.load(open(load_config("theta"), "r"), yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["name"])
+        
 
+        self.version = version
+        
+  
         self.threshold = 0.5
 
+        
+        if version == "2":
+            # make the threshold more stringent
+            self.threshold = self.threshold * (1.0/2.0)
+            #  make the max depth of one of the nodes smaller. error because sim not running. maybe use swmm-api?
+            #print(self.config['states'][0][0])
+            model = swmmio.Model(self.config["swmm_input"])
+
+            #print(model.inp.storage)
+            #print(model.inp.storage.loc[self.config['states'][0][0] , 'MaxD'])
+            model.inp.storage.loc[self.config['states'][0][0] , 'MaxD'] = model.inp.storage.loc[self.config['states'][0][0] , 'MaxD'] / 2.0
+            #print(model.inp.storage)
+            
+            #print(self.config["swmm_input"])
+            # end the simulation sooner, half the length of the original
+            #print(model.inp.options)
+            model.inp.options.loc['END_DATE', 'Value'] = "2/26/2018"
+            model.inp.options.loc["END_TIME", "Value"] = "12:00:00"
+            #print(model.inp.options)
+            model.inp.save(derived_network_path(self.config["swmm_input"], "v2")) 
+            self.config["swmm_input"] = derived_network_path(self.config["swmm_input"], "v2")
+
+            
         # Create the environment based on the physical parameters
-        self.env = environment(self.config, ctrl=True)
+        self.env = environment(self.config, ctrl=True,version=version,level=level)
+
 
         # Create an object for storing the data points
         self.data_log = {
@@ -48,9 +77,9 @@ class theta(scenario):
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
 
-    def step(self, actions=None, log=True):
+    def step(self, actions=None, log=True,version="1",level="1"):
         # Implement the actions and take a step forward
-        done = self.env.step(actions)
+        done = self.env.step(actions,level=level)
 
         # Log the flows in the networks
         if log:
@@ -74,7 +103,7 @@ class theta(scenario):
         self.data_log["performance_measure"].append(__performance)
 
         # Terminate the simulation
-        if done:
+        if done:   
             self.env.terminate()
 
         return done

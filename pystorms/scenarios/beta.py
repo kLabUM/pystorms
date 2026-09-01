@@ -25,13 +25,13 @@ class beta(scenario):
 
     """
 
-    def __init__(self):
+    def __init__(self, version="1", level="1"):
         # Network configuration
         self.config = yaml.load(open(load_config("beta"), "r"), yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["name"])
 
         # Create the environment based on the physical parameters defined in the config file
-        self.env = environment(self.config, ctrl=True)
+        self.env = environment(self.config, ctrl=True,version=version,level=level)
 
         # Create an object for storing data
         self.data_log = {
@@ -44,9 +44,9 @@ class beta(scenario):
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
 
-    def step(self, actions=None, log=True):
+    def step(self, actions=None, log=True,level="1",version="1"):
         # Implement the action and take a step forward
-        done = self.env.step(actions)
+        done = self.env.step(actions,level=level)
 
         # Initialize the time step temporary performance value
         __performance = 0.0  # temporary variable

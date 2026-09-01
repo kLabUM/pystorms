@@ -36,13 +36,13 @@ class zeta(scenario):
 
     """
 
-    def __init__(self):
+    def __init__(self, version="1", level="1"):
         # Network configuration
         self.config = yaml.load(open(load_config("zeta"), "r"), yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["name"])
 
         # Create the environment based on the physical parameters
-        self.env = environment(self.config, ctrl=True)
+        self.env = environment(self.config, ctrl=True, version=version, level=level)
 
         self.penalty_weight = {
             "T1": 1,
@@ -70,9 +70,9 @@ class zeta(scenario):
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
 
-    def step(self, actions=None, log=True):
+    def step(self, actions=None, log=True,level="1",version="1"):
         # Implement the actions and take a step forward
-        done = self.env.step(actions)
+        done = self.env.step(actions,level=level)
 
         # Initialize temporary variables
         __performance = 0.0  #

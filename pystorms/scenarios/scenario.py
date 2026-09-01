@@ -20,8 +20,8 @@ class scenario(abc.ABC):
             elif attribute == 'simulation_time':
                 self.data_log[attribute].append(self.env.methods[attribute]())
 
-    def state(self):
-        return self.env._state()
+    def state(self,level="1"):
+        return self.env._state(level=level)
 
     def performance(self, metric="cumulative"):
         return perf_metrics(self.data_log["performance_measure"], metric)

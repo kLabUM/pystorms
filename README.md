@@ -21,7 +21,9 @@ For the motivation behind this effort, we refer the reader to our manuscript [*p
 
 - PyYAML >= 5.3
 - numpy >= 18.4
-- pyswmm < 2.0.0
+- pyswmm >= 1.0.1
+- pandas >= 1.0
+- swmmio >= 0.6.11
 
 
 ```bash 
@@ -71,6 +73,6 @@ Sensor noise and actuator faults can also be enabled via the level keyword. The 
 env = pystorms.scenarios.theta(version=version, level=level) # "1" is the ideal, original, and default case. "2" is realistic and "3" is adverse.
 env = pystorms.scenarios.theta(level=level) # also valid. This would load version 1 of the model.
 ```
-More details on the updates are accessible at (preprint link). As of June 2025, these updates are only in the "dev" branch and have not yet been merged in "master."
+More details on the updates are accessible at (preprint link).
 
 Detailed documentation can be found on the [webpage](https://www.pystorms.org)
