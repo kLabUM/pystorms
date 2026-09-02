@@ -1,5 +1,11 @@
-# Builds the distributions on every push, and publishes them to PyPI when
-# a tag is pushed.
+# Builds the distributions on every push, and publishes them to PyPI when a
+# tag is pushed.
+#
+# Publishing uses PyPI trusted publishing: the job exchanges a short lived
+# OIDC token from GitHub for an upload token, so there is no API token stored
+# in the repository. This requires a matching trusted publisher to be
+# registered on PyPI for the project, pointing at this repository, this
+# workflow filename and the pypi environment below.
 
 name: Publish Python 🐍 distributions 📦 to PyPI
 
@@ -30,6 +36,14 @@ jobs:
     if: startsWith(github.ref, 'refs/tags')
     needs: build
     runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+      url: https://pypi.org/p/pystorms
+
+    permissions:
+      id-token: write
+
     steps:
     - uses: actions/download-artifact@v8
       with:
@@ -38,5 +52,3 @@ jobs:
 
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.PYPI_API_TOKEN }}

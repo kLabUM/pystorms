@@ -33,6 +33,14 @@ pip install pystorms
 
 Please raise an issue on the repository or reach out if you run into any issues installing the package. 
 
+> On macOS 26 the `swmm-toolkit` wheel ships ad hoc signed libraries that a
+> hardened Python refuses to load, and the interpreter is killed with no
+> traceback. If `import pystorms` dies silently, re-sign them:
+>
+> ```bash
+> codesign --force --sign - "$(python -c 'import swmm.toolkit, pathlib; print(pathlib.Path(swmm.toolkit.__file__).parent)')"/*.dylib
+> ```
+
 ### Example 
 
 Here is an example implementation on how you would use this library for evaluating the ability of a rule based control in maintaining the flows in a network below a desired threshold. 
