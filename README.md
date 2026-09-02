@@ -41,14 +41,13 @@ Here is an example implementation on how you would use this library for evaluati
 import pystorms 
 import numpy as np
 
-# Define your awesome controller 
-def controller(state):
-	actions = np.ones(len(state))
-	for i in range(0, len(state)):
-		if state[i] > 0.5:
-			actions[i] = 1.0
-	return actions 
-	
+# Define your awesome controller.
+# Hold water back until a basin is more than half full, then release.
+def controller(state, trigger=0.5, opening=0.5):
+	actions = np.zeros(len(state))
+	actions[state > trigger] = opening
+	return actions
+
 
 env = pystorms.scenarios.theta() # Initialize scenario 
 
@@ -62,18 +61,52 @@ performance = env.performance()
 
 ```
 
-Updated versions of _theta_, _alpha_, _gamma_, _delta_, and _epsilon_ are accessible via a version keyword in the initialization command.
+### Scenario versions
+
+Harder variants of _theta_, _alpha_, _gamma_, _delta_ and _epsilon_ are selected with the `version` keyword. `"1"` is the default and matches the originally published scenarios; `"2"` tightens the objective and modifies the network.
 
 ```python
-env = pystorms.scenarios.theta(version=version) # "1" is the default and original, "2" are the updated versions.
+env = pystorms.scenarios.theta(version="2")
 ```
 
-Sensor noise and actuator faults can also be enabled via the level keyword. The options are 1, 2, and 3 in ascending order of difficulty. Version or level or both can be specified. 
+### Difficulty levels
+
+The `level` keyword decides how trustworthy the instrumentation is. `"1"` is the default and gives perfect readings. `"2"` adds sensor noise, drift and calibration bias, and lets valves stick. `"3"` intensifies all of that and adds sensors that drop out entirely. Version and level are independent, so you can hold the network fixed and vary only the measurement quality.
+
+`level` has to be passed in **two** places: once when building the scenario, which draws the fault schedule, and again on every `state()` and `step()` call, which applies it.
 
 ```python
-env = pystorms.scenarios.theta(version=version, level=level) # "1" is the ideal, original, and default case. "2" is realistic and "3" is adverse.
-env = pystorms.scenarios.theta(level=level) # also valid. This would load version 1 of the model.
+level = "2"
+
+env = pystorms.scenarios.theta(level=level)   # draws the faults
+done = False
+while not done:
+    state = env.state(level=level)            # applies noise, drift and dropouts
+    done = env.step(controller(state), level=level)  # applies stuck valves
 ```
+
+Passing it in only one place will either silently give you clean readings or raise an `AttributeError`.
+
+Fault schedules are drawn from numpy's global random state, so seed it before building a scenario if you need a level 2 or level 3 comparison to be repeatable:
+
+```python
+np.random.seed(42)
+env = pystorms.scenarios.theta(level="3")
+```
+
 More details on the updates are accessible at (preprint link).
+
+## Tutorials
+
+The [`tutorials`](tutorials) directory has runnable notebooks for each scenario, plus:
+
+| Notebook | Topic |
+| --- | --- |
+| [`Versions_and_Levels.ipynb`](tutorials/Versions_and_Levels.ipynb) | The `version` and `level` keywords, end to end |
+| [`RuleBasedControl.ipynb`](tutorials/RuleBasedControl.ipynb) | A threshold controller, and a sweep over its parameters |
+| [`BayesianOptimization.ipynb`](tutorials/BayesianOptimization.ipynb) | Tuning a controller with Bayesian optimization |
+| [`ReinforcementLearning.ipynb`](tutorials/ReinforcementLearning.ipynb) | Training a deep Q network on _theta_ |
+
+[`baseline_controllers`](baseline_controllers) holds the controller implementations, tuned parameters and analysis scripts behind the accompanying manuscript.
 
 Detailed documentation can be found on the [webpage](https://www.pystorms.org)
