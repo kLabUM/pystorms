@@ -1,23 +1,42 @@
+# Builds the distributions on every push, and publishes them to PyPI when
+# a tag is pushed.
+
 name: Publish Python 🐍 distributions 📦 to PyPI
 
 on: push
 
 jobs:
-  build-n-publish:
-    name: Build and publish Python 🐍 distributions 📦 to PyPI
+  build:
+    name: Build distributions
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - uses: actions/checkout@v7
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v10
       with:
-        python-version: "3.11"
-    - name: Install pypa/build
-      run: python -m pip install --upgrade build
+        enable-cache: true
+
     - name: Build a binary wheel and a source tarball
-      run: python -m build --sdist --wheel --outdir dist/ .
+      run: uv build
+
+    - uses: actions/upload-artifact@v7
+      with:
+        name: distributions
+        path: dist/
+
+  publish:
+    name: Publish 📦 to PyPI
+    if: startsWith(github.ref, 'refs/tags')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/download-artifact@v8
+      with:
+        name: distributions
+        path: dist/
+
     - name: Publish distribution 📦 to PyPI
-      if: startsWith(github.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}

@@ -59,3 +59,4 @@ baseline_controllers/**/*.pkl
 baseline_controllers/**/*.png
 baseline_controllers/**/*.svg
 baseline_controllers/**/results/
+.venv/
