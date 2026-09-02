@@ -19,6 +19,7 @@ For the motivation behind this effort, we refer the reader to our manuscript [*p
 
 **Requirements**
 
+- Python >= 3.9
 - PyYAML >= 5.3
 - numpy >= 18.4
 - pyswmm >= 1.0.1
