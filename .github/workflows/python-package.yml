@@ -29,8 +29,12 @@ jobs:
         enable-cache: true
         cache-dependency-glob: setup.py
 
+    # only-managed keeps every job on a uv supplied interpreter. Without it
+    # uv picks up whatever the runner image preinstalled, and macOS ships an
+    # Apple signed Python whose hardened runtime refuses to load the ad hoc
+    # signed dylib inside the swmm-toolkit wheel.
     - name: Create the environment
-      run: uv venv --python ${{ matrix.python-version }}
+      run: uv venv --python ${{ matrix.python-version }} --python-preference only-managed
 
     - name: Install pystorms and test dependencies
       run: uv pip install . pytest
