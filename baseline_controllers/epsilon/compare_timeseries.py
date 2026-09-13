@@ -143,8 +143,6 @@ plt.close('all')
 ################
 # plot the timeseries in an L
 ################
-import sys
-sys.path.append("C:/modpods")
 import modpods
 
 uncontrolled_response = pd.concat([uncontrolled_actions,uncontrolled_states],axis=1)

@@ -291,8 +291,6 @@ for parameter in tuning_values:
         # put all the data together
         #response = pd.concat([weir_heads32, states], axis=1)
         response = pd.concat([actions, states],axis=1)
-        import sys
-        sys.path.append("C:/modpods")
         import modpods
         import networkx as nx
         # plot the flows on top of the subway map

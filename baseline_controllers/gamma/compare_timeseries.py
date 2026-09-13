@@ -118,8 +118,6 @@ plt.close('all')
 
 
 # try arranging the main trunk in a U shape
-import sys
-sys.path.append("C:/modpods")
 import modpods
 
 flows = pd.DataFrame.from_dict(equal_filling_data_log['flow'])

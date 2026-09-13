@@ -46,7 +46,9 @@ dill
 ```
 
 `optimize_parameters.py` additionally needs `trieste` (which pulls in
-TensorFlow) and `scikit-optimize`. `theta/benchmarking_dev.py` uses `modpods`.
+TensorFlow) and `scikit-optimize`. `theta/benchmarking_dev.py`, the epsilon
+scripts and `gamma/compare_timeseries.py` import `modpods` for the network
+layout plots; install it into the same environment.
 
 ## Reproducibility
 
