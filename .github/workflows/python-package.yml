@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
     - uses: actions/checkout@v7
@@ -27,7 +27,7 @@ jobs:
       uses: astral-sh/setup-uv@v10.0.1
       with:
         enable-cache: true
-        cache-dependency-glob: setup.py
+        cache-dependency-glob: pyproject.toml
 
     # only-managed keeps every job on a uv supplied interpreter. Without it
     # uv picks up whatever the runner image preinstalled, and macOS ships an

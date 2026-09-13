@@ -60,3 +60,7 @@ baseline_controllers/**/*.png
 baseline_controllers/**/*.svg
 baseline_controllers/**/results/
 .venv/
+
+# IDEs and local builds
+.idea/
+build/

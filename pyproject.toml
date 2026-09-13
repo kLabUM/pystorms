@@ -1,3 +1,55 @@
 [build-system]
-requires = ["setuptools >= 40.6.0", "wheel"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "pystorms"
+dynamic = ["version"]
+description = "Simulation sandbox for stormwater control algorithms"
+readme = "README.md"
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+authors = [
+  { name = "Abhiram Mullapudi", email = "abhiramm@umich.edu" },
+  { name = "Sara C. Troutman", email = "stroutm@umich.edu" },
+  { name = "Sara Rimer" },
+  { name = "Branko Kerkez" },
+]
+keywords = ["stormwater", "swmm", "control", "benchmark", "reinforcement learning"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Scientific/Engineering",
+]
+dependencies = [
+  "numpy>=1.18.4",
+  "pyswmm>=1.0.1",
+  "pyyaml>=5.3",
+  "pandas>=1.0",
+  "swmmio>=0.6.11",
+]
+
+[project.urls]
+Homepage = "https://pystorms.netlify.app"
+Documentation = "https://pystorms.netlify.app"
+Source = "https://github.com/kLabUM/pystorms"
+Issues = "https://github.com/kLabUM/pystorms/issues"
+Changelog = "https://github.com/kLabUM/pystorms/blob/master/CHANGELOG.md"
+
+[tool.setuptools]
+packages = ["pystorms", "pystorms.config", "pystorms.networks", "pystorms.scenarios"]
+
+[tool.setuptools.dynamic]
+version = { attr = "pystorms.__version__" }
+
+[tool.setuptools.package-data]
+pystorms = ["networks/*.inp", "config/*.yaml"]
