@@ -1,10 +1,12 @@
-from pystorms.environment import environment
+from pystorms.environment import environment, validate_level
 from pystorms.networks import load_network, derived_network_path
 from pystorms.config import load_config
 from pystorms.scenarios import scenario
+from pystorms.scenarios.scenario import validate_version
 from pystorms.utilities import threshold
 import yaml
 import swmmio
+
 
 class epsilon(scenario):
     r"""Epsilon Scenario
@@ -13,7 +15,13 @@ class epsilon(scenario):
 
     Parameters
     ----------
-    config : yaml file
+    version : str
+        ``"1"`` is the scenario as published. ``"2"`` lowers the TSS loading
+        threshold to 70 percent of the original, extends the event to the
+        middle of February and scales the rainfall up by 10 percent.
+    level : str
+        difficulty level of the instrumentation, see
+        :class:`pystorms.environment.environment`
 
     Methods
     ----------
@@ -25,41 +33,40 @@ class epsilon(scenario):
 
     """
 
-    def __init__(self,version="1",level="1"):
+    def __init__(self, version="1", level="1"):
+        self.version = validate_version(version, ("1", "2"), "epsilon")
+        self.level = validate_level(level)
+
         # Network configuration
-        self.config = yaml.load(open(load_config("epsilon"), "r"), yaml.FullLoader)
+        with open(load_config("epsilon"), "r") as fh:
+            self.config = yaml.load(fh, yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["name"])
 
         # Dry weather TSS loading, measured at the outlet of the network
         self._performormance_threshold = 1.075  # Kg/sec
-        
-        self.version = version
 
-        if version == "2":
+        if self.version == "2":
             # make the threshold more stringent
-            self._performormance_threshold = self._performormance_threshold * (7.0/10.0)
+            self._performormance_threshold = self._performormance_threshold * (7.0 / 10.0)
 
             model = swmmio.Model(self.config["swmm_input"])
-            #print(model)
-            #print(model.inp)
-            #print(model.inp.files)
-            
-            # set end date to feb 15 2017
-            #print(model.inp.options)
-            model.inp.options.loc['END_DATE', 'Value'] = '02/15/2017'
-            #print(model.inp.options)
+            # extend the event to the middle of February
+            model.inp.options.loc["END_DATE", "Value"] = "02/15/2017"
 
             # increase the rainfall intensity by 10% throughout
             # the Value column is stored as text, so scale in float and write back as text
-            model.inp.timeseries.loc[:, 'Value'] = (
-                1.1 * model.inp.timeseries['Value'].astype(float)
+            model.inp.timeseries.loc[:, "Value"] = (
+                1.1 * model.inp.timeseries["Value"].astype(float)
             ).astype(str)
-            model.inp.save(derived_network_path(self.config["swmm_input"], "v2")) 
-            self.config["swmm_input"] = derived_network_path(self.config["swmm_input"], "v2")
 
+            derived = derived_network_path(self.config["swmm_input"], "v2")
+            model.inp.save(derived)
+            self.config["swmm_input"] = derived
 
         # Create the env based on the config file
-        self.env = environment(self.config, ctrl=True, binary=self.config["binary"],version=version,level=level)
+        self.env = environment(
+            self.config, ctrl=True, version=self.version, level=self.level
+        )
 
         # Create an object for storing data
         self.data_log = {
@@ -68,16 +75,17 @@ class epsilon(scenario):
             "pollutantL": {},
             "flow": {},
             "flooding": {},
-            "simulation_time": []
+            "simulation_time": [],
         }
 
         # Data logger for storing _performormance data
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
 
-    def step(self, actions=None, log=True,version="1",level="1"):
+    def step(self, actions=None, log=True, level=None, version=None):
+        # version is accepted for backwards compatibility and ignored
         # Implement the action and take a step forward
-        done = self.env.step(actions,level=level)
+        done = self.env.step(actions, level=level)
 
         # Log the flows in the networks
         if log:
@@ -93,7 +101,7 @@ class epsilon(scenario):
                     __performance += 10 ** 9
             elif attribute == "loading":
                 pollutantLoading = (
-                    self.env.methods["pollutantL"](ID, 'TSS')
+                    self.env.methods["pollutantL"](ID, "TSS")
                     * self.env.methods["flow"](ID)
                     * 28.3168
                     / (10 ** 6)
@@ -115,7 +123,7 @@ class epsilon(scenario):
         for ID, attribute in self.config["performance_targets"]:
             if attribute == "loading":
                 pollutantLoading = (
-                    self.env.methods["pollutantL"](ID, 'TSS')
+                    self.env.methods["pollutantL"](ID, "TSS")
                     * self.env.methods["flow"](ID)
                     * 28.3168
                     / (10 ** 6)

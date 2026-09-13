@@ -1,8 +1,8 @@
-from pystorms.environment import environment
+from pystorms.environment import environment, validate_level
 from pystorms.networks import load_network
 from pystorms.config import load_config
 from pystorms.scenarios import scenario
-from pystorms.utilities import threshold
+from pystorms.scenarios.scenario import validate_version
 import yaml
 
 
@@ -13,7 +13,11 @@ class beta(scenario):
 
     Parameters
     ----------
-    config : yaml file
+    version : str
+        only ``"1"`` is defined for this scenario
+    level : str
+        difficulty level of the instrumentation, see
+        :class:`pystorms.environment.environment`
 
     Methods
     ----------
@@ -26,12 +30,18 @@ class beta(scenario):
     """
 
     def __init__(self, version="1", level="1"):
+        self.version = validate_version(version, ("1",), "beta")
+        self.level = validate_level(level)
+
         # Network configuration
-        self.config = yaml.load(open(load_config("beta"), "r"), yaml.FullLoader)
+        with open(load_config("beta"), "r") as fh:
+            self.config = yaml.load(fh, yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["name"])
 
         # Create the environment based on the physical parameters defined in the config file
-        self.env = environment(self.config, ctrl=True,version=version,level=level)
+        self.env = environment(
+            self.config, ctrl=True, version=self.version, level=self.level
+        )
 
         # Create an object for storing data
         self.data_log = {
@@ -44,9 +54,10 @@ class beta(scenario):
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
 
-    def step(self, actions=None, log=True,level="1",version="1"):
+    def step(self, actions=None, log=True, level=None, version=None):
+        # version is accepted for backwards compatibility and ignored
         # Implement the action and take a step forward
-        done = self.env.step(actions,level=level)
+        done = self.env.step(actions, level=level)
 
         # Initialize the time step temporary performance value
         __performance = 0.0  # temporary variable
@@ -81,9 +92,6 @@ class beta(scenario):
 
         # Record the _performormance
         self.data_log["performance_measure"].append(__performance)
-
-        # # Log the simulation time
-        # self.data_log["simulation_time"].append(__currentsimtime)
 
         # Terminate the simulation
         if done:

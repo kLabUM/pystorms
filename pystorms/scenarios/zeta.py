@@ -1,8 +1,8 @@
-from pystorms.environment import environment
+from pystorms.environment import environment, validate_level
 from pystorms.networks import load_network
 from pystorms.config import load_config
 from pystorms.scenarios import scenario
-from pystorms.utilities import threshold, exponentialpenalty
+from pystorms.scenarios.scenario import validate_version
 
 import yaml
 
@@ -14,8 +14,11 @@ class zeta(scenario):
 
     Parameters
     ----------
-    config : yaml configuration file
-        physical attributes of the network.
+    version : str
+        only ``"1"`` is defined for this scenario
+    level : str
+        difficulty level of the instrumentation, see
+        :class:`pystorms.environment.environment`
 
     Methods
     ----------
@@ -37,12 +40,18 @@ class zeta(scenario):
     """
 
     def __init__(self, version="1", level="1"):
+        self.version = validate_version(version, ("1",), "zeta")
+        self.level = validate_level(level)
+
         # Network configuration
-        self.config = yaml.load(open(load_config("zeta"), "r"), yaml.FullLoader)
+        with open(load_config("zeta"), "r") as fh:
+            self.config = yaml.load(fh, yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["name"])
 
         # Create the environment based on the physical parameters
-        self.env = environment(self.config, ctrl=True, version=version, level=level)
+        self.env = environment(
+            self.config, ctrl=True, version=self.version, level=self.level
+        )
 
         self.penalty_weight = {
             "T1": 1,
@@ -50,10 +59,10 @@ class zeta(scenario):
             "T3": 1,
             "T4": 1,
             "T5": 1,
-            "T6": 2, #creek
-            "CSO7": 2, #creek
+            "T6": 2,  # creek
+            "CSO7": 2,  # creek
             "CSO8": 1,
-            "CSO9": 2, #creek
+            "CSO9": 2,  # creek
             "CSO10": 1,
         }
 
@@ -70,9 +79,10 @@ class zeta(scenario):
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
 
-    def step(self, actions=None, log=True,level="1",version="1"):
+    def step(self, actions=None, log=True, level=None, version=None):
+        # version is accepted for backwards compatibility and ignored
         # Implement the actions and take a step forward
-        done = self.env.step(actions,level=level)
+        done = self.env.step(actions, level=level)
 
         # Initialize temporary variables
         __performance = 0.0  #
@@ -115,9 +125,6 @@ class zeta(scenario):
 
         # Record the _performance
         self.data_log["performance_measure"].append(__performance)
-
-        # # Log the simulation time
-        # self.data_log["simulation_time"].append(__currentsimtime)
 
         # Terminate the simulation
         if done:

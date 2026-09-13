@@ -1,10 +1,12 @@
-from pystorms.environment import environment
+from pystorms.environment import environment, validate_level
 from pystorms.networks import load_network, derived_network_path
 from pystorms.config import load_config
 from pystorms.scenarios import scenario
+from pystorms.scenarios.scenario import validate_version
 from pystorms.utilities import threshold, exponentialpenalty
 import yaml
 import swmmio
+
 
 class delta(scenario):
     r"""Delta Scenario
@@ -13,8 +15,15 @@ class delta(scenario):
 
     Parameters
     ----------
-    config : yaml configuration file
-        physical attributes of the network.
+    version : str
+        ``"1"`` is the scenario as published. ``"2"`` tightens the outflow
+        threshold, extends the event by three days, scales the rainfall up by
+        30 percent, removes the downstream conduit restrictions and the
+        uncontrollable subcatchment flooding, and fixes the routing step at
+        five seconds.
+    level : str
+        difficulty level of the instrumentation, see
+        :class:`pystorms.environment.environment`
 
     Methods
     ----------
@@ -35,9 +44,13 @@ class delta(scenario):
 
     """
 
-    def __init__(self,version="1",level="1"):
+    def __init__(self, version="1", level="1"):
+        self.version = validate_version(version, ("1", "2"), "delta")
+        self.level = validate_level(level)
+
         # Network configuration
-        self.config = yaml.load(open(load_config("delta"), "r"), yaml.FullLoader)
+        with open(load_config("delta"), "r") as fh:
+            self.config = yaml.load(fh, yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["name"])
 
         self.threshold = 12.0
@@ -52,42 +65,45 @@ class delta(scenario):
 
         # Additional penalty definition
         self.max_penalty = 10 ** 6
-        
-        if version == "2":
+
+        if self.version == "2":
             # threshold more stringent
             self.threshold = 0.5
+
             model = swmmio.Model(self.config["swmm_input"])
             # extend end date
-            model.inp.options.loc['END_DATE', 'Value'] = '4/27/2016'
+            model.inp.options.loc["END_DATE", "Value"] = "4/27/2016"
             # remove downstream structural flow limitation
-            model.inp.xsections.loc["conduit_Eup","Geom1"] = 5.0 
-            model.inp.xsections.loc["conduit_Edown","Geom1"] = 5.0 
+            model.inp.xsections.loc["conduit_Eup", "Geom1"] = 5.0
+            model.inp.xsections.loc["conduit_Edown", "Geom1"] = 5.0
             # eliminate uncontrollable subcatchment flooding
-            model.inp.xsections.loc["conduit_Csc","Geom1"] = 3.0
-            model.inp.xsections.loc["conduit_N1sc","Geom1"] = 3.0
-            #print(model.inp.infiltration)
-            
-            model.inp.options.loc['VARIABLE_STEP',"Value"] = "0.00" # ensure all sims have same number of steps
-            model.inp.options.loc["ROUTING_STEP","Value"] = "0:00:05" # X second hydraulic routing
-            #print(model.inp.options)
-            # change infiltration method to horton (error 200 in original)
-            #model.inp.options.loc['INFILTRATION', 'Value'] = 'MODIFIED_HORTON'   
-            # initial moisture deficit is indicated as 4.0 for most subcatchments. can't be greater than 1.0
+            model.inp.xsections.loc["conduit_Csc", "Geom1"] = 3.0
+            model.inp.xsections.loc["conduit_N1sc", "Geom1"] = 3.0
+
+            # fixed five second routing step, so every run has the same number of steps
+            model.inp.options.loc["VARIABLE_STEP", "Value"] = "0.00"
+            model.inp.options.loc["ROUTING_STEP", "Value"] = "0:00:05"
+
+            # the initial moisture deficit is given as 4.0 for most subcatchments,
+            # which is out of range. Assume the decimal point slipped.
             for subcatch in model.inp.infiltration.index:
-                if model.inp.infiltration.loc[subcatch, 'IMDmax'] > 1.0:
-                    #print(subcatch)
-                    model.inp.infiltration.loc[subcatch, 'IMDmax'] = 0.4 # assume typo. decimal one point over.
-                
+                if model.inp.infiltration.loc[subcatch, "IMDmax"] > 1.0:
+                    model.inp.infiltration.loc[subcatch, "IMDmax"] = 0.4
+
             # increase all rainfall intensities
             # the Value column is stored as text, so scale in float and write back as text
-            model.inp.timeseries.loc[:, 'Value'] = (
-                1.3 * model.inp.timeseries['Value'].astype(float)
+            model.inp.timeseries.loc[:, "Value"] = (
+                1.3 * model.inp.timeseries["Value"].astype(float)
             ).astype(str)
-            model.inp.save(derived_network_path(self.config["swmm_input"], "v2")) 
-            self.config["swmm_input"] = derived_network_path(self.config["swmm_input"], "v2")
+
+            derived = derived_network_path(self.config["swmm_input"], "v2")
+            model.inp.save(derived)
+            self.config["swmm_input"] = derived
 
         # Create the environment based on the physical parameters
-        self.env = environment(self.config, ctrl=True,version=version,level=level)
+        self.env = environment(
+            self.config, ctrl=True, version=self.version, level=self.level
+        )
 
         # Create an object for storing the data points
         self.data_log = {
@@ -95,16 +111,17 @@ class delta(scenario):
             "depthN": {},
             "flow": {},
             "flooding": {},
-            "simulation_time": []
+            "simulation_time": [],
         }
 
         # Data logger for storing _performance data
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
 
-    def step(self, actions=None, log=True,version="1",level="1"):
+    def step(self, actions=None, log=True, level=None, version=None):
+        # version is accepted for backwards compatibility and ignored
         # Implement the actions and take a step forward
-        done = self.env.step(actions,level=level)
+        done = self.env.step(actions, level=level)
 
         # Log the flows in the networks
         if log:

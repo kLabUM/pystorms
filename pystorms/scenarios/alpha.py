@@ -1,10 +1,12 @@
-from pystorms.environment import environment
+from pystorms.environment import environment, validate_level
 from pystorms.networks import load_network, derived_network_path
 from pystorms.config import load_config
 from pystorms.scenarios import scenario
-from pystorms.utilities import threshold, exponentialpenalty
+from pystorms.scenarios.scenario import validate_version
+from pystorms.utilities import threshold
 import yaml
 import swmmio
+
 
 class alpha(scenario):
     r"""Alpha Scenario
@@ -14,8 +16,12 @@ class alpha(scenario):
 
     Parameters
     ----------
-    config : yaml configuration file
-        physical attributes of the network.
+    version : str
+        ``"1"`` is the scenario as published. ``"2"`` adds the five weirs to
+        the action space and widens every orifice to the interceptor diameter.
+    level : str
+        difficulty level of the instrumentation, see
+        :class:`pystorms.environment.environment`
 
     Methods
     ----------
@@ -33,50 +39,34 @@ class alpha(scenario):
 
     """
 
-    def __init__(self,version="1", level="1"):
+    def __init__(self, version="1", level="1"):
+        self.version = validate_version(version, ("1", "2"), "alpha")
+        self.level = validate_level(level)
+
         # Network configuration
-        self.config = yaml.load(open(load_config("alpha"), "r"), yaml.FullLoader)
+        with open(load_config("alpha"), "r") as fh:
+            self.config = yaml.load(fh, yaml.FullLoader)
         self.config["swmm_input"] = load_network(self.config["name"])
-        #print(self.config["swmm_input"])
-        # suppress print statements from this script
 
-
-        if version == "2":
-            # make the action space the weirs in additon to the orifices
+        if self.version == "2":
+            # the weirs become controllable in addition to the orifices
             model = swmmio.Model(self.config["swmm_input"])
-            #print(self.config['action_space'])
-            #print(model.inp.weirs)
             for item in model.inp.weirs.index.tolist():
-                self.config['action_space'].append(item)
-            #print(self.config['action_space'])
-            #print(model.inp.xsections)
+                self.config["action_space"].append(item)
+
+            # make all orifices the same diameter as the maximum interceptor diameter
             for idx in model.inp.xsections.index:
                 if "Or" in idx:
-                    model.inp.xsections.loc[idx, 'Geom1'] = 1.5 # make all the same diameter as the maximum interceptor diameter
-            #print(model.inp.xsections)    
-            '''
-            for col in model.inp.weirs:
-                print(col)
-            # set the max weir height such that they can completely block flow
-            for weir in model.inp.weirs.index:
-                # find the max height of the upstream regulator. that's the same number with a prefix of R instead of W
-                regulator = "R" + weir[1:]
-                print(weir)
-                print(regulator)
-                print(model.inp.junctions.loc[regulator, 'MaxDepth'])
-                print(model.inp.weirs.loc[weir, 'CrestHeight'])
-                model.inp.xsections.loc[weir, 'Geom1'] = model.inp.junctions.loc[regulator, 'MaxDepth'] - model.inp.weirs.loc[weir, 'CrestHeight']
-                
-                '''
-            # save changes to the model
-            model.inp.save(derived_network_path(self.config["swmm_input"], "v2"))
-            self.config["swmm_input"] = derived_network_path(self.config["swmm_input"], "v2")
-            
+                    model.inp.xsections.loc[idx, "Geom1"] = 1.5
 
-
+            derived = derived_network_path(self.config["swmm_input"], "v2")
+            model.inp.save(derived)
+            self.config["swmm_input"] = derived
 
         # Create the environment based on the physical parameters
-        self.env = environment(self.config, ctrl=True,version=version,level=level)
+        self.env = environment(
+            self.config, ctrl=True, version=self.version, level=self.level
+        )
 
         # Create an object for storing the data points
         self.data_log = {
@@ -85,16 +75,16 @@ class alpha(scenario):
             "flow": {},
             "volume": {},
             "flooding": {},
-            "simulation_time": [],
         }
 
         # Data logger for storing _performance data
         for ID, attribute in self.config["performance_targets"]:
             self.data_log[attribute][ID] = []
 
-    def step(self, actions=None, log=True,level="1",version="1"):
+    def step(self, actions=None, log=True, level=None, version=None):
+        # version is accepted for backwards compatibility and ignored
         # Implement the actions and take a step forward
-        done = self.env.step(actions,level=level)
+        done = self.env.step(actions, level=level)
 
         # Temp variables
         __performance = 0.0

@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 
 def append_rainfall(
@@ -47,7 +48,7 @@ def append_rainfall(
                         rainfall_source.index[i].hour,
                         rainfall_source.index[i].minute,
                         rainfall_source.index[i].second,
-                        rainfall_source[i],
+                        rainfall_source.iloc[i],
                     )
                 )
     return path_to_file
@@ -168,4 +169,4 @@ def _to_dataframe(data_log):
         if attribute != 'simulation_time':
             data_dataframe[attribute] = pd.DataFrame(index=time_index,
                                                      data=data_log[attribute])
-    return dataframe
+    return data_dataframe
